@@ -18,19 +18,18 @@
 package com.nimbusds.jose.jwk;
 
 
-import java.net.URI;
-import java.security.*;
-import java.text.ParseException;
-import java.util.*;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import net.jcip.annotations.Immutable;
-
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.*;
+import net.jcip.annotations.Immutable;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.URI;
+import java.security.*;
+import java.text.ParseException;
+import java.util.*;
 
 
 /**
@@ -61,7 +60,7 @@ import com.nimbusds.jose.util.*;
  * 
  * @author Justin Richer
  * @author Vladimir Dzhuvinov
- * @version 2022-12-26
+ * @version 2024-04-20
  */
 @Immutable
 public final class OctetSequenceKey extends JWK implements SecretJWK {
@@ -562,12 +561,7 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 				final KeyStore ks) {
 	
 		super(KeyType.OCT, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, ks);
-
-		if (k == null) {
-			throw new IllegalArgumentException("The key value must not be null");
-		}
-
-		this.k = k;
+		this.k = Objects.requireNonNull(k, "The key value must not be null");
 	}
     
 
@@ -737,7 +731,7 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 				JWKMetadata.parseIssueTime(jsonObject),
 				null // key store
 			);
-		} catch (IllegalArgumentException e) {
+		} catch (Exception e) {
 			throw new ParseException(e.getMessage(), 0);
 		}
 	}

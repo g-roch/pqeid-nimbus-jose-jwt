@@ -18,13 +18,16 @@
 package com.nimbusds.jose.util;
 
 
-import com.nimbusds.jose.util.Resource;
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
-public class ResourceTest extends TestCase {
+public class ResourceTest {
 
 
+	@Test
 	public void testWithContentType() {
 
 		Resource resource = new Resource("content", "text/plain");
@@ -33,6 +36,7 @@ public class ResourceTest extends TestCase {
 	}
 
 
+	@Test
 	public void testUnspecifiedContentType() {
 
 		Resource resource = new Resource("content", null);
@@ -41,19 +45,15 @@ public class ResourceTest extends TestCase {
 	}
 
 
+	@Test
 	public void testEmptyContent() {
 
 		assertEquals("", new Resource("", null).getContent());
 	}
 
 
+	@Test(expected = NullPointerException.class)
 	public void testRejectNullContent() {
-
-		try {
-			new Resource(null, null);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The resource content must not be null", e.getMessage());
-		}
+		new Resource(null, null);
 	}
 }

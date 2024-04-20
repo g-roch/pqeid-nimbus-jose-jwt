@@ -20,13 +20,15 @@ package com.nimbusds.jose.util.cache;
 
 import net.jcip.annotations.Immutable;
 
+import java.util.Objects;
+
 
 /**
  * Cached object.
  *
  * @param <V> The object type.
  *
- * @version 2023-02-15
+ * @version @version 2024-04-20
  */
 @Immutable
 public final class CachedObject<V> {
@@ -69,10 +71,7 @@ public final class CachedObject<V> {
 	 *                       Unix epoch.
 	 */
 	public CachedObject(final V object, final long timestamp, final long expirationTime) {
-		if (object == null) {
-			throw new IllegalArgumentException("The object must not be null");
-		}
-		this.object = object;
+		this.object = Objects.requireNonNull(object);
 		this.timestamp = timestamp;
 		this.expirationTime = expirationTime;
 	}

@@ -18,11 +18,11 @@
 package com.nimbusds.jose;
 
 
-import java.io.Serializable;
-
 import com.nimbusds.jose.util.JSONStringUtils;
-
 import net.jcip.annotations.Immutable;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 
 /**
@@ -39,7 +39,7 @@ import net.jcip.annotations.Immutable;
  * constructor. 
  *
  * @author Vladimir Dzhuvinov
- * @version 2013-01-15
+ * @version 2024-04-20
  */
 @Immutable
 public final class CompressionAlgorithm implements Serializable {
@@ -68,11 +68,7 @@ public final class CompressionAlgorithm implements Serializable {
 	 */
 	public CompressionAlgorithm(final String name) {
 
-		if (name == null) {
-			throw new IllegalArgumentException("The compression algorithm name must not be null");
-		}
-
-		this.name = name;
+		this.name = Objects.requireNonNull(name);
 	}
 
 

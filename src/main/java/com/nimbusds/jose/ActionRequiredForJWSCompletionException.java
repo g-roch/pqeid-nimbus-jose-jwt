@@ -18,10 +18,15 @@
 package com.nimbusds.jose;
 
 
+import java.util.Objects;
+
 /**
  * Action required for JWS completion. Can be used to signal a user
  * authentication requirement in Android to unlock a private signing key
  * created with {@code setUserAuthenticationRequired(true)}.
+ *
+ * @author Vladimir Dzhuvinov
+ * @version 2024-04-20
  */
 public class ActionRequiredForJWSCompletionException extends JOSEException {
 	
@@ -45,15 +50,8 @@ public class ActionRequiredForJWSCompletionException extends JOSEException {
 						       final JWSSignerOption option,
 						       final CompletableJWSObjectSigning completableSigning) {
 		super(message);
-		if (option == null) {
-			throw new IllegalArgumentException("The triggering option must not be null");
-		}
-		this.option = option;
-		
-		if (completableSigning == null) {
-			throw new IllegalArgumentException("The completable signing must not be null");
-		}
-		this.completableSigning = completableSigning;
+		this.option = Objects.requireNonNull(option);
+		this.completableSigning = Objects.requireNonNull(completableSigning);
 	}
 	
 	

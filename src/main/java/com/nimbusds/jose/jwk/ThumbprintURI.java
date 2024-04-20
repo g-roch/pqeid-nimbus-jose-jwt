@@ -41,7 +41,7 @@ import com.nimbusds.jose.util.Base64URL;
  * <p>See draft-ietf-oauth-jwk-thumbprint-uri-01
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-02-21
+ * @version 2024-04-20
  */
 @Immutable
 public class ThumbprintURI {
@@ -72,13 +72,13 @@ public class ThumbprintURI {
 	 * @param thumbprint The thumbprint value. Must not be {@code null}.
 	 */
 	public ThumbprintURI(final String hashAlg, final Base64URL thumbprint) {
-		if (hashAlg == null || hashAlg.isEmpty()) {
-			throw new IllegalArgumentException("The hash algorithm must not be null or empty");
+		if (hashAlg.isEmpty()) {
+			throw new IllegalArgumentException("The hash algorithm must not be empty");
 		}
 		this.hashAlg = hashAlg;
 		
-		if (thumbprint == null || thumbprint.toString().isEmpty()) {
-			throw new IllegalArgumentException("The thumbprint must not be null or empty");
+		if (thumbprint.toString().isEmpty()) {
+			throw new IllegalArgumentException("The thumbprint must not be empty");
 		}
 		this.thumbprint = thumbprint;
 	}

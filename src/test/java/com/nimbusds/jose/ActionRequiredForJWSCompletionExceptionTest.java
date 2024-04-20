@@ -18,13 +18,12 @@
 package com.nimbusds.jose;
 
 
-import java.security.Signature;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.crypto.opts.UserAuthenticationRequired;
 import com.nimbusds.jose.util.Base64URL;
+import junit.framework.TestCase;
+
+import java.security.Signature;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class ActionRequiredForJWSCompletionExceptionTest extends TestCase {
@@ -65,7 +64,7 @@ public class ActionRequiredForJWSCompletionExceptionTest extends TestCase {
 	public void testTriggeringOptionMustNotBeNull() {
 		
 		try {
-			ActionRequiredForJWSCompletionException e = new ActionRequiredForJWSCompletionException(
+			new ActionRequiredForJWSCompletionException(
 				null,
 				null,
 				new CompletableJWSObjectSigning() {
@@ -75,14 +74,14 @@ public class ActionRequiredForJWSCompletionExceptionTest extends TestCase {
 					}
 
 					@Override
-					public Base64URL complete() throws JOSEException {
+					public Base64URL complete() {
 						return null;
 					}
 				}
 			);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The triggering option must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 	}
 	
@@ -90,14 +89,14 @@ public class ActionRequiredForJWSCompletionExceptionTest extends TestCase {
 	public void testCompletableMustNotBeNull() {
 		
 		try {
-			ActionRequiredForJWSCompletionException e = new ActionRequiredForJWSCompletionException(
+			new ActionRequiredForJWSCompletionException(
 				null,
 				UserAuthenticationRequired.getInstance(),
 				null
 			);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The completable signing must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 	}
 }

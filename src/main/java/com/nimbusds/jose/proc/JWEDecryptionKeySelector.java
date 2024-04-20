@@ -18,20 +18,24 @@
 package com.nimbusds.jose.proc;
 
 
+import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JWEAlgorithm;
+import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.KeySourceException;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKMatcher;
+import com.nimbusds.jose.jwk.JWKSelector;
+import com.nimbusds.jose.jwk.KeyConverter;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import net.jcip.annotations.ThreadSafe;
+
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import javax.crypto.SecretKey;
-
-import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.KeySourceException;
-import com.nimbusds.jose.jwk.*;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import net.jcip.annotations.ThreadSafe;
+import java.util.Objects;
 
 
 /**
@@ -39,7 +43,7 @@ import net.jcip.annotations.ThreadSafe;
  * retrieved from a {@link JWKSource JSON Web Key (JWK) source}.
  *
  * @author Vladimir Dzhuvinov
- * @version 2016-06-21
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class JWEDecryptionKeySelector<C extends SecurityContext> extends AbstractJWKSelectorWithSource<C> implements JWEKeySelector<C> {
@@ -71,14 +75,8 @@ public class JWEDecryptionKeySelector<C extends SecurityContext> extends Abstrac
 					final EncryptionMethod jweEnc,
 					final JWKSource<C> jwkSource) {
 		super(jwkSource);
-		if (jweAlg == null) {
-			throw new IllegalArgumentException("The JWE algorithm must not be null");
-		}
-		this.jweAlg = jweAlg;
-		if (jweEnc == null) {
-			throw new IllegalArgumentException("The JWE encryption method must not be null");
-		}
-		this.jweEnc = jweEnc;
+		this.jweAlg = Objects.requireNonNull(jweAlg);
+		this.jweEnc = Objects.requireNonNull(jweEnc);
 	}
 
 

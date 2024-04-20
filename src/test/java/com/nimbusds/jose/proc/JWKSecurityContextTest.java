@@ -18,13 +18,12 @@
 package com.nimbusds.jose.proc;
 
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.nimbusds.jose.jwk.JWK;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.nimbusds.jose.jwk.JWK;
+import java.util.Arrays;
+import java.util.List;
 
 public class JWKSecurityContextTest {
 	@Test
@@ -36,7 +35,7 @@ public class JWKSecurityContextTest {
 		Assert.assertEquals(keys, context.getKeys());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = NullPointerException.class)
 	public void testConstructorWithNull() {
 		new JWKSecurityContext(null);
 	}

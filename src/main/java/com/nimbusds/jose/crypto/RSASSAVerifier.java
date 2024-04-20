@@ -18,20 +18,23 @@
 package com.nimbusds.jose.crypto;
 
 
+import com.nimbusds.jose.CriticalHeaderParamsAware;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
+import com.nimbusds.jose.crypto.impl.RSASSA;
+import com.nimbusds.jose.crypto.impl.RSASSAProvider;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.Base64URL;
+import net.jcip.annotations.ThreadSafe;
+
 import java.security.InvalidKeyException;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Objects;
 import java.util.Set;
-
-import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
-import com.nimbusds.jose.crypto.impl.RSASSA;
-import com.nimbusds.jose.crypto.impl.RSASSAProvider;
-import net.jcip.annotations.ThreadSafe;
-
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.util.Base64URL;
 
 
 /**
@@ -59,7 +62,7 @@ import com.nimbusds.jose.util.Base64URL;
  * <p>Supports the BouncyCastle FIPS provider for the PSxxx family of JWS algorithms.
  * 
  * @author Vladimir Dzhuvinov
- * @version 2015-06-02
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class RSASSAVerifier extends RSASSAProvider implements JWSVerifier, CriticalHeaderParamsAware {
@@ -113,12 +116,7 @@ public class RSASSAVerifier extends RSASSAProvider implements JWSVerifier, Criti
 	public RSASSAVerifier(final RSAPublicKey publicKey,
 			      final Set<String> defCritHeaders) {
 
-		if (publicKey == null) {
-			throw new IllegalArgumentException("The public RSA key must not be null");
-		}
-
-		this.publicKey = publicKey;
-
+		this.publicKey = Objects.requireNonNull(publicKey);
 		critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
 	}
 

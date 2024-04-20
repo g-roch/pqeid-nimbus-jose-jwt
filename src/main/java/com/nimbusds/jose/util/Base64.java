@@ -17,16 +17,17 @@
 
 package com.nimbusds.jose.util;
 
+import net.jcip.annotations.Immutable;
+
 import java.io.Serializable;
 import java.math.BigInteger;
-
-import net.jcip.annotations.Immutable;
+import java.util.Objects;
 
 /**
  * Base64-encoded object.
  *
  * @author Vladimir Dzhuvinov
- * @version 2019-10-04
+ * @version @version 2024-04-20
  */
 @Immutable
 public class Base64 implements Serializable {
@@ -47,12 +48,7 @@ public class Base64 implements Serializable {
 	 */
 	public Base64(final String base64) {
 
-		if (base64 == null) {
-
-			throw new IllegalArgumentException("The Base64 value must not be null");
-		}
-
-		value = base64;
+		value = Objects.requireNonNull(base64);
 	}
 
 	/**

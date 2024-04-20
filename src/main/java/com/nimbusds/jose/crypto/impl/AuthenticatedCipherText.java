@@ -20,12 +20,14 @@ package com.nimbusds.jose.crypto.impl;
 
 import net.jcip.annotations.Immutable;
 
+import java.util.Objects;
+
 
 /**
  * Authenticated cipher text. This class is immutable.
  *
  * @author Vladimir Dzhuvinov
- * @version 2013-05-06
+ * @version 2024-04-20
  */
 @Immutable
 public final class AuthenticatedCipherText {
@@ -52,16 +54,8 @@ public final class AuthenticatedCipherText {
 	 */
 	public AuthenticatedCipherText(final byte[] cipherText, final byte[] authenticationTag) {
 
-		if (cipherText == null)
-			throw new IllegalArgumentException("The cipher text must not be null");
-
-		this.cipherText = cipherText;
-
-
-		if (authenticationTag == null)
-			throw new IllegalArgumentException("The authentication tag must not be null");
-
-		this.authenticationTag = authenticationTag;
+		this.cipherText = Objects.requireNonNull(cipherText);
+		this.authenticationTag = Objects.requireNonNull(authenticationTag);
 	}
 
 

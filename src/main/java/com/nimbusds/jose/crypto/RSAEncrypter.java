@@ -18,15 +18,15 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.security.interfaces.RSAPublicKey;
-import javax.crypto.SecretKey;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.impl.*;
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64URL;
+import net.jcip.annotations.ThreadSafe;
+
+import javax.crypto.SecretKey;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Objects;
 
 
 /**
@@ -71,7 +71,7 @@ import com.nimbusds.jose.util.Base64URL;
  * @author Vladimir Dzhuvinov
  * @author Jun Yu
  * @author Egor Puzanov
- * @version 2023-09-10
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
@@ -125,11 +125,7 @@ public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
 	public RSAEncrypter(final RSAPublicKey publicKey, final SecretKey contentEncryptionKey) {
 
 		super(contentEncryptionKey);
-
-		if (publicKey == null) {
-			throw new IllegalArgumentException("The public RSA key must not be null");
-		}
-		this.publicKey = publicKey;
+		this.publicKey = Objects.requireNonNull(publicKey);
 	}
 	
 	

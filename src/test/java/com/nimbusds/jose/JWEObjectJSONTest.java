@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
  *
  * @author Egor Puzanov
  * @author Vladimir Dzhuvinov
- * @version 2024-02-06
+ * @version 2024-04-20
  */
 public class JWEObjectJSONTest {
 
@@ -210,15 +210,15 @@ public class JWEObjectJSONTest {
 		try {
 			new JWEObjectJSON(null, payload);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The JWE protected header must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 
 		try {
 			new JWEObjectJSON(header, null);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The payload must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 	}
 
@@ -231,15 +231,15 @@ public class JWEObjectJSONTest {
 		try {
 			new JWEObjectJSON(null, null, null, null, null, null, null);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The JWE protected header must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertNull("The JWE protected header must not be null", e.getMessage());
 		}
 
 		try {
 			new JWEObjectJSON(header, null, null, null, null, null, null);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The cipher text must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertNotNull(e.getMessage());
 		}
 	}
 
@@ -251,16 +251,16 @@ public class JWEObjectJSONTest {
 			Map<String, Object> json = null;
 			JWEObjectJSON.parse(json);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The JSON object must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertNotNull(e.getMessage());
 		}
 
 		try {
 			String json = null;
 			JWEObjectJSON.parse(json);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The JSON object string must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 	}
 

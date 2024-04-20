@@ -24,6 +24,7 @@ import net.jcip.annotations.ThreadSafe;
 
 import java.security.Signature;
 import java.text.ParseException;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -35,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>This class is thread-safe.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-09-27
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class JWSObject extends JOSEObject {
@@ -106,16 +107,8 @@ public class JWSObject extends JOSEObject {
 	 */
 	public JWSObject(final JWSHeader header, final Payload payload) {
 
-		if (header == null) {
-			throw new IllegalArgumentException("The JWS header must not be null");
-		}
-		this.header = header;
-
-		if (payload == null) {
-			throw new IllegalArgumentException("The payload must not be null");
-		}
-		setPayload(payload);
-		
+		this.header = Objects.requireNonNull(header);
+		setPayload(Objects.requireNonNull(payload));
 		signingInputString = composeSigningInput();
 		signature = null;
 		state.set(State.UNSIGNED);
@@ -158,25 +151,16 @@ public class JWSObject extends JOSEObject {
 	public JWSObject(final Base64URL firstPart, final Payload payload, final Base64URL thirdPart)
 		throws ParseException {
 
-		if (firstPart == null) {
-			throw new IllegalArgumentException("The first part must not be null");
-		}
 		try {
 			this.header = JWSHeader.parse(firstPart);
 		} catch (ParseException e) {
 			throw new ParseException("Invalid JWS header: " + e.getMessage(), 0);
 		}
 
-		if (payload == null) {
-			throw new IllegalArgumentException("The payload (second part) must not be null");
-		}
-		setPayload(payload);
+		setPayload(Objects.requireNonNull(payload));
 		
 		signingInputString = composeSigningInput();
 
-		if (thirdPart == null) {
-			throw new IllegalArgumentException("The third part must not be null");
-		}
 		if (thirdPart.toString().trim().isEmpty()) {
 			throw new ParseException("The signature must not be empty", 0);
 		}

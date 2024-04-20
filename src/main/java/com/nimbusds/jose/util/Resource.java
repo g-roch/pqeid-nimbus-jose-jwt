@@ -20,6 +20,8 @@ package com.nimbusds.jose.util;
 
 import net.jcip.annotations.Immutable;
 
+import java.util.Objects;
+
 
 /**
  * Resource with optional associated content type.
@@ -50,11 +52,7 @@ public class Resource {
 	 */
 	public Resource(final String content, final String contentType) {
 
-		if (content == null) {
-			throw new IllegalArgumentException("The resource content must not be null");
-		}
-
-		this.content = content;
+		this.content = Objects.requireNonNull(content);
 		this.contentType = contentType;
 	}
 

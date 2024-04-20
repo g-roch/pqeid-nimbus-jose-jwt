@@ -18,15 +18,16 @@
 package com.nimbusds.jose;
 
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.util.Map;
-
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jose.util.StandardCharset;
 import com.nimbusds.jwt.SignedJWT;
 import net.jcip.annotations.Immutable;
+
+import java.io.Serializable;
+import java.text.ParseException;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -50,7 +51,7 @@ import net.jcip.annotations.Immutable;
  * <p>The {@link }
  *
  * @author Vladimir Dzhuvinov
- * @version 2020-06-27
+ * @version 2024-04-20
  */
 @Immutable
 public final class Payload implements Serializable {
@@ -179,12 +180,8 @@ public final class Payload implements Serializable {
 	 */
 	public Payload(final Map<String, Object> jsonObject) {
 
-		if (jsonObject == null) {
-			throw new IllegalArgumentException("The JSON object must not be null");
-		}
-
 		this.jsonObject = JSONObjectUtils.newJSONObject();
-		this.jsonObject.putAll(jsonObject);
+		this.jsonObject.putAll(Objects.requireNonNull(jsonObject, "The JSON object must not be null"));
 		string = null;
 		bytes = null;
 		base64URL = null;
@@ -203,12 +200,8 @@ public final class Payload implements Serializable {
 	 */
 	public Payload(final String string) {
 
-		if (string == null) {
-			throw new IllegalArgumentException("The string must not be null");
-		}
-
 		jsonObject = null;
-		this.string = string;
+		this.string = Objects.requireNonNull(string, "The string must not be null");
 		bytes = null;
 		base64URL = null;
 		jwsObject = null;
@@ -226,13 +219,9 @@ public final class Payload implements Serializable {
 	 */
 	public Payload(final byte[] bytes) {
 
-		if (bytes == null) {
-			throw new IllegalArgumentException("The byte array must not be null");
-		}
-
 		jsonObject = null;
 		string = null;
-		this.bytes = bytes;
+		this.bytes = Objects.requireNonNull(bytes, "The byte array must not be null");
 		base64URL = null;
 		jwsObject = null;
 		signedJWT = null;
@@ -249,14 +238,10 @@ public final class Payload implements Serializable {
 	 */
 	public Payload(final Base64URL base64URL) {
 
-		if (base64URL == null) {
-			throw new IllegalArgumentException("The Base64URL-encoded object must not be null");
-		}
-
 		jsonObject = null;
 		string = null;
 		bytes = null;
-		this.base64URL = base64URL;
+		this.base64URL = Objects.requireNonNull(base64URL, "The Base64URL-encoded object must not be null");
 		jwsObject = null;
 		signedJWT = null;
 
@@ -272,10 +257,6 @@ public final class Payload implements Serializable {
 	 *                  a signed state and not {@code null}.
 	 */
 	public Payload(final JWSObject jwsObject) {
-
-		if (jwsObject == null) {
-			throw new IllegalArgumentException("The JWS object must not be null");
-		}
 
 		if (jwsObject.getState() == JWSObject.State.UNSIGNED) {
 			throw new IllegalArgumentException("The JWS object must be signed");
@@ -300,10 +281,6 @@ public final class Payload implements Serializable {
 	 *                  a signed state and not {@code null}.
 	 */
 	public Payload(final SignedJWT signedJWT) {
-
-		if (signedJWT == null) {
-			throw new IllegalArgumentException("The signed JWT must not be null");
-		}
 
 		if (signedJWT.getState() == JWSObject.State.UNSIGNED) {
 			throw new IllegalArgumentException("The JWT must be signed");

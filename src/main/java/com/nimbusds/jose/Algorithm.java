@@ -18,11 +18,11 @@
 package com.nimbusds.jose;
 
 
-import java.io.Serializable;
-
 import com.nimbusds.jose.util.JSONStringUtils;
-
 import net.jcip.annotations.Immutable;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 
 /**
@@ -36,7 +36,7 @@ import net.jcip.annotations.Immutable;
  * </ul>
  *
  * @author Vladimir Dzhuvinov 
- * @version 2020-06-03
+ * @version 2024-04-20
  */
 @Immutable
 public class Algorithm implements Serializable {
@@ -71,14 +71,7 @@ public class Algorithm implements Serializable {
 	 *             known.
 	 */
 	public Algorithm(final String name, final Requirement req) {
-
-		if (name == null) {
-
-			throw new IllegalArgumentException("The algorithm name must not be null");
-		}
-
-		this.name = name;
-
+		this.name = Objects.requireNonNull(name);
 		requirement = req;
 	}
 

@@ -18,17 +18,16 @@
 package com.nimbusds.jose;
 
 
-import java.net.URI;
-import java.text.ParseException;
-import java.util.*;
-
-import net.jcip.annotations.Immutable;
-
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jose.util.X509CertChainUtils;
+import net.jcip.annotations.Immutable;
+
+import java.net.URI;
+import java.text.ParseException;
+import java.util.*;
 
 
 /**
@@ -65,7 +64,7 @@ import com.nimbusds.jose.util.X509CertChainUtils;
  * </pre>
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-03-07
+ * @version 2024-04-20
  */
 @Immutable
 public final class JWSHeader extends CommonSEHeader {
@@ -631,10 +630,6 @@ public final class JWSHeader extends CommonSEHeader {
 			 final Base64URL parsedBase64URL) {
 
 		super(alg, typ, cty, crit, jku, jwk, x5u, x5t, x5t256, x5c, kid, customParams, parsedBase64URL);
-
-		if (alg == null) {
-			throw new IllegalArgumentException("The algorithm \"alg\" header parameter must not be null");
-		}
 
 		if (alg.getName().equals(Algorithm.NONE.getName())) {
 			throw new IllegalArgumentException("The JWS algorithm \"alg\" cannot be \"none\"");

@@ -18,19 +18,19 @@
 package com.nimbusds.jose.jwk.gen;
 
 
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.google.crypto.tink.subtle.X25519;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.util.Base64URL;
+
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -44,7 +44,7 @@ import com.nimbusds.jose.util.Base64URL;
  * </ul>
  *
  * @author Tim McLean
- * @version 2023-01-02
+ * @version 2024-04-20
  */
 public class OctetKeyPairGenerator extends JWKGenerator<OctetKeyPair> {
 
@@ -76,14 +76,9 @@ public class OctetKeyPairGenerator extends JWKGenerator<OctetKeyPair> {
 	 */
 	public OctetKeyPairGenerator(final Curve crv) {
 
-		if (crv == null) {
-			throw new IllegalArgumentException("The curve must not be null");
-		}
-
-		if (! SUPPORTED_CURVES.contains(crv)) {
+		if (! SUPPORTED_CURVES.contains(Objects.requireNonNull(crv))) {
 			throw new IllegalArgumentException("Curve not supported for OKP generation");
 		}
-
 		this.crv = crv;
 	}
 	

@@ -18,19 +18,20 @@
 package com.nimbusds.jose.crypto.impl;
 
 
-import java.util.Collections;
-import java.util.Set;
-
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSProvider;
 import com.nimbusds.jose.jca.JCAContext;
+
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
 
 
 /**
  * The base abstract class for JSON Web Signature (JWS) signers and verifiers.
  *
  * @author Vladimir Dzhuvinov
- * @version 2015-11-16
+ * @version @version 2024-04-20
  */
 public abstract class BaseJWSProvider implements JWSProvider {
 
@@ -55,11 +56,7 @@ public abstract class BaseJWSProvider implements JWSProvider {
 	 */
 	public BaseJWSProvider(final Set<JWSAlgorithm> algs) {
 
-		if (algs == null) {
-			throw new IllegalArgumentException("The supported JWS algorithm set must not be null");
-		}
-
-		this.algs = Collections.unmodifiableSet(algs);
+		this.algs = Collections.unmodifiableSet(Objects.requireNonNull(algs));
 	}
 
 

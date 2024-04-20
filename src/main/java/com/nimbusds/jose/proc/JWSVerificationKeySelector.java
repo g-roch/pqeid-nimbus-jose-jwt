@@ -18,16 +18,6 @@
 package com.nimbusds.jose.proc;
 
 
-import java.security.Key;
-import java.security.PublicKey;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import javax.crypto.SecretKey;
-
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.KeySourceException;
@@ -36,6 +26,12 @@ import com.nimbusds.jose.jwk.JWKMatcher;
 import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.KeyConverter;
 import com.nimbusds.jose.jwk.source.JWKSource;
+import net.jcip.annotations.ThreadSafe;
+
+import javax.crypto.SecretKey;
+import java.security.Key;
+import java.security.PublicKey;
+import java.util.*;
 
 
 /**
@@ -44,7 +40,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
  *
  * @author Vladimir Dzhuvinov
  * @author Marco Vermeulen
- * @version 2020-06-02
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class JWSVerificationKeySelector<C extends SecurityContext> extends AbstractJWKSelectorWithSource<C> implements JWSKeySelector<C> {
@@ -69,10 +65,7 @@ public class JWSVerificationKeySelector<C extends SecurityContext> extends Abstr
 	 */
 	public JWSVerificationKeySelector(final JWSAlgorithm jwsAlg, final JWKSource<C> jwkSource) {
 		super(jwkSource);
-		if (jwsAlg == null) {
-			throw new IllegalArgumentException("The JWS algorithm must not be null");
-		}
-		this.jwsAlgs = Collections.singleton(jwsAlg);
+		this.jwsAlgs = Collections.singleton(Objects.requireNonNull(jwsAlg));
 		this.singleJwsAlgConstructorWasCalled = true;
 	}
 
@@ -86,8 +79,8 @@ public class JWSVerificationKeySelector<C extends SecurityContext> extends Abstr
 	 */
 	public JWSVerificationKeySelector(final Set<JWSAlgorithm> jwsAlgs, final JWKSource<C> jwkSource) {
 		super(jwkSource);
-		if (jwsAlgs == null || jwsAlgs.isEmpty()) {
-			throw new IllegalArgumentException("The JWS algorithms must not be null or empty");
+		if (jwsAlgs.isEmpty()) {
+			throw new IllegalArgumentException("The JWS algorithms must not be empty");
 		}
 		this.jwsAlgs = Collections.unmodifiableSet(jwsAlgs);
 		this.singleJwsAlgConstructorWasCalled = false;

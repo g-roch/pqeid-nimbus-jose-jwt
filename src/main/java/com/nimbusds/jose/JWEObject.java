@@ -23,6 +23,7 @@ import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.ThreadSafe;
 
 import java.text.ParseException;
+import java.util.Objects;
 
 
 /**
@@ -34,7 +35,7 @@ import java.text.ParseException;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2023-03-26
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class JWEObject extends JOSEObject {
@@ -116,24 +117,10 @@ public class JWEObject extends JOSEObject {
 	 */
 	public JWEObject(final JWEHeader header, final Payload payload) {
 
-		if (header == null) {
-
-			throw new IllegalArgumentException("The JWE header must not be null");
-		}
-
-		this.header = header;
-
-		if (payload == null) {
-
-			throw new IllegalArgumentException("The payload must not be null");
-		}
-
-		setPayload(payload);
-
+		this.header = Objects.requireNonNull(header);
+		setPayload(Objects.requireNonNull(payload));
 		encryptedKey = null;
-
 		cipherText = null;
-
 		state = State.UNENCRYPTED;
 	}
 
@@ -164,16 +151,9 @@ public class JWEObject extends JOSEObject {
 		         final Base64URL fifthPart)
 		throws ParseException {
 
-		if (firstPart == null) {
-
-			throw new IllegalArgumentException("The first part must not be null");
-		}
-
 		try {
-			this.header = JWEHeader.parse(firstPart);
-
+			this.header = JWEHeader.parse(Objects.requireNonNull(firstPart));
 		} catch (ParseException e) {
-
 			throw new ParseException("Invalid JWE header: " + e.getMessage(), 0);
 		}
 
@@ -195,12 +175,7 @@ public class JWEObject extends JOSEObject {
 			iv = thirdPart;
 		}
 
-		if (fourthPart == null) {
-
-			throw new IllegalArgumentException("The fourth part must not be null");
-		}
-
-		cipherText = fourthPart;
+		cipherText = Objects.requireNonNull(fourthPart);
 
 		if (fifthPart == null || fifthPart.toString().isEmpty()) {
 

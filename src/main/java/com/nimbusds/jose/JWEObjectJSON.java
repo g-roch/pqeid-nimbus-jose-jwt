@@ -27,10 +27,7 @@ import net.jcip.annotations.ThreadSafe;
 
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -42,7 +39,7 @@ import java.util.Map;
  *
  * @author Egor Puzanov
  * @author Vladimir Dzhuvinov
- * @version 2023-09-13
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class JWEObjectJSON extends JOSEObjectJSON {
@@ -259,17 +256,8 @@ public class JWEObjectJSON extends JOSEObjectJSON {
 		             final byte[] aad) {
 
 		super(payload);
-
-		if (header == null) {
-			throw new IllegalArgumentException("The JWE protected header must not be null");
-		}
-		this.header = header;
-
-		if (payload == null) {
-			throw new IllegalArgumentException("The payload must not be null");
-		}
-		setPayload(payload);
-
+		this.header = Objects.requireNonNull(header);
+		setPayload(Objects.requireNonNull(payload));
 		this.unprotectedHeader = unprotectedHeader;
 		this.aad = aad;
 		this.cipherText = null;
@@ -306,20 +294,12 @@ public class JWEObjectJSON extends JOSEObjectJSON {
 
 		super(null); // Payload not decrypted yet, must be null
 
-		if (header == null) {
-			throw new IllegalArgumentException("The JWE protected header must not be null");
-		}
-
-		if (cipherText == null) {
-			throw new IllegalArgumentException("The cipher text must not be null");
-		}
-
-		this.header = header;
+		this.header = Objects.requireNonNull(header);
 		this.recipients.addAll(recipients);
 		this.unprotectedHeader = unprotectedHeader;
 		this.aad = aad;
 		this.iv = iv;
-		this.cipherText = cipherText;
+		this.cipherText = Objects.requireNonNull(cipherText);
 		this.authTag = authTag;
 
 		state = State.ENCRYPTED; // but not decrypted yet!
@@ -689,10 +669,6 @@ public class JWEObjectJSON extends JOSEObjectJSON {
 	public static JWEObjectJSON parse(final Map<String, Object> jsonObject)
 		throws ParseException {
 
-		if (jsonObject == null) {
-			throw new IllegalArgumentException("The JSON object must not be null");
-		}
-
 		if (!jsonObject.containsKey("protected")) {
 			throw new ParseException("The JWE protected header mast be present", 0);
 		}
@@ -743,10 +719,6 @@ public class JWEObjectJSON extends JOSEObjectJSON {
 	public static JWEObjectJSON parse(final String json)
 		throws ParseException {
 
-		if (json == null) {
-			throw new IllegalArgumentException("The JSON object string must not be null");
-		}
-
-		return parse(JSONObjectUtils.parse(json));
+		return parse(JSONObjectUtils.parse(Objects.requireNonNull(json)));
 	}
 }

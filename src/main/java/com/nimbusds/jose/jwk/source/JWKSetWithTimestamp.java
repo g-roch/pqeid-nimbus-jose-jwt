@@ -18,18 +18,18 @@
 package com.nimbusds.jose.jwk.source;
 
 
-import java.util.Date;
-
+import com.nimbusds.jose.jwk.JWKSet;
 import net.jcip.annotations.Immutable;
 
-import com.nimbusds.jose.jwk.JWKSet;
+import java.util.Date;
+import java.util.Objects;
 
 
 /**
  * JSON Web Key (JWK) set with timestamp.
  *
  * @author Vladimir Dzhuvinov
- * @version 2020-12-27
+ * @version 2024-04-20
  * @deprecated see {@linkplain RemoteJWKSet}.
  */
 @Deprecated
@@ -58,14 +58,8 @@ public final class JWKSetWithTimestamp {
 	 * @param timestamp The timestamp date. Must not be {@code null}.
 	 */
 	public JWKSetWithTimestamp(final JWKSet jwkSet, final Date timestamp) {
-		if (jwkSet == null) {
-			throw new IllegalArgumentException("The JWK set must not be null");
-		}
-		this.jwkSet = jwkSet;
-		if (timestamp == null) {
-			throw new IllegalArgumentException("The timestamp must not null");
-		}
-		this.timestamp = timestamp;
+		this.jwkSet = Objects.requireNonNull(jwkSet);
+		this.timestamp = Objects.requireNonNull(timestamp);
 	}
 	
 	

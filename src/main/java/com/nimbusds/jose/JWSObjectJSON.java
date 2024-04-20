@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Alexander Martynov
  * @author Vladimir Dzhuvinov
- * @version 2021-10-09
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class JWSObjectJSON extends JOSEObjectJSON {
@@ -279,9 +279,7 @@ public class JWSObjectJSON extends JOSEObjectJSON {
 	private JWSObjectJSON(final Payload payload,
 			      final List<Signature> signatures) {
 		
-		super(payload);
-		
-		Objects.requireNonNull(payload, "The payload must not be null");
+		super(Objects.requireNonNull(payload, "The payload must not be null"));
 		
 		if (signatures.isEmpty()) {
 			throw new IllegalArgumentException("At least one signature required");

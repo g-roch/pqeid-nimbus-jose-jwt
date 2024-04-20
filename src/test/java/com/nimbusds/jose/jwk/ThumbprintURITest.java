@@ -18,13 +18,12 @@
 package com.nimbusds.jose.jwk;
 
 
-import java.text.ParseException;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64URL;
+import junit.framework.TestCase;
+
+import java.text.ParseException;
 
 
 public class ThumbprintURITest extends TestCase {
@@ -79,8 +78,8 @@ public class ThumbprintURITest extends TestCase {
 		try {
 			new ThumbprintURI(null, new Base64URL("NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs"));
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The hash algorithm must not be null or empty", e.getMessage());
+		} catch (NullPointerException e) {
+			assertEquals("Cannot invoke \"String.isEmpty()\" because \"hashAlg\" is null", e.getMessage());
 		}
 	}
 	
@@ -91,7 +90,7 @@ public class ThumbprintURITest extends TestCase {
 			new ThumbprintURI("", new Base64URL("NzbLsXh8uDCcd-6MNwXF4W_7noWXFZAfHkxZsRGC9Xs"));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The hash algorithm must not be null or empty", e.getMessage());
+			assertEquals("The hash algorithm must not be empty", e.getMessage());
 		}
 	}
 	
@@ -101,8 +100,8 @@ public class ThumbprintURITest extends TestCase {
 		try {
 			new ThumbprintURI("sha-256", null);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The thumbprint must not be null or empty", e.getMessage());
+		} catch (NullPointerException e) {
+			assertEquals("Cannot invoke \"com.nimbusds.jose.util.Base64URL.toString()\" because \"thumbprint\" is null", e.getMessage());
 		}
 	}
 	
@@ -113,7 +112,7 @@ public class ThumbprintURITest extends TestCase {
 			new ThumbprintURI("sha-256", new Base64URL(""));
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The thumbprint must not be null or empty", e.getMessage());
+			assertEquals("The thumbprint must not be empty", e.getMessage());
 		}
 	}
 	

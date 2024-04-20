@@ -18,17 +18,16 @@
 package com.nimbusds.jose;
 
 
-import java.net.URI;
-import java.text.ParseException;
-import java.util.*;
-
-import net.jcip.annotations.Immutable;
-
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jose.util.X509CertChainUtils;
+import net.jcip.annotations.Immutable;
+
+import java.net.URI;
+import java.text.ParseException;
+import java.util.*;
 
 
 /**
@@ -74,7 +73,7 @@ import com.nimbusds.jose.util.X509CertChainUtils;
  * </pre>
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-03-07
+ * @version 2024-04-20
  */
 @Immutable
 public final class JWEHeader extends CommonSEHeader {
@@ -286,14 +285,9 @@ public final class JWEHeader extends CommonSEHeader {
 			if (alg.getName().equals(Algorithm.NONE.getName())) {
 				throw new IllegalArgumentException("The JWE algorithm \"alg\" cannot be \"none\"");
 			}
-
 			this.alg = alg;
 
-			if (enc == null) {
-				throw new IllegalArgumentException("The encryption method \"enc\" parameter must not be null");
-			}
-
-			this.enc = enc;
+			this.enc = Objects.requireNonNull(enc);
 		}
 
 
@@ -305,11 +299,7 @@ public final class JWEHeader extends CommonSEHeader {
 		 */
 		public Builder(final EncryptionMethod enc) {
 
-			if (enc == null) {
-				throw new IllegalArgumentException("The encryption method \"enc\" parameter must not be null");
-			}
-
-			this.enc = enc;
+			this.enc = Objects.requireNonNull(enc);
 		}
 
 
@@ -932,15 +922,11 @@ public final class JWEHeader extends CommonSEHeader {
 			throw new IllegalArgumentException("The JWE algorithm cannot be \"none\"");
 		}
 
-		if (enc == null) {
-			throw new IllegalArgumentException("The encryption method \"enc\" parameter must not be null");
-		}
-
 		if (epk != null && epk.isPrivate()) {
 			throw new IllegalArgumentException("Ephemeral public key should not be a private key");
 		}
 
-		this.enc = enc;
+		this.enc = Objects.requireNonNull(enc);
 
 		this.epk = epk;
 		this.zip = zip;

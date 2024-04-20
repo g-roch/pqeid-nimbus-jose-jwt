@@ -18,14 +18,14 @@
 package com.nimbusds.jose.jwk.source;
 
 
-import java.util.List;
-
-import net.jcip.annotations.Immutable;
-
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
+import net.jcip.annotations.Immutable;
+
+import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -33,7 +33,7 @@ import com.nimbusds.jose.proc.SecurityContext;
  *
  * @author Vladimir Dzhuvinov
  * @author Thomas Rørvik Skjølberg
- * @version 2022-08-24
+ * @version 2024-04-20
  */
 @Immutable
 public class ImmutableJWKSet<C extends SecurityContext> implements JWKSource<C> {
@@ -51,10 +51,7 @@ public class ImmutableJWKSet<C extends SecurityContext> implements JWKSource<C> 
 	 * @param jwkSet The JWK set. Must not be {@code null}.
 	 */
 	public ImmutableJWKSet(final JWKSet jwkSet) {
-		if (jwkSet == null) {
-			throw new IllegalArgumentException("The JWK set must not be null");
-		}
-		this.jwkSet = jwkSet;
+		this.jwkSet = Objects.requireNonNull(jwkSet);
 	}
 
 

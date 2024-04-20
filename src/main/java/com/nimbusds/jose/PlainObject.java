@@ -22,6 +22,7 @@ import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.ThreadSafe;
 
 import java.text.ParseException;
+import java.util.Objects;
 
 
 /**
@@ -32,7 +33,7 @@ import java.text.ParseException;
  * <p>This class is thread-safe.
  *
  * @author Vladimir Dzhuvinov
- * @version 2014-04-08
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class PlainObject extends JOSEObject {
@@ -55,12 +56,7 @@ public class PlainObject extends JOSEObject {
 	 */
 	public PlainObject(final Payload payload) {
 
-		if (payload == null) {
-			throw new IllegalArgumentException("The payload must not be null");
-		}
-
-		setPayload(payload);
-
+		setPayload(Objects.requireNonNull(payload));
 		header = new PlainHeader();
 	}
 
@@ -74,19 +70,8 @@ public class PlainObject extends JOSEObject {
 	 */
 	public PlainObject(final PlainHeader header, final Payload payload) {
 
-		if (header == null) {
-
-			throw new IllegalArgumentException("The unsecured header must not be null");
-		}
-
-		this.header = header;
-
-		if (payload == null) {
-
-			throw new IllegalArgumentException("The payload must not be null");
-		}
-
-		setPayload(payload);
+		this.header = Objects.requireNonNull(header);
+		setPayload(Objects.requireNonNull(payload));
 	}
 
 
@@ -104,25 +89,15 @@ public class PlainObject extends JOSEObject {
 	public PlainObject(final Base64URL firstPart, final Base64URL secondPart)
 		throws ParseException {
 
-		if (firstPart == null) {
-
-			throw new IllegalArgumentException("The first part must not be null");
-		}
-
 		try {
-			header = PlainHeader.parse(firstPart);
+			header = PlainHeader.parse(Objects.requireNonNull(firstPart));
 
 		} catch (ParseException e) {
 
 			throw new ParseException("Invalid unsecured header: " + e.getMessage(), 0);
 		}
 
-		if (secondPart == null) {
-
-			throw new IllegalArgumentException("The second part must not be null");
-		}
-
-		setPayload(new Payload(secondPart));
+		setPayload(new Payload(Objects.requireNonNull(secondPart)));
 
 		setParsedParts(firstPart, secondPart, null);
 	}

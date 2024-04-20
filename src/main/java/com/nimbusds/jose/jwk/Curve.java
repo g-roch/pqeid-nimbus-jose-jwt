@@ -18,12 +18,12 @@
 package com.nimbusds.jose.jwk;
 
 
+import com.nimbusds.jose.JWSAlgorithm;
+import net.jcip.annotations.Immutable;
+
 import java.io.Serializable;
 import java.security.spec.ECParameterSpec;
 import java.util.*;
-
-import com.nimbusds.jose.JWSAlgorithm;
-import net.jcip.annotations.Immutable;
 
 
 /**
@@ -54,7 +54,7 @@ import net.jcip.annotations.Immutable;
  *
  * @author Vladimir Dzhuvinov
  * @author Aleksei Doroganov
- * @version 2021-07-02
+ * @version 2024-04-20
  */
 @Immutable
 public final class Curve implements Serializable {
@@ -164,14 +164,8 @@ public final class Curve implements Serializable {
 	 */
 	public Curve(final String name, final String stdName, final String oid) {
 		
-		if (name == null) {
-			throw new IllegalArgumentException("The JOSE cryptographic curve name must not be null");
-		}
-		
-		this.name = name;
-		
+		this.name = Objects.requireNonNull(name);
 		this.stdName = stdName;
-		
 		this.oid = oid;
 	}
 	

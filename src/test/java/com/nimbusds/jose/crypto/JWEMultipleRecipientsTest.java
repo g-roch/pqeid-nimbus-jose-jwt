@@ -29,7 +29,6 @@ import com.nimbusds.jose.util.JSONObjectUtils;
 import junit.framework.TestCase;
 
 import javax.crypto.SecretKey;
-import java.net.URI;
 import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -369,8 +368,8 @@ public class JWEMultipleRecipientsTest extends TestCase {
 		try {
 			new MultiEncrypter(null, cek);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The JWK set must not be null", e.getMessage());
+		} catch (NullPointerException e) {
+			assertEquals("Cannot invoke \"com.nimbusds.jose.jwk.JWKSet.getKeys()\" because \"keys\" is null", e.getMessage());
 		}
 	}
 

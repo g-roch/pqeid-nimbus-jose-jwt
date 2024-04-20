@@ -18,16 +18,17 @@
 package com.nimbusds.jose.jwk.gen;
 
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
-
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
+import java.util.Objects;
 
 
 /**
@@ -44,7 +45,7 @@ import com.nimbusds.jose.jwk.ECKey;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Cranford
- * @version 2023-01-29
+ * @version 2024-04-20
  */
 public class ECKeyGenerator extends JWKGenerator<ECKey> {
 	
@@ -61,11 +62,7 @@ public class ECKeyGenerator extends JWKGenerator<ECKey> {
 	 * @param crv The curve. Must not be {@code null}.
 	 */
 	public ECKeyGenerator(final Curve crv) {
-	
-		if (crv == null) {
-			throw new IllegalArgumentException("The curve must not be null");
-		}
-		this.crv = crv;
+		this.crv = Objects.requireNonNull(crv);
 	}
 	
 	

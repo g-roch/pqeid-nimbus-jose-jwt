@@ -71,7 +71,7 @@ public class JWKSecurityContextJWKSetTest {
 	}
 
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = NullPointerException.class)
 	public void testGetWithNullContext() throws Exception {
 		this.jwkSource.get(SELECT_ALL, null);
 	}

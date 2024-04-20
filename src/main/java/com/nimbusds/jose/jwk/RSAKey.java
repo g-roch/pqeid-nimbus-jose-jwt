@@ -18,6 +18,12 @@
 package com.nimbusds.jose.jwk;
 
 
+import com.nimbusds.jose.Algorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.util.Base64;
+import com.nimbusds.jose.util.*;
+import net.jcip.annotations.Immutable;
+
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.net.URI;
@@ -31,13 +37,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.*;
 import java.text.ParseException;
 import java.util.*;
-
-import net.jcip.annotations.Immutable;
-
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.util.Base64;
-import com.nimbusds.jose.util.*;
 
 
 /**
@@ -130,7 +129,7 @@ import com.nimbusds.jose.util.*;
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
  * @author Cedric Staub
- * @version 2022-12-26
+ * @version 2024-04-20
  */
 @Immutable
 public final class RSAKey extends JWK implements AsymmetricJWK {
@@ -179,27 +178,9 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 *          coefficient. Must not be {@code null}.
 		 */
 		public OtherPrimesInfo(final Base64URL r, final Base64URL d, final Base64URL t) {
-
-			if (r == null) {
-
-				throw new IllegalArgumentException("The prime factor must not be null");
-			}
-
-			this.r = r;
-
-			if (d == null) {
-
-				throw new IllegalArgumentException("The factor CRT exponent must not be null");
-			}
-
-			this.d = d;
-
-			if (t == null) {
-
-				throw new IllegalArgumentException("The factor CRT coefficient must not be null");
-			}
-			
-			this.t = t;
+			this.r = Objects.requireNonNull(r);
+			this.d = Objects.requireNonNull(d);
+			this.t = Objects.requireNonNull(t);
 		}
 
 
@@ -464,19 +445,8 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		public Builder(final Base64URL n, final Base64URL e) {
 
 			// Ensure the public params are defined
-
-			if (n == null) {
-				throw new IllegalArgumentException("The modulus value must not be null");
-			}
-
-			this.n = n;
-
-
-			if (e == null) {
-				throw new IllegalArgumentException("The public exponent value must not be null");
-			}
-
-			this.e = e;
+			this.n = Objects.requireNonNull(n);
+			this.e = Objects.requireNonNull(e);
 		}
 
 
@@ -1270,9 +1240,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		this(n, e, d, null, null, null, null, null, null, null, use, ops, alg, kid,
 		     x5u, x5t, x5t256, x5c, exp, nbf, iat, ks);
 
-		if (d == null) {
-			throw new IllegalArgumentException("The private exponent must not be null");
-		}
+		Objects.requireNonNull(d, "The private exponent must not be null");
 	}
 
 
@@ -1407,25 +1375,12 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		     exp, nbf, iat,
 		     ks);
 
-		if (p == null) {
-			throw new IllegalArgumentException("The first prime factor must not be null");
-		}
+		Objects.requireNonNull(p, "The first prime factor must not be null");
+		Objects.requireNonNull(q, "The second prime factor must not be null");
+		Objects.requireNonNull(dp, "The first factor CRT exponent must not be null");
+		Objects.requireNonNull(dq, "The second factor CRT exponent must not be null");
+		Objects.requireNonNull(qi, "The first CRT coefficient must not be null");
 
-		if (q == null) {
-			throw new IllegalArgumentException("The second prime factor must not be null");
-		}
-
-		if (dp == null) {
-			throw new IllegalArgumentException("The first factor CRT exponent must not be null");
-		}
-
-		if (dq == null) {
-			throw new IllegalArgumentException("The second factor CRT exponent must not be null");
-		}
-
-		if (qi == null) {
-			throw new IllegalArgumentException("The first CRT coefficient must not be null");
-		}
 	}
 
 

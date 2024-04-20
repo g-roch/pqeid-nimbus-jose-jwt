@@ -21,12 +21,14 @@ package com.nimbusds.jose.proc;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import net.jcip.annotations.ThreadSafe;
 
+import java.util.Objects;
+
 
 /**
  * Abstract JSON Web Key (JWK) selector with source.
  *
  * @author Vladimir Dzhuvinov
- * @version 2016-04-10
+ * @version 2024-04-20
  */
 @ThreadSafe
 abstract class AbstractJWKSelectorWithSource <C extends SecurityContext> {
@@ -44,10 +46,7 @@ abstract class AbstractJWKSelectorWithSource <C extends SecurityContext> {
 	 * @param jwkSource The JWK source. Must not be {@code null}.
 	 */
 	public AbstractJWKSelectorWithSource(final JWKSource<C> jwkSource) {
-		if (jwkSource == null) {
-			throw new IllegalArgumentException("The JWK source must not be null");
-		}
-		this.jwkSource = jwkSource;
+		this.jwkSource = Objects.requireNonNull(jwkSource);
 	}
 
 

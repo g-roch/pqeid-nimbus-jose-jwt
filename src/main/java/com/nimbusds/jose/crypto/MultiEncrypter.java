@@ -85,7 +85,7 @@ import java.util.Map;
  *
  * @author Egor Puzanov
  * @author Vladimir Dzhuvinov
- * @version 2023-09-10
+ * @version 2024-04-20
  */
 @ThreadSafe
 public class MultiEncrypter extends MultiCryptoProvider implements JWEEncrypter {
@@ -144,10 +144,6 @@ public class MultiEncrypter extends MultiCryptoProvider implements JWEEncrypter 
 		throws KeyLengthException {
 		
 		super(contentEncryptionKey);
-
-		if (keys == null) {
-			throw new IllegalArgumentException("The JWK set must not be null");
-		}
 
 		for (JWK jwk : keys.getKeys()) {
 			KeyType kty = jwk.getKeyType();

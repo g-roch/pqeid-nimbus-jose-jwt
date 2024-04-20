@@ -18,11 +18,11 @@
 package com.nimbusds.jose;
 
 
-import java.io.Serializable;
-
 import com.nimbusds.jose.util.JSONStringUtils;
-
 import net.jcip.annotations.Immutable;
+
+import java.io.Serializable;
+import java.util.Objects;
 
 
 
@@ -42,7 +42,7 @@ import net.jcip.annotations.Immutable;
  * <p>Additional types can be defined using the constructor.
  *
  * @author Vladimir Dzhuvinov
- * @version 2021-04-06
+ * @version 2024-04-20
  */
 @Immutable
 public final class JOSEObjectType implements  Serializable {
@@ -58,7 +58,7 @@ public final class JOSEObjectType implements  Serializable {
 
 
 	/**
-	 * JSON-encoded JOSE object type..
+	 * JSON-encoded JOSE object type.
 	 */
 	public static final JOSEObjectType JOSE_JSON = new JOSEObjectType("JOSE+JSON");
 
@@ -82,11 +82,7 @@ public final class JOSEObjectType implements  Serializable {
 	 */
 	public JOSEObjectType(final String type) {
 
-		if (type == null) {
-			throw new IllegalArgumentException("The object type must not be null");
-		}
-
-		this.type = type;
+		this.type = Objects.requireNonNull(type);
 	}
 
 

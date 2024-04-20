@@ -18,14 +18,6 @@
 package com.nimbusds.jose.jwk.source;
 
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.jwk.JWK;
@@ -36,6 +28,14 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.util.DefaultResourceRetriever;
 import com.nimbusds.jose.util.Resource;
 import com.nimbusds.jose.util.ResourceRetriever;
+import net.jcip.annotations.ThreadSafe;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -71,7 +71,7 @@ import com.nimbusds.jose.util.ResourceRetriever;
  *
  * @author Vladimir Dzhuvinov
  * @author Andreas Huber
- * @version 2022-01-30
+ * @version 2024-04-20
  * @deprecated Construct a {@linkplain JWKSource} using {@linkplain JWKSourceBuilder}.
  */
 @ThreadSafe
@@ -269,10 +269,7 @@ public class RemoteJWKSet<C extends SecurityContext> implements JWKSource<C> {
 			    final ResourceRetriever resourceRetriever,
 			    final JWKSetCache jwkSetCache) {
 		
-		if (jwkSetURL == null) {
-			throw new IllegalArgumentException("The JWK set URL must not be null");
-		}
-		this.jwkSetURL = jwkSetURL;
+		this.jwkSetURL = Objects.requireNonNull(jwkSetURL);
 		
 		this.failoverJWKSource = failoverJWKSource;
 

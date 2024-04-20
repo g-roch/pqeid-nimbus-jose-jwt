@@ -18,14 +18,13 @@
 package com.nimbusds.jose.proc;
 
 
+import com.nimbusds.jose.JOSEObjectType;
+import junit.framework.TestCase;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import junit.framework.TestCase;
-
-import com.nimbusds.jose.JOSEObjectType;
 
 
 public class DefaultJOSEObjectTypeVerifierTest extends TestCase {
@@ -164,8 +163,8 @@ public class DefaultJOSEObjectTypeVerifierTest extends TestCase {
 		try {
 			new DefaultJOSEObjectTypeVerifier((Set)null);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The allowed types must not be null or empty", e.getMessage());
+		} catch (NullPointerException e) {
+			assertEquals("Cannot invoke \"java.util.Set.isEmpty()\" because \"allowedTypes\" is null", e.getMessage());
 		}
 	}
 	
@@ -176,7 +175,7 @@ public class DefaultJOSEObjectTypeVerifierTest extends TestCase {
 			new DefaultJOSEObjectTypeVerifier(Collections.<JOSEObjectType>emptySet());
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The allowed types must not be null or empty", e.getMessage());
+			assertEquals("The allowed types must not be empty", e.getMessage());
 		}
 	}
 	
@@ -186,8 +185,8 @@ public class DefaultJOSEObjectTypeVerifierTest extends TestCase {
 		try {
 			new DefaultJOSEObjectTypeVerifier((JOSEObjectType[])null);
 			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The allowed types must not be null or empty", e.getMessage());
+		} catch (NullPointerException e) {
+			assertEquals("Cannot read the array length because \"allowedTypes\" is null", e.getMessage());
 		}
 	}
 	
@@ -198,7 +197,7 @@ public class DefaultJOSEObjectTypeVerifierTest extends TestCase {
 			new DefaultJOSEObjectTypeVerifier(new JOSEObjectType[]{});
 			fail();
 		} catch (IllegalArgumentException e) {
-			assertEquals("The allowed types must not be null or empty", e.getMessage());
+			assertEquals("The allowed types must not be empty", e.getMessage());
 		}
 	}
 }

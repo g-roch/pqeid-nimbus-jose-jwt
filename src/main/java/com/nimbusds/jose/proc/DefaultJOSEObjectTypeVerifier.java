@@ -18,14 +18,13 @@
 package com.nimbusds.jose.proc;
 
 
+import com.nimbusds.jose.JOSEObjectType;
+import net.jcip.annotations.Immutable;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import net.jcip.annotations.Immutable;
-
-import com.nimbusds.jose.JOSEObjectType;
 
 
 /**
@@ -102,8 +101,8 @@ public class DefaultJOSEObjectTypeVerifier <C extends SecurityContext> implement
 	 *                     or empty.
 	 */
 	public DefaultJOSEObjectTypeVerifier(final Set<JOSEObjectType> allowedTypes) {
-		if (allowedTypes == null || allowedTypes.isEmpty()) {
-			throw new IllegalArgumentException("The allowed types must not be null or empty");
+		if (allowedTypes.isEmpty()) {
+			throw new IllegalArgumentException("The allowed types must not be empty");
 		}
 		this.allowedTypes = allowedTypes;
 	}
@@ -119,8 +118,8 @@ public class DefaultJOSEObjectTypeVerifier <C extends SecurityContext> implement
 	 *                     or empty.
 	 */
 	public DefaultJOSEObjectTypeVerifier(final JOSEObjectType ... allowedTypes) {
-		if (allowedTypes == null || allowedTypes.length == 0) {
-			throw new IllegalArgumentException("The allowed types must not be null or empty");
+		if (allowedTypes.length == 0) {
+			throw new IllegalArgumentException("The allowed types must not be empty");
 		}
 		this.allowedTypes = new HashSet<>(Arrays.asList(allowedTypes));
 	}

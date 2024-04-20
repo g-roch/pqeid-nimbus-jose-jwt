@@ -18,16 +18,17 @@
 package com.nimbusds.jose;
 
 
+import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.Immutable;
 
-import com.nimbusds.jose.util.Base64URL;
+import java.util.Objects;
 
 
 /**
  * The cryptographic parts of a JSON Web Encryption (JWE) object.
  *
  * @author Vladimir Dzhuvinov
- * @version 2021-09-30
+ * @version 2024-04-20
  */
 @Immutable
 public final class JWECryptoParts {
@@ -107,18 +108,9 @@ public final class JWECryptoParts {
 			      final Base64URL authenticationTag) {
 
 		this.header = header;
-
 		this.encryptedKey = encryptedKey;
-
 		this.iv = iv;
-
-		if (cipherText == null) {
-
-			throw new IllegalArgumentException("The cipher text must not be null");
-		}
-
-		this.cipherText = cipherText;
-
+		this.cipherText = Objects.requireNonNull(cipherText);
 		this.authenticationTag = authenticationTag;
 	}
 

@@ -1,18 +1,20 @@
 package com.nimbusds.jose.proc;
 
 
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+
 import java.security.Key;
 import java.util.Collections;
 import java.util.List;
-
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
+import java.util.Objects;
 
 
 /**
  * A {@link JWSKeySelector} that always returns the same {@link Key}.
  *
  * @author Josh Cummings
+ * @version 2024-04-20
  */
 public class SingleKeyJWSKeySelector<C extends SecurityContext> implements JWSKeySelector<C> {
 	
@@ -32,14 +34,8 @@ public class SingleKeyJWSKeySelector<C extends SecurityContext> implements JWSKe
 	 *                       {@code null}.
 	 */
 	public SingleKeyJWSKeySelector(final JWSAlgorithm expectedJWSAlg, final Key key) {
-		if (expectedJWSAlg == null) {
-			throw new IllegalArgumentException("The expected JWS algorithm cannot be null");
-		}
-		if (key == null) {
-			throw new IllegalArgumentException("The key cannot be null");
-		}
-		this.singletonKeyList = Collections.singletonList(key);
-		this.expectedJWSAlg = expectedJWSAlg;
+		this.singletonKeyList = Collections.singletonList(Objects.requireNonNull(key));
+		this.expectedJWSAlg = Objects.requireNonNull(expectedJWSAlg);
 	}
 
 	

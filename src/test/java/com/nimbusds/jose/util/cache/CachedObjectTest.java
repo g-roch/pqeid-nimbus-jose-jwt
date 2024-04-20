@@ -18,23 +18,17 @@
 package com.nimbusds.jose.util.cache;
 
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 
 public class CachedObjectTest {
 
 
-	@Test
+	@Test(expected = NullPointerException.class)
 	public void rejectNullObject() {
-		
-		try {
-			new CachedObject<>(null, 1L, 2L);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("The object must not be null", e.getMessage());
-		}
+		new CachedObject<>(null, 1L, 2L);
 	}
 	
 	

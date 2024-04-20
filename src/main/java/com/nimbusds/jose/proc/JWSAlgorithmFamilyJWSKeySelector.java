@@ -18,19 +18,19 @@
 package com.nimbusds.jose.proc;
 
 
-import java.net.URL;
-import java.security.Key;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+
+import java.net.URL;
+import java.security.Key;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A {@link JWSKeySelector} that expects an algorithm from a specified
@@ -55,9 +55,6 @@ public class JWSAlgorithmFamilyJWSKeySelector<C extends SecurityContext> extends
 	 */
 	public JWSAlgorithmFamilyJWSKeySelector(final JWSAlgorithm.Family jwsAlgFamily, final JWKSource<C> jwkSource) {
 		super(jwkSource);
-		if (jwsAlgFamily == null) {
-			throw new IllegalArgumentException("JWS algorithm family must not be null");
-		}
 		for (JWSAlgorithm jwsAlg : jwsAlgFamily) {
 			this.selectors.put(jwsAlg, new JWSVerificationKeySelector<>(jwsAlg, jwkSource));
 		}

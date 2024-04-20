@@ -17,13 +17,13 @@
 
 package com.nimbusds.jose.jwk.source;
 
-import java.util.List;
-
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.JWKSecurityContext;
+
+import java.util.List;
 
 
 /**
@@ -31,7 +31,7 @@ import com.nimbusds.jose.proc.JWKSecurityContext;
  *
  * @author Rob Winch
  * @author Josh Cummings
- * @version 2019-01-10
+ * @version @version 2024-04-20
  */
 public class JWKSecurityContextJWKSet implements JWKSource<JWKSecurityContext> {
 
@@ -40,10 +40,6 @@ public class JWKSecurityContextJWKSet implements JWKSource<JWKSecurityContext> {
 	 */
 	@Override
 	public List<JWK> get(final JWKSelector jwkSelector, final JWKSecurityContext context) throws KeySourceException {
-		if (context == null) {
-			throw new IllegalArgumentException("Security Context must not be null");
-		}
-
 		return jwkSelector.select(new JWKSet(context.getKeys()));
 	}
 }
