@@ -95,7 +95,7 @@ public final class KeyType implements Serializable {
 	 * Creates a new key type with the specified value and implementation 
 	 * requirement.
 	 *
-	 * @param value The key type value. Values are case sensitive. Must not
+	 * @param value The key type value. Values are case-sensitive. Must not
 	 *              be {@code null}.
 	 * @param req   The implementation requirement, {@code null} if not 
 	 *              known.
@@ -114,7 +114,7 @@ public final class KeyType implements Serializable {
 
 
 	/**
-	 * Gets the value of this key type. Values are case sensitive.
+	 * Gets the value of this key type. Values are case-sensitive.
 	 *
 	 * @return The key type.
 	 */
