@@ -415,8 +415,8 @@ public abstract class Header implements Serializable {
 	 * Parses a {@link PlainHeader}, {@link JWSHeader} or {@link JWEHeader}
 	 * from the specified JSON object.
 	 *
-	 * @param jsonObject      The JSON object to parse. Must not be
-	 *                        {@code null}.
+	 * @param jsonObject The JSON object to parse. Must not be
+	 *                   {@code null}.
 	 *
 	 * @return The header.
 	 *
