@@ -64,6 +64,7 @@ public class OctetKeyPairTest extends TestCase {
 	private static final Date EXP = DateUtils.fromSecondsSinceEpoch(13_000_000L);
 	private static final Date NBF = DateUtils.fromSecondsSinceEpoch(12_000_000L);
 	private static final Date IAT = DateUtils.fromSecondsSinceEpoch(11_000_000L);
+	private static final KeyRevocation KEY_REVOCATION = new KeyRevocation(DateUtils.fromSecondsSinceEpoch(12_600_000L), null);
 	
 
 	public void testParseRFCPrivateKeyExample()
@@ -166,7 +167,7 @@ public class OctetKeyPairTest extends TestCase {
 		
 		OctetKeyPair key = new OctetKeyPair(EXAMPLE_OKP_ED25519.CRV, EXAMPLE_OKP_ED25519.X, EXAMPLE_OKP_ED25519.D,
 			KeyUse.SIGNATURE, ops, JWSAlgorithm.EdDSA, "1", x5u, x5t, x5t256, x5c,
-			EXP, NBF, IAT,
+			EXP, NBF, IAT, KEY_REVOCATION,
 			keyStore);
 		
 		assertTrue(key instanceof AsymmetricJWK);
@@ -184,6 +185,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -211,6 +213,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -237,6 +240,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -279,6 +283,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -306,6 +311,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -332,6 +338,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -357,7 +364,7 @@ public class OctetKeyPairTest extends TestCase {
 		
 		OctetKeyPair key = new OctetKeyPair(EXAMPLE_OKP_ED25519.CRV, EXAMPLE_OKP_ED25519.X, 
 			KeyUse.SIGNATURE, ops, JWSAlgorithm.EdDSA, "1", x5u, x5t, x5t256, x5c,
-			EXP, NBF, IAT,
+			EXP, NBF, IAT, KEY_REVOCATION,
 			keyStore);
 		
 		assertTrue(key instanceof AsymmetricJWK);
@@ -375,6 +382,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -402,6 +410,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -444,6 +453,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -471,6 +481,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -506,6 +517,7 @@ public class OctetKeyPairTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.keyStore(keyStore)
 			.build();
 		
@@ -521,6 +533,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -544,6 +557,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -569,6 +583,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -603,6 +618,7 @@ public class OctetKeyPairTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.keyStore(keyStore)
 			.build();
 		
@@ -620,6 +636,7 @@ public class OctetKeyPairTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 		
 		assertEquals(Curve.Ed25519, key.getCurve());
@@ -678,13 +695,13 @@ public class OctetKeyPairTest extends TestCase {
 			throws Exception {
 
 		//Given
-		String json = "{\n" +
-				"    \"kty\" : \"OKP\",\n" +
-				"    \"crv\" : \"Ed25519\",\n" +
-				"    \"x\"   : \"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo\",\n" +
-				"    \"d\"   : \"nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A\",\n" +
-				"    \"use\" : \"sig\",\n" +
-				"    \"kid\" : \"1\"\n" +
+		String json = "{" +
+				"    \"kty\" : \"OKP\"," +
+				"    \"crv\" : \"Ed25519\"," +
+				"    \"x\"   : \"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo\"," +
+				"    \"d\"   : \"nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A\"," +
+				"    \"use\" : \"sig\"," +
+				"    \"kid\" : \"1\"" +
 				"  }";
 
 		OctetKeyPair okpA = OctetKeyPair.parse(json);
@@ -700,24 +717,24 @@ public class OctetKeyPairTest extends TestCase {
 			throws Exception {
 
 		//Given
-		String jsonA = "{\n" +
-				"    \"kty\" : \"OKP\",\n" +
-				"    \"crv\" : \"Ed25519\",\n" +
-				"    \"x\"   : \"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo\",\n" +
-				"    \"d\"   : \"nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A\",\n" +
-				"    \"use\" : \"sig\",\n" +
-				"    \"kid\" : \"1\"\n" +
+		String jsonA = "{" +
+				"    \"kty\" : \"OKP\"," +
+				"    \"crv\" : \"Ed25519\"," +
+				"    \"x\"   : \"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo\"," +
+				"    \"d\"   : \"nWGxne_9WmC6hEr0kuwsxERJxWl7MmkZcDusAxyuf2A\"," +
+				"    \"use\" : \"sig\"," +
+				"    \"kid\" : \"1\"" +
 				"  }";
 
 		OctetKeyPair okpA = OctetKeyPair.parse(jsonA);
 
-		String jsonB = "{\n" +
-				"    \"kty\" : \"OKP\",\n" +
-				"    \"crv\" : \"Ed25519\",\n" +
-				"    \"x\"   : \"ewrewrewr\",\n" +
-				"    \"d\"   : \"werewrwerw\",\n" +
-				"    \"use\" : \"sig\",\n" +
-				"    \"kid\" : \"1\"\n" +
+		String jsonB = "{" +
+				"    \"kty\" : \"OKP\"," +
+				"    \"crv\" : \"Ed25519\"," +
+				"    \"x\"   : \"ewrewrewr\"," +
+				"    \"d\"   : \"werewrwerw\"," +
+				"    \"use\" : \"sig\"," +
+				"    \"kid\" : \"1\"" +
 				"  }";
 
 		OctetKeyPair okpB = OctetKeyPair.parse(jsonB);
@@ -780,7 +797,7 @@ public class OctetKeyPairTest extends TestCase {
 			OctetKeyPair.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The 'x' parameter must not be null", e.getMessage());
+			assertEquals("The x parameter must not be null", e.getMessage());
 		}
 	}
 }

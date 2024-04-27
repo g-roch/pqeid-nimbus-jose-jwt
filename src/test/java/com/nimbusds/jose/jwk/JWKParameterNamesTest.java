@@ -10,7 +10,7 @@ import junit.framework.TestCase;
  * Tests the correctness of the JWK Parameter Constants.
  *
  * @author Nathaniel Hart
- * @version 2021-07-02
+ * @version 2024-04-27
  */
 public class JWKParameterNamesTest extends TestCase {
 	
@@ -26,7 +26,11 @@ public class JWKParameterNamesTest extends TestCase {
 		assertEquals("x5c", X_509_CERT_CHAIN);
 		assertEquals("x5t", X_509_CERT_SHA_1_THUMBPRINT);
 		assertEquals("x5t#S256", X_509_CERT_SHA_256_THUMBPRINT);
-		
+		assertEquals("exp", EXPIRATION_TIME);
+		assertEquals("nbf", NOT_BEFORE);
+		assertEquals("iat", ISSUED_AT);
+		assertEquals("revoked", REVOKED);
+
 		assertEquals("crv", ELLIPTIC_CURVE);
 		assertEquals("x", ELLIPTIC_CURVE_X_COORDINATE);
 		assertEquals("y", ELLIPTIC_CURVE_Y_COORDINATE);

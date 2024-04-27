@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2024, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -60,7 +60,7 @@ import java.util.*;
  * 
  * @author Justin Richer
  * @author Vladimir Dzhuvinov
- * @version 2024-04-20
+ * @version 2024-04-27
  */
 @Immutable
 public final class OctetSequenceKey extends JWK implements SecretJWK {
@@ -161,6 +161,12 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 		 * The key issued-at time, optional.
 		 */
 		private Date iat;
+
+
+		/**
+		 * The key revocation, optional.
+		 */
+		private KeyRevocation revocation;
 		
 		
 		/**
@@ -178,11 +184,7 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 		 */
 		public Builder(final Base64URL k) {
 
-			if (k == null) {
-				throw new IllegalArgumentException("The key value must not be null");
-			}
-
-			this.k = k;
+			this.k = Objects.requireNonNull(k);
 		}
 
 
@@ -234,6 +236,7 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 			exp = octJWK.getExpirationTime();
 			nbf = octJWK.getNotBeforeTime();
 			iat = octJWK.getIssueTime();
+			revocation = octJWK.getKeyRevocation();
 			ks = octJWK.getKeyStore();
 		}
 
@@ -455,6 +458,21 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 			this.iat = iat;
 			return this;
 		}
+
+
+		/**
+		 * Sets the revocation ({@code revoked}) of the JWK.
+		 *
+		 * @param revocation The key revocation, {@code null} if not
+		 *                   specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder keyRevocation(final KeyRevocation revocation) {
+
+			this.revocation = revocation;
+			return this;
+		}
 		
 		
 		/**
@@ -483,7 +501,7 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 		public OctetSequenceKey build() {
 
 			try {
-				return new OctetSequenceKey(k, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, ks);
+				return new OctetSequenceKey(k, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, revocation, ks);
 
 			} catch (IllegalArgumentException e) {
 
@@ -554,13 +572,56 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               not specified.
 	 */
+	@Deprecated
 	public OctetSequenceKey(final Base64URL k,
 				final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
 		                final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
 				final Date exp, final Date nbf, final Date iat,
 				final KeyStore ks) {
 	
-		super(KeyType.OCT, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, ks);
+		this(k, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, null, ks);
+	}
+
+
+	/**
+	 * Creates a new octet sequence JSON Web Key (JWK) with the specified
+	 * parameters.
+	 *
+	 * @param k          The key value. It is represented as the Base64URL
+	 *                   encoding of the value's big endian representation.
+	 *                   Must not be {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID. {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
+	 */
+	public OctetSequenceKey(final Base64URL k,
+				final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		                final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+				final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
+				final KeyStore ks) {
+
+		super(KeyType.OCT, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, revocation, ks);
 		this.k = Objects.requireNonNull(k, "The key value must not be null");
 	}
     
@@ -729,6 +790,7 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 				JWKMetadata.parseExpirationTime(jsonObject),
 				JWKMetadata.parseNotBeforeTime(jsonObject),
 				JWKMetadata.parseIssueTime(jsonObject),
+				JWKMetadata.parseKeyRevocation(jsonObject),
 				null // key store
 			);
 		} catch (Exception e) {

@@ -73,13 +73,13 @@ The library handles the following JOSE algorithms:
   and Encryption (JOSE) Registrations for Web Authentication (WebAuthn) 
   Algorithms
 * RFC 9278 - JSON Web Key (JWK) Thumbprint URI
+* OpenID Federation 1.0
 * draft-madden-jose-ecdh-1pu-04 - Public Key Authenticated Encryption for JOSE: 
   ECDH-1PU
 * draft-amringer-jose-chacha-02 - Chacha derived AEAD algorithms in JSON Object 
   Signing and Encryption (JOSE) (note, support for XC20P only)
 * draft-irtf-cfrg-xchacha-03 - XChaCha: eXtended-nonce ChaCha and 
   AEAD_XChaCha20_Poly1305
-* OpenID Federation 1.0 (JWK exp, nbf and iat parameters)
 
 
 ## System requirements and dependencies

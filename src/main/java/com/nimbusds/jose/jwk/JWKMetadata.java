@@ -18,13 +18,6 @@
 package com.nimbusds.jose.jwk;
 
 
-import java.net.URI;
-import java.text.ParseException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
@@ -32,12 +25,19 @@ import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jose.util.X509CertChainUtils;
 import com.nimbusds.jwt.util.DateUtils;
 
+import java.net.URI;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * JSON Web Key (JWK) metadata.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-12-26
+ * @version 2024-04-27
  */
 final class JWKMetadata {
 
@@ -259,5 +259,25 @@ final class JWKMetadata {
 		}
 		
 		return DateUtils.fromSecondsSinceEpoch(JSONObjectUtils.getLong(o, JWKParameterNames.ISSUED_AT));
+	}
+
+
+	/**
+	 * Parses the optional key revocation.
+	 *
+	 * @param o The JSON object to parse. Must not be {@code null}.
+	 *
+	 * @return The key revocation, {@code null} if not specified.
+	 *
+	 * @throws ParseException If parsing failed.
+	 */
+	static KeyRevocation parseKeyRevocation(final Map<String, Object> o)
+		throws ParseException {
+
+		if (o.get(JWKParameterNames.REVOKED) == null) {
+			return null;
+		}
+
+		return KeyRevocation.parse(JSONObjectUtils.getJSONObject(o, JWKParameterNames.REVOKED));
 	}
 }

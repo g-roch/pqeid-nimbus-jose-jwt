@@ -18,6 +18,20 @@
 package com.nimbusds.jose.jwk;
 
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jose.util.Base64;
+import com.nimbusds.jose.util.*;
+import com.nimbusds.jwt.util.DateUtils;
+import junit.framework.TestCase;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.KeyUsage;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.net.URI;
@@ -34,27 +48,12 @@ import java.util.*;
 
 import static org.junit.Assert.assertNotEquals;
 
-import junit.framework.TestCase;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.KeyUsage;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
-
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
-import com.nimbusds.jose.util.Base64;
-import com.nimbusds.jose.util.*;
-import com.nimbusds.jwt.util.DateUtils;
-
 
 /**
  * Tests the EC JWK class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-12-26
+ * @version 2024-04-27
  */
 public class ECKeyTest extends TestCase {
 
@@ -121,6 +120,7 @@ public class ECKeyTest extends TestCase {
 	private static final Date EXP = DateUtils.fromSecondsSinceEpoch(13_000_000L);
 	private static final Date NBF = DateUtils.fromSecondsSinceEpoch(12_000_000L);
 	private static final Date IAT = DateUtils.fromSecondsSinceEpoch(11_000_000L);
+	private static final KeyRevocation KEY_REVOCATION = new KeyRevocation(DateUtils.fromSecondsSinceEpoch(13_500_000L), KeyRevocation.Reason.UNSPECIFIED);
 	
 
 
@@ -197,7 +197,7 @@ public class ECKeyTest extends TestCase {
 		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
 		ECKey key = new ECKey(ExampleKeyP256.CRV, ExampleKeyP256.X, ExampleKeyP256.Y, ExampleKeyP256.D,
-			KeyUse.SIGNATURE, ops, JWSAlgorithm.ES256, "1", x5u, x5t, x5t256, x5c, EXP, NBF, IAT, keyStore);
+			KeyUse.SIGNATURE, ops, JWSAlgorithm.ES256, "1", x5u, x5t, x5t256, x5c, EXP, NBF, IAT, KEY_REVOCATION, keyStore);
 
 		assertTrue(key instanceof AsymmetricJWK);
 		assertTrue(key instanceof CurveBasedJWK);
@@ -215,6 +215,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -237,6 +238,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -263,6 +265,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -286,7 +289,7 @@ public class ECKeyTest extends TestCase {
 		Set<KeyOperation> ops = new LinkedHashSet<>(Arrays.asList(KeyOperation.SIGN, KeyOperation.VERIFY));
 
 		ECKey key = new ECKey(ExampleKeyP256.CRV, ExampleKeyP256.X, ExampleKeyP256.Y, ExampleKeyP256.D,
-			use, ops, JWSAlgorithm.ES256, "1", x5u, x5t, x5t256, x5c, EXP, NBF, IAT, null);
+			use, ops, JWSAlgorithm.ES256, "1", x5u, x5t, x5t256, x5c, EXP, NBF, IAT, KEY_REVOCATION, null);
 
 		// Test getters
 		assertNull(key.getKeyUse());
@@ -303,6 +306,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -327,6 +331,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -355,6 +360,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -386,6 +392,7 @@ public class ECKeyTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.keyStore(keyStore)
 			.build();
 
@@ -400,6 +407,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -421,6 +429,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -445,6 +454,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -476,6 +486,7 @@ public class ECKeyTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.keyStore(keyStore)
 			.build();
 		
@@ -493,6 +504,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 
 		assertEquals(Curve.P_256, key.getCurve());
@@ -870,7 +882,7 @@ public class ECKeyTest extends TestCase {
 	}
 	
 	
-	public void testX509CertificateChain_algDoesntMatch() {
+	public void testX509CertificateChain_algDoesNotMatch() {
 		try {
 			new ECKey.Builder(
 				ExampleKeyP256.CRV,
@@ -885,7 +897,7 @@ public class ECKeyTest extends TestCase {
 	}
 	
 	
-	public void testX509CertificateChain_xAndYdontMatch()
+	public void testX509CertificateChain_xAndYdoNotMatch()
 		throws Exception {
 		
 		List<X509Certificate> chain = X509CertChainUtils.parse(SampleCertificates.SAMPLE_X5C_EC);
@@ -925,6 +937,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(1511337599L, DateUtils.toSecondsSinceEpoch(ecKey.getExpirationTime()));
 		assertEquals(1479715200L, DateUtils.toSecondsSinceEpoch(ecKey.getNotBeforeTime()));
 		assertNull(ecKey.getIssueTime());
+		assertNull(ecKey.getKeyRevocation());
 	}
 	
 	
@@ -994,6 +1007,7 @@ public class ECKeyTest extends TestCase {
 		assertEquals(DateUtils.toSecondsSinceEpoch(exp), DateUtils.toSecondsSinceEpoch(ecKey.getExpirationTime()));
 		assertEquals(DateUtils.toSecondsSinceEpoch(nbf), DateUtils.toSecondsSinceEpoch(ecKey.getNotBeforeTime()));
 		assertNull(ecKey.getIssueTime());
+		assertNull(ecKey.getKeyRevocation());
 		assertTrue(ecKey.isPrivate());
 		assertEquals(keyStore, ecKey.getKeyStore());
 		
@@ -1251,7 +1265,7 @@ public class ECKeyTest extends TestCase {
 			ECKey.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The 'x' coordinate must not be null", e.getMessage());
+			assertEquals("The x coordinate must not be null", e.getMessage());
 		}
 	}
 	
@@ -1266,7 +1280,7 @@ public class ECKeyTest extends TestCase {
 			ECKey.parse(jsonObject);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("The 'y' coordinate must not be null", e.getMessage());
+			assertEquals("The y coordinate must not be null", e.getMessage());
 		}
 	}
 }

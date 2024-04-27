@@ -14,7 +14,7 @@ import com.nimbusds.jwt.JWTClaimNames;
  * parameters registry</a> administered by IANA.
  *
  * @author Nathaniel Hart
- * @version 2022-02-26
+ * @version 2024-04-27
  */
 public final class JWKParameterNames {
 	
@@ -80,21 +80,27 @@ public final class JWKParameterNames {
 	
 	
 	/**
-	 * @see <a href="https://openid.net/specs/openid-connect-federation-1_0.html#name-iana-considerations">OpenID Connect Federation 1.0</a>
+	 * @see <a href="https://openid.net/specs/openid-federation-1_0.html#name-iana-considerations">OpenID Federation 1.0</a>
 	 */
 	public static final String EXPIRATION_TIME = JWTClaimNames.EXPIRATION_TIME;
 	
 	
 	/**
-	 * @see <a href="https://openid.net/specs/openid-connect-federation-1_0.html#name-iana-considerations">OpenID Connect Federation 1.0</a>
+	 * @see <a href="https://openid.net/specs/openid-federation-1_0.html#name-iana-considerations">OpenID Federation 1.0</a>
 	 */
 	public static final String NOT_BEFORE = JWTClaimNames.NOT_BEFORE;
 	
 	
 	/**
-	 * @see <a href="https://openid.net/specs/openid-connect-federation-1_0.html#name-iana-considerations">OpenID Connect Federation 1.0</a>
+	 * @see <a href="https://openid.net/specs/openid-federation-1_0.html#name-iana-considerations">OpenID Federation 1.0</a>
 	 */
 	public static final String ISSUED_AT = JWTClaimNames.ISSUED_AT;
+
+
+	/**
+	 * @see <a href="https://openid.net/specs/openid-federation-1_0.html#name-iana-considerations">OpenID Federation 1.0</a>
+	 */
+	public static final String REVOKED = "revoked";
 	
 	
 	////////////////////////////////////////////////////////////////////////////////

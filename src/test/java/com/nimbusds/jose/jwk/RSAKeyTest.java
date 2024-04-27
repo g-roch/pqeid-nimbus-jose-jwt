@@ -53,7 +53,7 @@ import com.nimbusds.jwt.util.DateUtils;
  * Tests the RSA JWK class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2023-01-31
+ * @version 2024-04-27
  */
 public class RSAKeyTest extends TestCase {
 
@@ -115,6 +115,7 @@ public class RSAKeyTest extends TestCase {
 	private static final Date EXP = DateUtils.fromSecondsSinceEpoch(13_000_000L);
 	private static final Date NBF = DateUtils.fromSecondsSinceEpoch(12_000_000L);
 	private static final Date IAT = DateUtils.fromSecondsSinceEpoch(11_000_000L);
+	private static final KeyRevocation KEY_REVOCATION = new KeyRevocation(DateUtils.fromSecondsSinceEpoch(13_500_000L), KeyRevocation.Reason.SUPERSEDED);
 	
 
 	public void testConstructAndSerialize()
@@ -138,7 +139,7 @@ public class RSAKeyTest extends TestCase {
 			privateKey,
 			KeyUse.SIGNATURE, null, JWSAlgorithm.RS256, "1",
 			x5u, x5t, x5t256, x5c,
-			EXP, NBF, IAT,
+			EXP, NBF, IAT, KEY_REVOCATION,
 			keyStore);
 
 		// Test getters
@@ -154,6 +155,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 
 		assertEquals(new Base64URL(n), key.getModulus());
@@ -194,6 +196,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 
 		assertEquals(new Base64URL(n), key.getModulus());
 		assertEquals(new Base64URL(e), key.getPublicExponent());
@@ -223,6 +226,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 
 		assertEquals(new Base64URL(n), key.getModulus());
 		assertEquals(new Base64URL(e), key.getPublicExponent());
@@ -271,6 +275,7 @@ public class RSAKeyTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 
 		assertEquals(new Base64URL(n), key.getModulus());
 		assertEquals(new Base64URL(e), key.getPublicExponent());
@@ -307,6 +312,7 @@ public class RSAKeyTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 
 		assertEquals(new Base64URL(n), key.getModulus());
 		assertEquals(new Base64URL(e), key.getPublicExponent());
@@ -336,6 +342,7 @@ public class RSAKeyTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 
 		assertEquals(new Base64URL(n), key.getModulus());
 		assertEquals(new Base64URL(e), key.getPublicExponent());
@@ -381,6 +388,7 @@ public class RSAKeyTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.build();
 
 		// Test getters
@@ -396,6 +404,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(new Base64URL(n), key.getModulus());
@@ -433,6 +442,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 
 		assertEquals(new Base64URL(n), key.getModulus());
 		assertEquals(new Base64URL(e), key.getPublicExponent());
@@ -484,6 +494,7 @@ public class RSAKeyTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.keyStore(keyStore)
 			.build();
 
@@ -502,6 +513,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 		
 		assertEquals(publicKey.getModulus(), key.getModulus().decodeToBigInteger());
@@ -533,6 +545,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 		
 		assertEquals(publicKey.getModulus(), key.getModulus().decodeToBigInteger());
@@ -573,6 +586,7 @@ public class RSAKeyTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.keyStore(keyStore)
 			.build();
 		
@@ -592,6 +606,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 		
 		assertEquals(new Base64URL(n), key.getModulus());
@@ -1361,6 +1376,7 @@ public class RSAKeyTest extends TestCase {
 		assertNull(rsaKey.getKeyOperations());
 		assertEquals(DateUtils.toSecondsSinceEpoch(cert.getNotAfter()), DateUtils.toSecondsSinceEpoch(rsaKey.getExpirationTime()));
 		assertEquals(DateUtils.toSecondsSinceEpoch(cert.getNotBefore()), DateUtils.toSecondsSinceEpoch(rsaKey.getNotBeforeTime()));
+		assertNull(rsaKey.getKeyRevocation());
 		assertNull(rsaKey.getIssueTime());
 	}
 	
@@ -1407,7 +1423,7 @@ public class RSAKeyTest extends TestCase {
 	}
 	
 	
-	public void testX509CertificateChain_algDoesntMatch() {
+	public void testX509CertificateChain_algDoesNotMatch() {
 		try {
 			new RSAKey.Builder(
 				new Base64URL(n),
@@ -1421,7 +1437,7 @@ public class RSAKeyTest extends TestCase {
 	}
 	
 	
-	public void testX509CertificateChain_modulusDoesntMatch()
+	public void testX509CertificateChain_modulusDoesNotMatch()
 		throws Exception {
 		
 		List<X509Certificate> chain = X509CertChainUtils.parse(SampleCertificates.SAMPLE_X5C_RSA);
@@ -1441,7 +1457,7 @@ public class RSAKeyTest extends TestCase {
 	}
 	
 	
-	public void testX509CertificateChain_exponentDoesntMatch()
+	public void testX509CertificateChain_exponentDoesNotMatch()
 		throws Exception {
 		
 		List<X509Certificate> chain = X509CertChainUtils.parse(SampleCertificates.SAMPLE_X5C_RSA);
@@ -1511,6 +1527,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(DateUtils.toSecondsSinceEpoch(exp), DateUtils.toSecondsSinceEpoch(rsaKey.getExpirationTime()));
 		assertEquals(DateUtils.toSecondsSinceEpoch(nbf), DateUtils.toSecondsSinceEpoch(rsaKey.getNotBeforeTime()));
 		assertNull(rsaKey.getIssueTime());
+		assertNull(rsaKey.getKeyRevocation());
 		assertTrue(rsaKey.isPrivate());
 		assertEquals(keyStore, rsaKey.getKeyStore());
 		
@@ -1549,6 +1566,7 @@ public class RSAKeyTest extends TestCase {
 		assertEquals(1512084859L, DateUtils.toSecondsSinceEpoch(rsaKey.getExpirationTime()));
 		assertEquals(1475331698L, DateUtils.toSecondsSinceEpoch(rsaKey.getNotBeforeTime()));
 		assertNull(rsaKey.getIssueTime());
+		assertNull(rsaKey.getKeyRevocation());
 		assertFalse(rsaKey.isPrivate());
 		assertEquals(keyStore, rsaKey.getKeyStore());
 	}
@@ -1607,37 +1625,37 @@ public class RSAKeyTest extends TestCase {
 			throws Exception {
 
 		//Given
-		String json = "{   \"kty\" : \"RSA\",\n" +
-				"   \"n\"   : \"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx\n" +
-				"            4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs\n" +
-				"            tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2\n" +
-				"            QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI\n" +
-				"            SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb\n" +
-				"            w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw\",\n" +
-				"   \"e\"   : \"AQAB\",\n" +
-				"   \"d\"   : \"X4cTteJY_gn4FYPsXB8rdXix5vwsg1FLN5E3EaG6RJoVH-HLLKD9\n" +
-				"            M7dx5oo7GURknchnrRweUkC7hT5fJLM0WbFAKNLWY2vv7B6NqXSzUvxT0_YSfqij\n" +
-				"            wp3RTzlBaCxWp4doFk5N2o8Gy_nHNKroADIkJ46pRUohsXywbReAdYaMwFs9tv8d\n" +
-				"            _cPVY3i07a3t8MN6TNwm0dSawm9v47UiCl3Sk5ZiG7xojPLu4sbg1U2jx4IBTNBz\n" +
-				"            nbJSzFHK66jT8bgkuqsk0GjskDJk19Z4qwjwbsnn4j2WBii3RL-Us2lGVkY8fkFz\n" +
-				"            me1z0HbIkfz0Y6mqnOYtqc0X4jfcKoAC8Q\",\n" +
-				"   \"p\"   : \"83i-7IvMGXoMXCskv73TKr8637FiO7Z27zv8oj6pbWUQyLPQBQxtPV\n" +
-				"            nwD20R-60eTDmD2ujnMt5PoqMrm8RfmNhVWDtjjMmCMjOpSXicFHj7XOuVIYQyqV\n" +
-				"            WlWEh6dN36GVZYk93N8Bc9vY41xy8B9RzzOGVQzXvNEvn7O0nVbfs\",\n" +
-				"   \"q\"   : \"3dfOR9cuYq-0S-mkFLzgItgMEfFzB2q3hWehMuG0oCuqnb3vobLyum\n" +
-				"            qjVZQO1dIrdwgTnCdpYzBcOfW5r370AFXjiWft_NGEiovonizhKpo9VVS78TzFgx\n" +
-				"            kIdrecRezsZ-1kYd_s1qDbxtkDEgfAITAG9LUnADun4vIcb6yelxk\",\n" +
-				"   \"dp\"  : \"G4sPXkc6Ya9y8oJW9_ILj4xuppu0lzi_H7VTkS8xj5SdX3coE0oim\n" +
-				"            YwxIi2emTAue0UOa5dpgFGyBJ4c8tQ2VF402XRugKDTP8akYhFo5tAA77Qe_Nmtu\n" +
-				"            YZc3C3m3I24G2GvR5sSDxUyAN2zq8Lfn9EUms6rY3Ob8YeiKkTiBj0\",\n" +
-				"   \"dq\"  : \"s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUU\n" +
-				"            vMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9\n" +
-				"            GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk\",\n" +
-				"   \"qi\"  : \"GyM_p6JrXySiz1toFgKbWV-JdI3jQ4ypu9rbMWx3rQJBfmt0FoYzg\n" +
-				"            UIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rx\n" +
-				"            yR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU\",\n" +
-				"   \"alg\" : \"RS256\",\n" +
-				"   \"kid\" : \"2011-04-29\"\n" +
+		String json = "{   \"kty\" : \"RSA\"," +
+				"   \"n\"   : \"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx" +
+				"            4cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMs" +
+				"            tn64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2" +
+				"            QvzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbI" +
+				"            SD08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqb" +
+				"            w0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw\"," +
+				"   \"e\"   : \"AQAB\"," +
+				"   \"d\"   : \"X4cTteJY_gn4FYPsXB8rdXix5vwsg1FLN5E3EaG6RJoVH-HLLKD9" +
+				"            M7dx5oo7GURknchnrRweUkC7hT5fJLM0WbFAKNLWY2vv7B6NqXSzUvxT0_YSfqij" +
+				"            wp3RTzlBaCxWp4doFk5N2o8Gy_nHNKroADIkJ46pRUohsXywbReAdYaMwFs9tv8d" +
+				"            _cPVY3i07a3t8MN6TNwm0dSawm9v47UiCl3Sk5ZiG7xojPLu4sbg1U2jx4IBTNBz" +
+				"            nbJSzFHK66jT8bgkuqsk0GjskDJk19Z4qwjwbsnn4j2WBii3RL-Us2lGVkY8fkFz" +
+				"            me1z0HbIkfz0Y6mqnOYtqc0X4jfcKoAC8Q\"," +
+				"   \"p\"   : \"83i-7IvMGXoMXCskv73TKr8637FiO7Z27zv8oj6pbWUQyLPQBQxtPV" +
+				"            nwD20R-60eTDmD2ujnMt5PoqMrm8RfmNhVWDtjjMmCMjOpSXicFHj7XOuVIYQyqV" +
+				"            WlWEh6dN36GVZYk93N8Bc9vY41xy8B9RzzOGVQzXvNEvn7O0nVbfs\"," +
+				"   \"q\"   : \"3dfOR9cuYq-0S-mkFLzgItgMEfFzB2q3hWehMuG0oCuqnb3vobLyum" +
+				"            qjVZQO1dIrdwgTnCdpYzBcOfW5r370AFXjiWft_NGEiovonizhKpo9VVS78TzFgx" +
+				"            kIdrecRezsZ-1kYd_s1qDbxtkDEgfAITAG9LUnADun4vIcb6yelxk\"," +
+				"   \"dp\"  : \"G4sPXkc6Ya9y8oJW9_ILj4xuppu0lzi_H7VTkS8xj5SdX3coE0oim" +
+				"            YwxIi2emTAue0UOa5dpgFGyBJ4c8tQ2VF402XRugKDTP8akYhFo5tAA77Qe_Nmtu" +
+				"            YZc3C3m3I24G2GvR5sSDxUyAN2zq8Lfn9EUms6rY3Ob8YeiKkTiBj0\"," +
+				"   \"dq\"  : \"s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUU" +
+				"            vMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9" +
+				"            GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk\"," +
+				"   \"qi\"  : \"GyM_p6JrXySiz1toFgKbWV-JdI3jQ4ypu9rbMWx3rQJBfmt0FoYzg" +
+				"            UIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rx" +
+				"            yR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU\"," +
+				"   \"alg\" : \"RS256\"," +
+				"   \"kid\" : \"2011-04-29\"" +
 				" }";
 		RSAKey keyA = RSAKey.parse(json.replaceAll("\n", ""));
 		RSAKey keyB = RSAKey.parse(json.replaceAll("\n", ""));

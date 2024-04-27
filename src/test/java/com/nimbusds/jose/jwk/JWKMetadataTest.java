@@ -50,6 +50,10 @@ public class JWKMetadataTest extends TestCase {
 		assertNull(JWKMetadata.parseX509CertThumbprint(o));
 		assertNull(JWKMetadata.parseX509CertSHA256Thumbprint(o));
 		assertNull(JWKMetadata.parseX509CertChain(o));
+		assertNull(JWKMetadata.parseExpirationTime(o));
+		assertNull(JWKMetadata.parseNotBeforeTime(o));
+		assertNull(JWKMetadata.parseIssueTime(o));
+		assertNull(JWKMetadata.parseKeyRevocation(o));
 	}
 	
 	
@@ -67,7 +71,11 @@ public class JWKMetadataTest extends TestCase {
 		o.put(JWKParameterNames.X_509_CERT_SHA_1_THUMBPRINT, null);
 		o.put(JWKParameterNames.X_509_CERT_SHA_256_THUMBPRINT, null);
 		o.put(JWKParameterNames.X_509_CERT_CHAIN, null);
-		
+		o.put(JWKParameterNames.EXPIRATION_TIME, null);
+		o.put(JWKParameterNames.NOT_BEFORE, null);
+		o.put(JWKParameterNames.ISSUED_AT, null);
+		o.put(JWKParameterNames.REVOKED, null);
+
 		try {
 			JWKMetadata.parseKeyType(o);
 			fail();
@@ -83,6 +91,10 @@ public class JWKMetadataTest extends TestCase {
 		assertNull(JWKMetadata.parseX509CertThumbprint(o));
 		assertNull(JWKMetadata.parseX509CertSHA256Thumbprint(o));
 		assertNull(JWKMetadata.parseX509CertChain(o));
+		assertNull(JWKMetadata.parseExpirationTime(o));
+		assertNull(JWKMetadata.parseNotBeforeTime(o));
+		assertNull(JWKMetadata.parseIssueTime(o));
+		assertNull(JWKMetadata.parseKeyRevocation(o));
 	}
 	
 	

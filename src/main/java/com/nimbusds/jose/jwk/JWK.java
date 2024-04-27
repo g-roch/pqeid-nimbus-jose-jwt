@@ -18,6 +18,12 @@
 package com.nimbusds.jose.jwk;
 
 
+import com.nimbusds.jose.Algorithm;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.util.Base64;
+import com.nimbusds.jose.util.*;
+import com.nimbusds.jwt.util.DateUtils;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.security.*;
@@ -29,12 +35,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.text.ParseException;
 import java.util.*;
-
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.util.Base64;
-import com.nimbusds.jose.util.*;
-import com.nimbusds.jwt.util.DateUtils;
 
 
 /**
@@ -55,6 +55,7 @@ import com.nimbusds.jwt.util.DateUtils;
  *     <li>{@link #getExpirationTime() exp} (optional)
  *     <li>{@link #getNotBeforeTime() nbf} (optional)
  *     <li>{@link #getIssueTime() iat} (optional)
+ *     <li>{@link #getKeyRevocation() revoked} (optional)
  *     <li>{@link #getKeyStore()}
  * </ul>
  *
@@ -74,7 +75,7 @@ import com.nimbusds.jwt.util.DateUtils;
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
  * @author Stefan Larsson
- * @version 2022-12-26
+ * @version 2024-04-27
  */
 public abstract class JWK implements Serializable {
 
@@ -160,6 +161,12 @@ public abstract class JWK implements Serializable {
 	 * The key issued-at time, optional.
 	 */
 	private final Date iat;
+
+
+	/**
+	 * The key revocation, optional.
+	 */
+	private final KeyRevocation revocation;
 	
 	
 	/**
@@ -237,6 +244,7 @@ public abstract class JWK implements Serializable {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               none.
 	 */
+	@Deprecated
 	protected JWK(final KeyType kty,
 		      final KeyUse use,
 		      final Set<KeyOperation> ops,
@@ -251,11 +259,55 @@ public abstract class JWK implements Serializable {
 		      final Date iat,
 		      final KeyStore ks) {
 
-		if (kty == null) {
-			throw new IllegalArgumentException("The key type \"" + JWKParameterNames.KEY_TYPE + "\" parameter must not be null");
-		}
+		this(kty, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, null, ks);
+	}
 
-		this.kty = kty;
+
+	/**
+	 * Creates a new JSON Web Key (JWK).
+	 *
+	 * @param kty        The key type. Must not be {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate thumbprint, {@code null} if
+	 *                   not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if none.
+	 */
+	protected JWK(final KeyType kty,
+		      final KeyUse use,
+		      final Set<KeyOperation> ops,
+		      final Algorithm alg,
+		      final String kid,
+		      final URI x5u,
+		      final Base64URL x5t,
+		      final Base64URL x5t256,
+		      final List<Base64> x5c,
+		      final Date exp,
+		      final Date nbf,
+		      final Date iat,
+		      final KeyRevocation revocation,
+		      final KeyStore ks) {
+
+		this.kty = Objects.requireNonNull(kty, "The key type \"" + JWKParameterNames.KEY_TYPE + "\" parameter must not be null");
 
 		if (! KeyUseAndOpsConsistency.areConsistent(use, ops)) {
 			throw new IllegalArgumentException("The key use \"" + JWKParameterNames.PUBLIC_KEY_USE + "\" and key options \"" + JWKParameterNames.KEY_OPS + "\" parameters are not consistent, " +
@@ -271,28 +323,29 @@ public abstract class JWK implements Serializable {
 		this.x5u = x5u;
 		this.x5t = x5t;
 		this.x5t256 = x5t256;
-		
+
 		if (x5c != null && x5c.isEmpty()) {
 			throw new IllegalArgumentException("The X.509 certificate chain \"" + JWKParameterNames.X_509_CERT_CHAIN + "\" must not be empty");
 		}
 		this.x5c = x5c;
-		
+
 		try {
 			parsedX5c = X509CertChainUtils.parse(x5c);
 		} catch (ParseException e) {
 			throw new IllegalArgumentException("Invalid X.509 certificate chain \"" + JWKParameterNames.X_509_CERT_CHAIN + "\": " + e.getMessage(), e);
 		}
-		
+
 		this.exp = exp;
 		this.nbf = nbf;
 		this.iat = iat;
-		
+		this.revocation = revocation;
+
 		this.keyStore = ks;
 	}
 
 
 	/**
-	 * Gets the type ({@code kty}) of this JWK.
+	 * Returns the type ({@code kty}) of this JWK.
 	 *
 	 * @return The key type.
 	 */
@@ -303,7 +356,7 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Gets the use ({@code use}) of this JWK.
+	 * Returns the use ({@code use}) of this JWK.
 	 *
 	 * @return The key use, {@code null} if not specified or if the key is
 	 *         intended for signing as well as encryption.
@@ -315,7 +368,7 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Gets the operations ({@code key_ops}) for this JWK.
+	 * Returns the operations ({@code key_ops}) for this JWK.
 	 *
 	 * @return The key operations, {@code null} if not specified.
 	 */
@@ -326,7 +379,7 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Gets the intended JOSE algorithm ({@code alg}) for this JWK.
+	 * Returns the intended JOSE algorithm ({@code alg}) for this JWK.
 	 *
 	 * @return The intended JOSE algorithm, {@code null} if not specified.
 	 */
@@ -337,7 +390,7 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Gets the ID ({@code kid}) of this JWK. The key ID can be used to 
+	 * Returns the ID ({@code kid}) of this JWK. The key ID can be used to
 	 * match a specific key. This can be used, for instance, to choose a 
 	 * key within a {@link JWKSet} during key rollover. The key ID may also 
 	 * correspond to a JWS/JWE {@code kid} header parameter value.
@@ -351,7 +404,7 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Gets the X.509 certificate URL ({@code x5u}) of this JWK.
+	 * Returns the X.509 certificate URL ({@code x5u}) of this JWK.
 	 *
 	 * @return The X.509 certificate URL, {@code null} if not specified.
 	 */
@@ -362,7 +415,7 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Gets the X.509 certificate SHA-1 thumbprint ({@code x5t}) of this
+	 * Returns the X.509 certificate SHA-1 thumbprint ({@code x5t}) of this
 	 * JWK.
 	 *
 	 * @return The X.509 certificate SHA-1 thumbprint, {@code null} if not
@@ -376,8 +429,8 @@ public abstract class JWK implements Serializable {
 	
 	
 	/**
-	 * Gets the X.509 certificate SHA-256 thumbprint ({@code x5t#S256}) of
-	 * this JWK.
+	 * Returns the X.509 certificate SHA-256 thumbprint ({@code x5t#S256})
+	 * of this JWK.
 	 *
 	 * @return The X.509 certificate SHA-256 thumbprint, {@code null} if
 	 *         not specified.
@@ -389,7 +442,7 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Gets the X.509 certificate chain ({@code x5c}) of this JWK.
+	 * Returns the X.509 certificate chain ({@code x5c}) of this JWK.
 	 *
 	 * @return The X.509 certificate chain as a unmodifiable list,
 	 *         {@code null} if not specified.
@@ -405,7 +458,8 @@ public abstract class JWK implements Serializable {
 	
 	
 	/**
-	 * Gets the parsed X.509 certificate chain ({@code x5c}) of this JWK.
+	 * Returns the parsed X.509 certificate chain ({@code x5c}) of this
+	 * JWK.
 	 *
 	 * @return The X.509 certificate chain as a unmodifiable list,
 	 *         {@code null} if not specified.
@@ -421,7 +475,7 @@ public abstract class JWK implements Serializable {
 	
 	
 	/**
-	 * Gets the expiration time ({@code exp}) if this JWK.
+	 * Returns the expiration time ({@code exp}) if this JWK.
 	 *
 	 * @return The expiration time, {@code null} if not specified.
 	 */
@@ -432,7 +486,7 @@ public abstract class JWK implements Serializable {
 	
 	
 	/**
-	 * Gets the not-before ({@code nbf}) of this JWK.
+	 * Returns the not-before ({@code nbf}) of this JWK.
 	 *
 	 * @return The not-before time, {@code null} if not specified.
 	 */
@@ -443,7 +497,7 @@ public abstract class JWK implements Serializable {
 	
 	
 	/**
-	 * Gets the issued-at ({@code iat}) time of this JWK.
+	 * Returns the issued-at ({@code iat}) time of this JWK.
 	 *
 	 * @return The issued-at time, {@code null} if not specified.
 	 */
@@ -451,8 +505,18 @@ public abstract class JWK implements Serializable {
 		
 		return iat;
 	}
-	
-	
+
+
+	/**
+	 * Returns the key revocation ({@code revoked}) of this JWK.
+	 *
+	 * @return The key revocation, {@code null} if not specified.
+	 */
+	public KeyRevocation getKeyRevocation() {
+		return revocation;
+	}
+
+
 	/**
 	 * Returns a reference to the underlying key store.
 	 *
@@ -664,6 +728,10 @@ public abstract class JWK implements Serializable {
 		
 		if (iat != null) {
 			o.put(JWKParameterNames.ISSUED_AT, DateUtils.toSecondsSinceEpoch(iat));
+		}
+
+		if (revocation != null) {
+			o.put(JWKParameterNames.REVOKED, revocation.toJSONObject());
 		}
 
 		return o;
@@ -1007,12 +1075,13 @@ public abstract class JWK implements Serializable {
 				Objects.equals(exp, jwk.exp) &&
 				Objects.equals(nbf, jwk.nbf) &&
 				Objects.equals(iat, jwk.iat) &&
+				Objects.equals(revocation, jwk.revocation) &&
 				Objects.equals(keyStore, jwk.keyStore);
 	}
 
 	
 	@Override
 	public int hashCode() {
-		return Objects.hash(kty, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, keyStore);
+		return Objects.hash(kty, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, revocation, keyStore);
 	}
 }

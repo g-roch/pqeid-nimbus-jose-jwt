@@ -47,7 +47,7 @@ import com.nimbusds.jwt.util.DateUtils;
  * Tests the Octet Sequence JWK class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-12-26
+ * @version 2024-04-27
  */
 public class OctetSequenceKeyTest extends TestCase {
 	
@@ -55,6 +55,7 @@ public class OctetSequenceKeyTest extends TestCase {
 	private static final Date EXP = DateUtils.fromSecondsSinceEpoch(13_000_000L);
 	private static final Date NBF = DateUtils.fromSecondsSinceEpoch(12_000_000L);
 	private static final Date IAT = DateUtils.fromSecondsSinceEpoch(11_000_000L);
+	private static final KeyRevocation KEY_REVOCATION = new KeyRevocation(DateUtils.fromSecondsSinceEpoch(12_500_000L), KeyRevocation.Reason.COMPROMISED);
 
 
 	public void testConstructorAndSerialization()
@@ -70,7 +71,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		
 		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
-		OctetSequenceKey key = new OctetSequenceKey(k, null, ops, JWSAlgorithm.HS256, "1", x5u, x5t, x5t256, x5c, EXP, NBF, IAT, keyStore);
+		OctetSequenceKey key = new OctetSequenceKey(k, null, ops, JWSAlgorithm.HS256, "1", x5u, x5t, x5t256, x5c, EXP, NBF, IAT, KEY_REVOCATION, keyStore);
 
 		assertTrue(key instanceof SecretJWK);
 
@@ -88,6 +89,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());
@@ -120,6 +122,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());
@@ -169,6 +172,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());
@@ -201,6 +205,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());
@@ -228,7 +233,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		Base64URL x5t256 = new Base64URL("abc256");
 		List<Base64> x5c = SampleCertificates.SAMPLE_X5C_RSA;
 
-		OctetSequenceKey key = new OctetSequenceKey(k, KeyUse.SIGNATURE, null, JWSAlgorithm.HS256, "1", x5u, x5t, x5t256, x5c,  EXP, NBF, IAT,null);
+		OctetSequenceKey key = new OctetSequenceKey(k, KeyUse.SIGNATURE, null, JWSAlgorithm.HS256, "1", x5u, x5t, x5t256, x5c,  EXP, NBF, IAT, KEY_REVOCATION, null);
 
 		assertEquals(KeyType.OCT, key.getKeyType());
 		assertEquals(KeyUse.SIGNATURE, key.getKeyUse());
@@ -242,6 +247,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());
@@ -272,6 +278,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 
 		assertEquals(k, key.getKeyValue());
 
@@ -312,6 +319,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());
@@ -342,6 +350,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertNull(key.getExpirationTime());
 		assertNull(key.getNotBeforeTime());
 		assertNull(key.getIssueTime());
+		assertNull(key.getKeyRevocation());
 
 		assertEquals(k, key.getKeyValue());
 
@@ -407,6 +416,7 @@ public class OctetSequenceKeyTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.keyStore(keyStore)
 			.build();
 
@@ -423,6 +433,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());
@@ -456,6 +467,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertNull(key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());
@@ -494,6 +506,7 @@ public class OctetSequenceKeyTest extends TestCase {
 			.expirationTime(EXP)
 			.notBeforeTime(NBF)
 			.issueTime(IAT)
+			.keyRevocation(KEY_REVOCATION)
 			.keyStore(keyStore)
 			.build();
 		
@@ -513,6 +526,7 @@ public class OctetSequenceKeyTest extends TestCase {
 		assertEquals(EXP, key.getExpirationTime());
 		assertEquals(NBF, key.getNotBeforeTime());
 		assertEquals(IAT, key.getIssueTime());
+		assertEquals(KEY_REVOCATION, key.getKeyRevocation());
 		assertEquals(keyStore, key.getKeyStore());
 
 		assertEquals(k, key.getKeyValue());

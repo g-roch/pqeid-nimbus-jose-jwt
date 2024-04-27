@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2024, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -122,14 +122,10 @@ import java.util.*;
  * 	.build();
  * </pre>
  *
- * <p>See RFC 3447.
- *
- * <p>See http://en.wikipedia.org/wiki/RSA_%28algorithm%29
- *
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
  * @author Cedric Staub
- * @version 2024-04-20
+ * @version 2024-04-27
  */
 @Immutable
 public final class RSAKey extends JWK implements AsymmetricJWK {
@@ -241,7 +237,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 * list of JWK Other Prime Infos.
 		 *
 		 * @param othArray Array of RSA Other Primes Info instances. 
-		 *                 May be be {@code null}.
+		 *                 May be {@code null}.
 		 *
 		 * @return The corresponding list of JWK Other Prime Infos, or
 		 *         empty list of the array was {@code null}.
@@ -422,6 +418,12 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 * The key issued-at time, optional.
 		 */
 		private Date iat;
+
+
+		/**
+		 * The key revocation, optional.
+		 */
+		private KeyRevocation revocation;
 		
 		
 		/**
@@ -433,7 +435,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		/**
 		 * Creates a new RSA JWK builder.
 		 *
-		 * @param n The the modulus value for the public RSA key. It is 
+		 * @param n The modulus value for the public RSA key. It is
 		 *          represented as the Base64URL encoding of value's 
 		 *          big endian representation. Must not be 
 		 *          {@code null}.
@@ -444,7 +446,6 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 */
 		public Builder(final Base64URL n, final Base64URL e) {
 
-			// Ensure the public params are defined
 			this.n = Objects.requireNonNull(n);
 			this.e = Objects.requireNonNull(e);
 		}
@@ -492,6 +493,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 			exp = rsaJWK.getExpirationTime();
 			nbf = rsaJWK.getNotBeforeTime();
 			iat = rsaJWK.getIssueTime();
+			revocation = rsaJWK.getKeyRevocation();
 			ks = rsaJWK.getKeyStore();
 		}
 
@@ -944,6 +946,21 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 			this.iat = iat;
 			return this;
 		}
+
+
+		/**
+		 * Sets the revocation ({@code revoked}) of the JWK.
+		 *
+		 * @param revocation The key revocation, {@code null} if not
+		 *                   specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder keyRevocation(final KeyRevocation revocation) {
+
+			this.revocation = revocation;
+			return this;
+		}
 		
 		
 		/**
@@ -976,7 +993,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 				return new RSAKey(n, e, d, p, q, dp, dq, qi, oth,
 					          priv,
 					          use, ops, alg, kid, x5u, x5t, x5t256, x5c,
-						  exp, nbf, iat,
+						  exp, nbf, iat, revocation,
 					          ks);
 
 			} catch (IllegalArgumentException e) {
@@ -1066,7 +1083,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * Creates a new public RSA JSON Web Key (JWK) with the specified 
 	 * parameters.
 	 *
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
@@ -1077,7 +1094,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1107,7 +1124,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * Creates a new public RSA JSON Web Key (JWK) with the specified
 	 * parameters.
 	 *
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
@@ -1118,7 +1135,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1135,6 +1152,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               not specified.
 	 */
+	@Deprecated
 	public RSAKey(final Base64URL n, final Base64URL e,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
 		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
@@ -1149,12 +1167,64 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	}
 
 
+	// JWK public
+	/**
+	 * Creates a new public RSA JSON Web Key (JWK) with the specified
+	 * parameters.
+	 *
+	 * @param n          The modulus value for the public RSA key. It is
+	 *                   represented as the Base64URL encoding of value's
+	 *                   big endian representation. Must not be
+	 *                   {@code null}.
+	 * @param e          The exponent value for the public RSA key. It is
+	 *                   represented as the Base64URL encoding of value's
+	 *                   big endian representation. Must not be
+	 *                   {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
+	 */
+	public RSAKey(final Base64URL n, final Base64URL e,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
+		      final KeyStore ks) {
+
+		// Call the full constructor, all private key parameters are null
+		this(n, e, null, null, null, null, null, null, null, null, use, ops, alg, kid,
+		     x5u, x5t, x5t256, x5c,
+		     exp, nbf, iat, revocation,
+		     ks);
+	}
+
+
 	/**
 	 * Creates a new public / private RSA JSON Web Key (JWK) with the 
 	 * specified parameters. The private RSA key is specified by its first
 	 * representation (see RFC 3447, section 3.2).
 	 * 
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
@@ -1168,7 +1238,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1198,7 +1268,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * specified parameters. The private RSA key is specified by its first
 	 * representation (see RFC 3447, section 3.2).
 	 *
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
@@ -1212,7 +1282,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1229,16 +1299,69 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               not specified.
 	 */
+	@Deprecated
 	public RSAKey(final Base64URL n, final Base64URL e, final Base64URL d,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
 		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
 		      final Date exp, final Date nbf, final Date iat,
 		      final KeyStore ks) {
 	    
+		this(n, e, d, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, null, ks);
+	}
+
+
+	// JWK public + private rep 1
+	/**
+	 * Creates a new public / private RSA JSON Web Key (JWK) with the
+	 * specified parameters. The private RSA key is specified by its first
+	 * representation (see RFC 3447, section 3.2).
+	 *
+	 * @param n          The modulus value for the public RSA key. It is
+	 *                   represented as the Base64URL encoding of value's
+	 *                   big endian representation. Must not be
+	 *                   {@code null}.
+	 * @param e          The exponent value for the public RSA key. It is
+	 *                   represented as the Base64URL encoding of value's
+	 *                   big endian representation. Must not be
+	 *                   {@code null}.
+	 * @param d          The private exponent. It is represented as the
+	 *                   Base64URL encoding of the value's big endian
+	 *                   representation. Must not be {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
+	 */
+	public RSAKey(final Base64URL n, final Base64URL e, final Base64URL d,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
+		      final KeyStore ks) {
+
 		// Call the full constructor, the second private representation
 		// parameters are all null
 		this(n, e, d, null, null, null, null, null, null, null, use, ops, alg, kid,
-		     x5u, x5t, x5t256, x5c, exp, nbf, iat, ks);
+		     x5u, x5t, x5t256, x5c, exp, nbf, iat, revocation, ks);
 
 		Objects.requireNonNull(d, "The private exponent must not be null");
 	}
@@ -1249,7 +1372,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * specified parameters. The private RSA key is specified by its
 	 * second representation (see RFC 3447, section 3.2).
 	 * 
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
@@ -1279,7 +1402,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1312,7 +1435,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * specified parameters. The private RSA key is specified by its
 	 * second representation (see RFC 3447, section 3.2).
 	 *
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
@@ -1342,7 +1465,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1359,6 +1482,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               not specified.
 	 */
+	@Deprecated
 	public RSAKey(final Base64URL n, final Base64URL e,
 		      final Base64URL p, final Base64URL q,
 		      final Base64URL dp, final Base64URL dq, final Base64URL qi,
@@ -1368,11 +1492,84 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		      final Date exp, final Date nbf, final Date iat,
 		      final KeyStore ks) {
 	    
+		this(n, e, p, q, dp, dq, qi, oth, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, null, ks);
+	}
+
+
+	// JWK public + private rep 2
+	/**
+	 * Creates a new public / private RSA JSON Web Key (JWK) with the
+	 * specified parameters. The private RSA key is specified by its
+	 * second representation (see RFC 3447, section 3.2).
+	 *
+	 * @param n          The modulus value for the public RSA key. It is
+	 *                   represented as the Base64URL encoding of value's
+	 *                   big endian representation. Must not be
+	 *                   {@code null}.
+	 * @param e          The exponent value for the public RSA key. It is
+	 *                   represented as the Base64URL encoding of value's
+	 *                   big endian representation. Must not be
+	 *                   {@code null}.
+	 * @param p          The first prime factor. It is represented as the
+	 *                   Base64URL encoding of the value's big endian
+	 *                   representation. Must not be {@code null}.
+	 * @param q          The second prime factor. It is represented as the
+	 *                   Base64URL encoding of the value's big endian
+	 *                   representation. Must not be {@code null}.
+	 * @param dp         The first factor Chinese Remainder Theorem
+	 *                   exponent. It is represented as the Base64URL
+	 *                   encoding of the value's big endian representation.
+	 *                   Must not be {@code null}.
+	 * @param dq         The second factor Chinese Remainder Theorem
+	 *                   exponent. It is represented as the Base64URL
+	 *                   encoding of the value's big endian representation.
+	 *                   Must not be {@code null}.
+	 * @param qi         The first Chinese Remainder Theorem coefficient.
+	 *                   It is represented as the Base64URL encoding of the
+	 *                   value's big endian representation. Must not be
+	 *                   {@code null}.
+	 * @param oth        The other primes information, should they exist,
+	 *                   {@code null} or an empty list if not specified.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null}
+	 *                   if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
+	 */
+	public RSAKey(final Base64URL n, final Base64URL e,
+		      final Base64URL p, final Base64URL q,
+		      final Base64URL dp, final Base64URL dq, final Base64URL qi,
+		      final List<OtherPrimesInfo> oth,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
+		      final KeyStore ks) {
+
 		// Call the full constructor, the first private representation
 		// d param is null
 		this(n, e, null, p, q, dp, dq, qi, oth, null, use, ops, alg, kid,
 		     x5u, x5t, x5t256, x5c,
-		     exp, nbf, iat,
+		     exp, nbf, iat, revocation,
 		     ks);
 
 		Objects.requireNonNull(p, "The first prime factor must not be null");
@@ -1380,7 +1577,6 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		Objects.requireNonNull(dp, "The first factor CRT exponent must not be null");
 		Objects.requireNonNull(dq, "The second factor CRT exponent must not be null");
 		Objects.requireNonNull(qi, "The first CRT coefficient must not be null");
-
 	}
 
 
@@ -1397,39 +1593,41 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * {@code q}, {@code dp}, {@code dq} and {@code qi}, else an
 	 * {@link java.lang.IllegalArgumentException} will be thrown.
 	 * 
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
-	 * @param d      The private exponent. It is represented as the Base64URL
-	 *               encoding of the value's big endian representation. May
-	 *               be {@code null}.
+	 * @param d      The private exponent. It is represented as the
+	 *               Base64URL encoding of the value's big endian
+	 *               representation. May be {@code null}.
 	 * @param p      The first prime factor. It is represented as the
 	 *               Base64URL encoding of the value's big endian
 	 *               representation. May be {@code null}.
 	 * @param q      The second prime factor. It is represented as the
 	 *               Base64URL encoding of the value's big endian
 	 *               representation. May be {@code null}.
-	 * @param dp     The first factor Chinese Remainder Theorem exponent. It
-	 *               is represented as the Base64URL encoding of the value's
-	 *               big endian representation. May be {@code null}.
-	 * @param dq     The second factor Chinese Remainder Theorem exponent. It
-	 *               is represented as the Base64URL encoding of the value's
-	 *               big endian representation. May be {@code null}.
+	 * @param dp     The first factor Chinese Remainder Theorem exponent.
+	 *               It is represented as the Base64URL encoding of the
+	 *               value's big endian representation. May be {@code null}.
+	 * @param dq     The second factor Chinese Remainder Theorem exponent.
+	 *               It is represented as the Base64URL encoding of the
+	 *               value's big endian representation. May be
+	 *               {@code null}.
 	 * @param qi     The first Chinese Remainder Theorem coefficient. It is
-	 *               represented as the Base64URL encoding of the value's big
-	 *               endian representation. May be {@code null}.
+	 *               represented as the Base64URL encoding of the value's
+	 *               big endian representation. May be {@code null}.
 	 * @param oth    The other primes information, should they exist,
 	 *               {@code null} or an empty list if not specified.
-	 * @param use    The key use, {@code null} if not specified or if the key
-	 *               is intended for signing as well as encryption.
+	 * @param use    The key use, {@code null} if not specified or if the
+	 *               key is intended for signing as well as encryption.
 	 * @param ops    The key operations, {@code null} if not specified.
-	 * @param alg    The intended JOSE algorithm for the key, {@code null} if
-	 *               not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
-	 * @param x5u    The X.509 certificate URL, {@code null} if not specified.
+	 * @param alg    The intended JOSE algorithm for the key, {@code null}
+	 *               if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
+	 * @param x5u    The X.509 certificate URL, {@code null} if not
+	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
 	 *               if not specified.
 	 * @param x5t256 The X.509 certificate SHA-256 thumbprint, {@code null}
@@ -1464,39 +1662,44 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * {@code q}, {@code dp}, {@code dq} and {@code qi}, else an
 	 * {@link java.lang.IllegalArgumentException} will be thrown.
 	 *
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
-	 * @param d      The private exponent. It is represented as the Base64URL
-	 *               encoding of the value's big endian representation. May
-	 *               be {@code null}.
+	 * @param d      The private exponent. It is represented as the
+	 *               Base64URL encoding of the value's big endian
+	 *               representation. May be {@code null}.
 	 * @param p      The first prime factor. It is represented as the
 	 *               Base64URL encoding of the value's big endian
 	 *               representation. May be {@code null}.
 	 * @param q      The second prime factor. It is represented as the
 	 *               Base64URL encoding of the value's big endian
 	 *               representation. May be {@code null}.
-	 * @param dp     The first factor Chinese Remainder Theorem exponent. It
-	 *               is represented as the Base64URL encoding of the value's
-	 *               big endian representation. May be {@code null}.
-	 * @param dq     The second factor Chinese Remainder Theorem exponent. It
-	 *               is represented as the Base64URL encoding of the value's
-	 *               big endian representation. May be {@code null}.
+	 * @param dp     The first factor Chinese Remainder Theorem exponent.
+	 *               It is represented as the Base64URL encoding of the
+	 *               value's big endian representation. May be
+	 *               {@code null}.
+	 * @param dq     The second factor Chinese Remainder Theorem exponent.
+	 *               It is represented as the Base64URL encoding of the
+	 *               value's big endian representation. May be
+	 *               {@code null}.
 	 * @param qi     The first Chinese Remainder Theorem coefficient. It is
-	 *               represented as the Base64URL encoding of the value's big
-	 *               endian representation. May be {@code null}.
+	 *               represented as the Base64URL encoding of the value's
+	 *               big endian representation. May be {@code null}.
 	 * @param oth    The other primes information, should they exist,
 	 *               {@code null} or an empty list if not specified.
-	 * @param use    The key use, {@code null} if not specified or if the key
-	 *               is intended for signing as well as encryption.
+	 * @param prv    The PKCS#11 handle as {@link PrivateKey}. May be
+	 *               {@code null}.
+	 * @param use    The key use, {@code null} if not specified or if the
+	 *               key is intended for signing as well as encryption.
 	 * @param ops    The key operations, {@code null} if not specified.
-	 * @param alg    The intended JOSE algorithm for the key, {@code null} if
-	 *               not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
-	 * @param x5u    The X.509 certificate URL, {@code null} if not specified.
+	 * @param alg    The intended JOSE algorithm for the key, {@code null}
+	 *               if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
+	 * @param x5u    The X.509 certificate URL, {@code null} if not
+	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
 	 *               if not specified.
 	 * @param x5t256 The X.509 certificate SHA-256 thumbprint, {@code null}
@@ -1535,7 +1738,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * {@code q}, {@code dp}, {@code dq} and {@code qi}, else an
 	 * {@link java.lang.IllegalArgumentException} will be thrown.
 	 *
-	 * @param n      The the modulus value for the public RSA key. It is
+	 * @param n      The modulus value for the public RSA key. It is
 	 *               represented as the Base64URL encoding of value's big
 	 *               endian representation. Must not be {@code null}.
 	 * @param e      The exponent value for the public RSA key. It is
@@ -1561,12 +1764,14 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 *               endian representation. May be {@code null}.
 	 * @param oth    The other primes information, should they exist,
 	 *               {@code null} or an empty list if not specified.
+	 * @param prv    The PKCS#11 handle as {@link PrivateKey}. May be
+	 *               {@code null}.
 	 * @param use    The key use, {@code null} if not specified or if the key
 	 *               is intended for signing as well as encryption.
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null} if
 	 *               not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
 	 *               if not specified.
@@ -1582,6 +1787,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               not specified.
 	 */
+	@Deprecated
 	public RSAKey(final Base64URL n, final Base64URL e,
 		      final Base64URL d,
 		      final Base64URL p, final Base64URL q,
@@ -1593,21 +1799,93 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		      final Date exp, final Date nbf, final Date iat,
 		      final KeyStore ks) {
 	    
-		super(KeyType.RSA, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, ks);
+		this(n, e, d, p, q, dp, dq, qi, oth, prv, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, null, ks);
+	}
+
+
+	// JWK + private rep 1/2/handle
+	/**
+	 * Creates a new public / private RSA JSON Web Key (JWK) with the
+	 * specified parameters. The private RSA key can be specified by its
+	 * first representation, its second representation (see RFC 3447,
+	 * section 3.2), or by a PKCS#11 handle as {@link PrivateKey}.
+	 *
+	 * <p>A valid first private RSA key representation must specify the
+	 * {@code d} parameter.
+	 *
+	 * <p>A valid second private RSA key representation must specify all
+	 * required Chinese Remainder Theorem (CRT) parameters - {@code p},
+	 * {@code q}, {@code dp}, {@code dq} and {@code qi}, else an
+	 * {@link java.lang.IllegalArgumentException} will be thrown.
+	 *
+	 * @param n          The modulus value for the public RSA key. It is
+	 *                   represented as the Base64URL encoding of value's big
+	 *                   endian representation. Must not be {@code null}.
+	 * @param e          The exponent value for the public RSA key. It is
+	 *                   represented as the Base64URL encoding of value's big
+	 *                   endian representation. Must not be {@code null}.
+	 * @param d          The private exponent. It is represented as the Base64URL
+	 *                   encoding of the value's big endian representation. May
+	 *                   be {@code null}.
+	 * @param p          The first prime factor. It is represented as the
+	 *                   Base64URL encoding of the value's big endian
+	 *                   representation. May be {@code null}.
+	 * @param q          The second prime factor. It is represented as the
+	 *                   Base64URL encoding of the value's big endian
+	 *                   representation. May be {@code null}.
+	 * @param dp         The first factor Chinese Remainder Theorem exponent. It
+	 *                   is represented as the Base64URL encoding of the value's
+	 *                   big endian representation. May be {@code null}.
+	 * @param dq         The second factor Chinese Remainder Theorem exponent. It
+	 *                   is represented as the Base64URL encoding of the value's
+	 *                   big endian representation. May be {@code null}.
+	 * @param qi         The first Chinese Remainder Theorem coefficient. It is
+	 *                   represented as the Base64URL encoding of the value's big
+	 *                   endian representation. May be {@code null}.
+	 * @param oth        The other primes information, should they exist,
+	 *                   {@code null} or an empty list if not specified.
+	 * @param prv        The PKCS#11 handle as {@link PrivateKey}. May be
+	 *                   {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if the key
+	 *                   is intended for signing as well as encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key, {@code null} if
+	 *                   not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint, {@code null}
+	 *                   if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint, {@code null}
+	 *                   if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store, {@code null} if
+	 *                   not specified.
+	 */
+	public RSAKey(final Base64URL n, final Base64URL e,
+		      final Base64URL d,
+		      final Base64URL p, final Base64URL q,
+		      final Base64URL dp, final Base64URL dq, final Base64URL qi,
+		      final List<OtherPrimesInfo> oth,
+		      final PrivateKey prv,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
+		      final KeyStore ks) {
+
+		super(KeyType.RSA, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, revocation, ks);
 
 
 		// Ensure the public params are defined
 
-		if (n == null) {
-			throw new IllegalArgumentException("The modulus value must not be null");
-		}
-		this.n = n;
-
-
-		if (e == null) {
-			throw new IllegalArgumentException("The public exponent value must not be null");
-		}
-		this.e = e;
+		this.n = Objects.requireNonNull(n, "The modulus value must not be null");
+		this.e = Objects.requireNonNull(e, "The public exponent value must not be null");
 
 		if (getParsedX509CertChain() != null) {
 			if (! matches(getParsedX509CertChain().get(0)))
@@ -1650,17 +1928,11 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 
 		} else if (p != null || q != null || dp != null || dq != null || qi != null) {
 
-			if (p == null) {
-				throw new IllegalArgumentException("Incomplete second private (CRT) representation: The first prime factor must not be null");
-			} else if (q == null) {
-				throw new IllegalArgumentException("Incomplete second private (CRT) representation: The second prime factor must not be null");
-			} else if (dp == null) {
-				throw new IllegalArgumentException("Incomplete second private (CRT) representation: The first factor CRT exponent must not be null");
-			} else if (dq == null) {
-				throw new IllegalArgumentException("Incomplete second private (CRT) representation: The second factor CRT exponent must not be null");
-			} else {
-				throw new IllegalArgumentException("Incomplete second private (CRT) representation: The first CRT coefficient must not be null");
-			}
+			Objects.requireNonNull(p, "Incomplete second private (CRT) representation: The first prime factor must not be null");
+			Objects.requireNonNull(q, "Incomplete second private (CRT) representation: The second prime factor must not be null");
+			Objects.requireNonNull(dp, "Incomplete second private (CRT) representation: The first factor CRT exponent must not be null");
+			Objects.requireNonNull(dq, "Incomplete second private (CRT) representation: The second factor CRT exponent must not be null");
+			throw new IllegalArgumentException("Incomplete second private (CRT) representation: The first CRT coefficient must not be null");
 		} else {
 			// No CRT params
 			this.p = null;
@@ -1670,7 +1942,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 			this.qi = null;
 			this.oth = Collections.emptyList();
 		}
-		
+
 		this.privateKey = prv; // PKCS#11 handle
 	}
 
@@ -1686,7 +1958,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1719,7 +1991,47 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
+	 * @param x5u    The X.509 certificate URL, {@code null} if not
+	 *               specified.
+	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
+	 *               if not specified.
+	 * @param x5t256 The X.509 certificate SHA-256 thumbprint, {@code null}
+	 *               if not specified.
+	 * @param x5c    The X.509 certificate chain, {@code null} if not
+	 *               specified.
+	 * @param exp    The key expiration time, {@code null} if not
+	 *               specified.
+	 * @param nbf    The key not-before time, {@code null} if not
+	 *               specified.
+	 * @param iat    The key issued-at time, {@code null} if not specified.
+	 * @param ks     Reference to the underlying key store, {@code null} if
+	 *               not specified.
+	 */
+	@Deprecated
+	public RSAKey(final RSAPublicKey pub,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat,
+		      final KeyStore ks) {
+
+		this(pub, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, null, ks);
+	}
+
+
+	// Java public
+	/**
+	 * Creates a new public RSA JSON Web Key (JWK) with the specified
+	 * parameters.
+	 *
+	 * @param pub    The public RSA key to represent. Must not be
+	 *               {@code null}.
+	 * @param use    The key use, {@code null} if not specified or if the
+	 *               key is intended for signing as well as encryption.
+	 * @param ops    The key operations, {@code null} if not specified.
+	 * @param alg    The intended JOSE algorithm for the key, {@code null}
+	 *               if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1739,14 +2051,14 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	public RSAKey(final RSAPublicKey pub,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
 		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
-		      final Date exp, final Date nbf, final Date iat,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
 		      final KeyStore ks) {
 
 		this(Base64URL.encode(pub.getModulus()),
 			Base64URL.encode(pub.getPublicExponent()),
 			use, ops, alg, kid,
 			x5u, x5t, x5t256, x5c,
-			exp, nbf, iat,
+			exp, nbf, iat, revocation,
 			ks);
 	}
 
@@ -1765,7 +2077,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1801,7 +2113,50 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
+	 * @param x5u    The X.509 certificate URL, {@code null} if not
+	 *               specified.
+	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
+	 *               if not specified.
+	 * @param x5t256 The X.509 certificate SHA-256 thumbprint, {@code null}
+	 *               if not specified.
+	 * @param x5c    The X.509 certificate chain, {@code null} if not
+	 *               specified.
+	 * @param exp    The key expiration time, {@code null} if not
+	 *               specified.
+	 * @param nbf    The key not-before time, {@code null} if not
+	 *               specified.
+	 * @param iat    The key issued-at time, {@code null} if not specified.
+	 * @param ks     Reference to the underlying key store, {@code null} if
+	 *               not specified.
+	 */
+	@Deprecated
+	public RSAKey(final RSAPublicKey pub, final RSAPrivateKey priv,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat,
+		      final KeyStore ks) {
+		
+		this(pub, priv, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, null, ks);
+	}
+
+
+	// Java public + private rep 1
+	/**
+	 * Creates a new public / private RSA JSON Web Key (JWK) with the
+	 * specified parameters. The private RSA key is specified by its first
+	 * representation (see RFC 3447, section 3.2).
+	 *
+	 * @param pub    The public RSA key to represent. Must not be
+	 *               {@code null}.
+	 * @param priv   The private RSA key to represent. Must not be
+	 *               {@code null}.
+	 * @param use    The key use, {@code null} if not specified or if the
+	 *               key is intended for signing as well as encryption.
+	 * @param ops    The key operations, {@code null} if not specified.
+	 * @param alg    The intended JOSE algorithm for the key, {@code null}
+	 *               if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1821,15 +2176,15 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	public RSAKey(final RSAPublicKey pub, final RSAPrivateKey priv,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
 		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
-		      final Date exp, final Date nbf, final Date iat,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
 		      final KeyStore ks) {
-		
+
 		this(Base64URL.encode(pub.getModulus()),
 		     Base64URL.encode(pub.getPublicExponent()),
 		     Base64URL.encode(priv.getPrivateExponent()),
 		     use, ops, alg, kid,
 		     x5u, x5t, x5t256, x5c,
-		     exp, nbf, iat,
+		     exp, nbf, iat, revocation,
 		     ks);
 	}
 
@@ -1848,7 +2203,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1884,7 +2239,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1901,6 +2256,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               not specified.
 	 */
+	@Deprecated
 	public RSAKey(final RSAPublicKey pub, final RSAPrivateCrtKey priv,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
 		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
@@ -1924,6 +2280,64 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	}
 
 
+	// Java public + private rep 2
+	/**
+	 * Creates a new public / private RSA JSON Web Key (JWK) with the
+	 * specified parameters. The private RSA key is specified by its second
+	 * representation (see RFC 3447, section 3.2).
+	 *
+	 * @param pub        The public RSA key to represent. Must not be
+	 *                   {@code null}.
+	 * @param priv       The private RSA key to represent. Must not be
+	 *                   {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
+	 */
+	public RSAKey(final RSAPublicKey pub, final RSAPrivateCrtKey priv,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
+		      final KeyStore ks) {
+
+		this(Base64URL.encode(pub.getModulus()),
+		     Base64URL.encode(pub.getPublicExponent()),
+		     Base64URL.encode(priv.getPrivateExponent()),
+		     Base64URL.encode(priv.getPrimeP()),
+		     Base64URL.encode(priv.getPrimeQ()),
+		     Base64URL.encode(priv.getPrimeExponentP()),
+		     Base64URL.encode(priv.getPrimeExponentQ()),
+		     Base64URL.encode(priv.getCrtCoefficient()),
+		     null,
+		     null,
+		     use, ops, alg, kid,
+		     x5u, x5t, x5t256, x5c,
+		     exp, nbf, iat, revocation,
+		     ks);
+	}
+
+
 	/**
 	 * Creates a new public / private RSA JSON Web Key (JWK) with the 
 	 * specified parameters. The private RSA key is specified by its second
@@ -1939,7 +2353,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1976,7 +2390,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -1993,6 +2407,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               not specified.
 	 */
+	@Deprecated
 	public RSAKey(final RSAPublicKey pub, final RSAMultiPrimePrivateCrtKey priv,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
 		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
@@ -2016,6 +2431,65 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	}
 
 
+	// Java public + private rep 2 other
+	/**
+	 * Creates a new public / private RSA JSON Web Key (JWK) with the
+	 * specified parameters. The private RSA key is specified by its second
+	 * representation, with optional other primes info (see RFC 3447,
+	 * section 3.2).
+	 *
+	 * @param pub        The public RSA key to represent. Must not be
+	 *                   {@code null}.
+	 * @param priv       The private RSA key to represent. Must not be
+	 *                   {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
+	 */
+	public RSAKey(final RSAPublicKey pub, final RSAMultiPrimePrivateCrtKey priv,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
+		      final KeyStore ks) {
+
+		this(Base64URL.encode(pub.getModulus()),
+		     Base64URL.encode(pub.getPublicExponent()),
+		     Base64URL.encode(priv.getPrivateExponent()),
+		     Base64URL.encode(priv.getPrimeP()),
+		     Base64URL.encode(priv.getPrimeQ()),
+		     Base64URL.encode(priv.getPrimeExponentP()),
+		     Base64URL.encode(priv.getPrimeExponentQ()),
+		     Base64URL.encode(priv.getCrtCoefficient()),
+		     OtherPrimesInfo.toList(priv.getOtherPrimeInfo()),
+		     null,
+		     use, ops, alg, kid,
+		     x5u, x5t, x5t256, x5c,
+		     exp, nbf, iat, revocation,
+		     ks);
+	}
+
+
 	/**
 	 * Creates a new public / private RSA JSON Web Key (JWK) with the
 	 * specified parameters. The private RSA key is specified by a PKCS#11
@@ -2030,7 +2504,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -2066,7 +2540,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ops    The key operations, {@code null} if not specified.
 	 * @param alg    The intended JOSE algorithm for the key, {@code null}
 	 *               if not specified.
-	 * @param kid    The key ID. {@code null} if not specified.
+	 * @param kid    The key ID, {@code null} if not specified.
 	 * @param x5u    The X.509 certificate URL, {@code null} if not
 	 *               specified.
 	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
@@ -2083,12 +2557,58 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * @param ks     Reference to the underlying key store, {@code null} if
 	 *               not specified.
 	 */
+	@Deprecated
 	public RSAKey(final RSAPublicKey pub, final PrivateKey priv,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
 		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
 		      final Date exp, final Date nbf, final Date iat,
 		      final KeyStore ks) {
 		
+		this(pub, priv, use, ops, alg, kid, x5u, x5t, x5t256, x5c, exp, nbf, iat, null, ks);
+	}
+
+
+	// Java public + private handle
+	/**
+	 * Creates a new public / private RSA JSON Web Key (JWK) with the
+	 * specified parameters. The private RSA key is specified by a PKCS#11
+	 * handle.
+	 *
+	 * @param pub        The public RSA key to represent. Must not be
+	 *                   {@code null}.
+	 * @param priv       The private RSA key as PKCS#11 handle,
+	 *                   {@code null} if not specified.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
+	 */
+	public RSAKey(final RSAPublicKey pub, final PrivateKey priv,
+		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
+		      final URI x5u, final Base64URL x5t, final Base64URL x5t256, final List<Base64> x5c,
+		      final Date exp, final Date nbf, final Date iat, final KeyRevocation revocation,
+		      final KeyStore ks) {
+
 		this(Base64URL.encode(pub.getModulus()),
 			Base64URL.encode(pub.getPublicExponent()),
 			null,
@@ -2101,7 +2621,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 			priv,
 			use, ops, alg, kid,
 			x5u, x5t, x5t256, x5c,
-			exp, nbf, iat,
+			exp, nbf, iat, revocation,
 			ks);
 	}
 
@@ -2451,7 +2971,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 			getModulus(), getPublicExponent(),
 			getKeyUse(), getKeyOperations(), getAlgorithm(), getKeyID(),
 			getX509CertURL(), getX509CertThumbprint(), getX509CertSHA256Thumbprint(), getX509CertChain(),
-			getExpirationTime(), getNotBeforeTime(), getIssueTime(),
+			getExpirationTime(), getNotBeforeTime(), getIssueTime(), getKeyRevocation(),
 			getKeyStore());
 	}
 	
@@ -2595,9 +3115,10 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 				JWKMetadata.parseExpirationTime(jsonObject),
 				JWKMetadata.parseNotBeforeTime(jsonObject),
 				JWKMetadata.parseIssueTime(jsonObject),
+				JWKMetadata.parseKeyRevocation(jsonObject),
 				null);
 		
-		} catch (IllegalArgumentException ex) {
+		} catch (Exception ex) {
 			// Missing mandatory n or e, inconsistent 2nd spec,
 			// conflicting 'use' and 'key_ops', etc.
 			throw new ParseException(ex.getMessage(), 0);
