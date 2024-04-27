@@ -33,7 +33,7 @@ import com.nimbusds.jwt.util.DateUtils;
  * Tests the JSON object utilities.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-09-27
+ * @version 2024-04-27
  */
 public class JSONObjectUtilsTest extends TestCase {
 	
@@ -515,6 +515,19 @@ public class JSONObjectUtilsTest extends TestCase {
 		jsonObject.put("key", "https://c2id.net");
 		assertEquals(URI.create("https://c2id.net"), JSONObjectUtils.getURI(jsonObject, "key"));
 	}
+
+
+	public void testGetURI_illegal() {
+
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		jsonObject.put("key", "a%b%c");
+		try {
+			JSONObjectUtils.getURI(jsonObject, "key");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Malformed escape pair at index 1: a%b%c", e.getMessage());
+		}
+	}
 	
 	
 	public void testGetURI_null() throws ParseException {
@@ -633,6 +646,28 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertEquals(1, array[1].size());
 		
 		assertEquals(2, array.length);
+	}
+
+
+	public void testGetJSONObjectArray_nullItems() throws ParseException {
+
+		Map<String, Object> o1 = JSONObjectUtils.newJSONObject();
+		o1.put("o1-key-1", "o1-val-1");
+
+		Map<String, Object> o2 = JSONObjectUtils.newJSONObject();
+		o2.put("o2-key-1", "o2-val-1");
+
+		List<Object> jsonArray = Arrays.asList(o1, null, (Object) o2, null);
+
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		jsonObject.put("key", jsonArray);
+
+		Map<String, Object>[] array = JSONObjectUtils.getJSONObjectArray(jsonObject, "key");
+		assertEquals(o1, array[0]);
+		assertNull(array[1]);
+		assertEquals(o2, array[2]);
+		assertNull(array[3]);
+		assertEquals(4, array.length);
 	}
 	
 	
