@@ -23,7 +23,6 @@ import junit.framework.TestCase;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 
 public class KeyRevocationTest extends TestCase {
@@ -54,6 +53,15 @@ public class KeyRevocationTest extends TestCase {
                 assertEquals(KeyRevocation.Reason.UNSPECIFIED, KeyRevocation.Reason.parse("unspecified"));
                 assertEquals(KeyRevocation.Reason.COMPROMISED, KeyRevocation.Reason.parse("compromised"));
                 assertEquals(KeyRevocation.Reason.SUPERSEDED, KeyRevocation.Reason.parse("superseded"));
+        }
+
+
+        public void testReason_inequality() {
+
+                assertNotSame(
+                        KeyRevocation.Reason.SUPERSEDED,
+                        KeyRevocation.Reason.COMPROMISED
+                );
         }
 
 
@@ -116,6 +124,30 @@ public class KeyRevocationTest extends TestCase {
                 assertEquals(reason, revocation.getReason());
                 assertEquals(parsed, revocation);
                 assertEquals(parsed.hashCode(), revocation.hashCode());
+        }
+
+
+        public void testInequality() {
+
+                assertNotSame(
+                        new KeyRevocation(DateUtils.nowWithSecondsPrecision(), null),
+                        new KeyRevocation(DateUtils.fromSecondsSinceEpoch(0L), null)
+                );
+
+                assertNotSame(
+                        new KeyRevocation(DateUtils.fromSecondsSinceEpoch(0L), KeyRevocation.Reason.SUPERSEDED),
+                        new KeyRevocation(DateUtils.fromSecondsSinceEpoch(0L), KeyRevocation.Reason.UNSPECIFIED)
+                );
+
+                assertNotSame(
+                        new KeyRevocation(DateUtils.fromSecondsSinceEpoch(0L), null),
+                        new KeyRevocation(DateUtils.fromSecondsSinceEpoch(0L), KeyRevocation.Reason.UNSPECIFIED)
+                );
+
+                assertNotSame(
+                        new KeyRevocation(DateUtils.nowWithSecondsPrecision(), null),
+                        "xxx"
+                );
         }
 
         public void testConstructor_nullRevokedAt() {
