@@ -112,11 +112,7 @@ public class JWKSet implements Serializable {
 	 */
 	public JWKSet(final JWK key) {
 		
-		this(Collections.singletonList(key));
-		
-		if (key == null) {
-			throw new IllegalArgumentException("The JWK must not be null");
-		}
+		this(Collections.singletonList(Objects.requireNonNull(key, "The JWK must not be null")));
 	}
 
 
@@ -141,12 +137,7 @@ public class JWKSet implements Serializable {
 	 */
 	public JWKSet(final List<JWK> keys, final Map<String,Object> customMembers) {
 
-		if (keys == null) {
-			throw new IllegalArgumentException("The JWK list must not be null");
-		}
-
-		this.keys = Collections.unmodifiableList(keys);
-
+		this.keys = Collections.unmodifiableList(Objects.requireNonNull(keys, "The JWK list must not be null"));
 		this.customMembers = Collections.unmodifiableMap(customMembers);
 	}
 

@@ -1129,9 +1129,10 @@ public class JWKSetTest {
 	}
 	
 	//https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/358/the-base64-must-not-be-null-message
+	@Test
 	public void testNullJWKSetValues() throws Exception {
 	  
-        String s = "{" +
+        	String s = "{" +
                 "\"keys\": [" +
                          "{" +
                          "\"additionalData\": {}," +
@@ -1291,5 +1292,29 @@ public class JWKSetTest {
 		
 		assertEquals(jwkSet, JWKSet.parse(json));
 		assertEquals(jwkSet.hashCode(), JWKSet.parse(json).hashCode());
+	}
+
+
+	@Test
+	public void testConstructor_singleJWK_null() {
+
+		try {
+			new JWKSet((JWK) null);
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("The JWK must not be null", e.getMessage());
+		}
+	}
+
+
+	@Test
+	public void testConstructor_jwkList_null() {
+
+		try {
+			new JWKSet((List<JWK>) null);
+			fail();
+		} catch (NullPointerException e) {
+			assertEquals("The JWK list must not be null", e.getMessage());
+		}
 	}
 }
