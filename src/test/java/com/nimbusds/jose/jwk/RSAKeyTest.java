@@ -648,7 +648,7 @@ public class RSAKeyTest extends TestCase {
 
 		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
 
-		RSAPrivateKey exported = rsaJWK.toRSAPrivateKey();
+		final RSAPrivateKey exported = rsaJWK.toRSAPrivateKey();
 
 		RSAPrivateKey rsaPrivateKey = new RSAPrivateKey() {
 			@Override
