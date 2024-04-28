@@ -194,9 +194,14 @@ public class DefaultResourceRetriever extends AbstractRestrictedResourceRetrieve
 	 * underlying HTTP implementation and the setting of the
 	 * {@code keep.alive} system property.
 	 *
-	 * If {@code true} the disconnect method of the underlying
+	 * <p>If {@code true} the disconnect method of the underlying
 	 * {@link HttpURLConnection} will be called after trying to
 	 * retrieve the resource.
+	 *
+	 * @param disconnectAfterUse If {@code true} the disconnect method of
+	 *                           the underlying {@link HttpURLConnection}
+	 *                           will be called after trying to retrieve
+	 *                           the resource.
 	 */
 	public void setDisconnectsAfterUse(final boolean disconnectAfterUse) {
 
@@ -205,7 +210,7 @@ public class DefaultResourceRetriever extends AbstractRestrictedResourceRetrieve
 
 	/**
 	 * Returns the HTTP proxy to use when opening the HttpURLConnection to
-	 * retrieve the resource. Note that the JVM may have a system wide
+	 * retrieve the resource. Note that the JVM may have a system-wide
 	 * proxy configured via the {@code https.proxyHost} Java system
 	 * property.
 	 *

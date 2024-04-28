@@ -85,8 +85,8 @@ public class AESCBC {
 	 *                      else creates a decryption cipher.
 	 * @param iv            The initialisation vector (IV). Must not be
 	 *                      {@code null}.
-	 * @param provider      The JCA provider, or {@code null} to use the
-	 *                      default one.
+	 * @param provider      The JCA provider, {@code null} to use the
+	 *                      default.
 	 *
 	 * @return The AES/CBC/PKCS5Padding cipher.
 	 */
@@ -130,8 +130,7 @@ public class AESCBC {
 	 * @param iv        The initialisation vector (IV). Must not be
 	 *                  {@code null}.
 	 * @param plainText The plain text. Must not be {@code null}.
-	 * @param provider  The JCA provider, or {@code null} to use the
-	 *                  default one.
+	 * @param provider  The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The cipher text.
 	 *
@@ -275,8 +274,7 @@ public class AESCBC {
 	 * @param iv         The initialisation vector (IV). Must not be
 	 *                   {@code null}.
 	 * @param cipherText The cipher text. Must not be {@code null}.
-	 * @param provider   The JCA provider, or {@code null} to use the
-	 *                   default one.
+	 * @param provider   The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The decrypted plain text.
 	 *

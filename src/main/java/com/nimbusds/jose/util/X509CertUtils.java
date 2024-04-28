@@ -69,7 +69,7 @@ public class X509CertUtils {
 	 * Sets the JCA provider to use for certification operations.
 	 *
 	 * @param provider The JCA provider to use for certificate operations,
-	 *                 {@code null} implies the default provider.
+	 *                 {@code null} implies the default.
 	 */
 	public static void setProvider(final Provider provider) {
 		jcaProvider = provider;

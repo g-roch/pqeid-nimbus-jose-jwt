@@ -52,8 +52,8 @@ public class AESKW {
 	 *                 be {@code null}.
 	 * @param kek      The AES Key Encryption Key (KEK) (wrapping key).
 	 *                 Must not be {@code null}.
-	 * @param provider The specific JCA provider to use, {@code null}
-	 *                 implies the default system one.
+	 * @param provider The JCA provider to use, {@code null} implies the
+	 *                 default.
 	 *
 	 * @return The wrapped Content Encryption Key (CEK).
 	 *
@@ -89,8 +89,8 @@ public class AESKW {
 	 *                     Must not be {@code null}.
 	 * @param encryptedCEK The wrapped Content Encryption Key (CEK) with
 	 *                     authentication tag. Must not be {@code null}.
-	 * @param provider     The specific JCA provider to use, {@code null}
-	 *                     implies the default system one.
+	 * @param provider     The JCA provider use, {@code null} implies the
+	 *                     default.
 	 *
 	 * @return The unwrapped Content Encryption Key (CEK).
 	 *

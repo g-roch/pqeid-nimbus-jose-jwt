@@ -147,8 +147,8 @@ public class ECDH {
 	 * @param privateKey The private EC Key, i.e. the ephemeral private EC
 	 *                   key on encryption, or the consumer's private EC
 	 *                   key on decryption. Must not be {@code null}.
-	 * @param provider   The specific JCA provider for the ECDH key
-	 *                   agreement, {@code null} to use the default one.
+	 * @param provider   The JCA provider for the ECDH key agreement,
+	 *                   {@code null} to use the default.
 	 *
 	 * @return The derived shared secret ('Z'), with algorithm "AES".
 	 *

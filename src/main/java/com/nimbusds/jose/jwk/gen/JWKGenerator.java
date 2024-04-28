@@ -250,8 +250,7 @@ public abstract class JWKGenerator<T extends JWK> {
 	 * Sets the JCA provider for the key generation. Note, some JWK
 	 * generators may not use the JCA provider API.
 	 *
-	 * @param provider The JCA provider, {@code null} to use the default
-	 *                 one.
+	 * @param provider The JCA provider, {@code null} to use the default.
 	 *
 	 * @return This generator.
 	 */

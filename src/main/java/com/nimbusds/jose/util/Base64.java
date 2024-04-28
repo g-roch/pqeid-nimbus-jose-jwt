@@ -27,7 +27,7 @@ import java.util.Objects;
  * Base64-encoded object.
  *
  * @author Vladimir Dzhuvinov
- * @version @version 2024-04-20
+ * @version 2024-04-20
  */
 @Immutable
 public class Base64 implements Serializable {

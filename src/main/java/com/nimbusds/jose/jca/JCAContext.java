@@ -57,8 +57,7 @@ public class JCAContext {
 	/**
 	 * Creates a new JCA context.
 	 *
-	 * @param provider  The JCA provider, {@code null} to use the default
-	 *                  system one.
+	 * @param provider  The JCA provider, {@code null} to use the default.
 	 * @param randomGen The specific secure random generator, {@code null}
 	 *                  to use the default system one.
 	 */
@@ -87,7 +86,7 @@ public class JCAContext {
 	 *
 	 * @param provider The JCA provider to be used for all operations where
 	 *                 a more specific one is absent, {@code null} to use
-	 *                 the default system provider.
+	 *                 the default.
 	 */
 	public void setProvider(final Provider provider) {
 

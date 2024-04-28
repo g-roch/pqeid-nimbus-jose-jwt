@@ -80,7 +80,6 @@ public class AESGCM {
 	 * Encrypts the specified plain text using AES/GCM/NoPadding.
 	 *
 	 * @param secretKey   The AES key. Must not be {@code null}.
-	 * @param plainText   The plain text. Must not be {@code null}.
 	 * @param ivContainer The initialisation vector (IV). Must not be
 	 *                    {@code null}. This is both input and output
 	 *                    parameter. On input, it carries externally
@@ -90,7 +89,10 @@ public class AESGCM {
 	 *                    described in
 	 *                    <a href="http://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf">NIST
 	 *                    Special Publication 800-38D </a>.
+	 * @param plainText   The plain text. Must not be {@code null}.
 	 * @param authData    The authenticated data. Must not be {@code null}.
+	 * @param provider    The JCA provider to use, {@code null} implies the
+	 *                    default.
 	 *
 	 * @return The authenticated cipher text.
 	 *
@@ -244,6 +246,8 @@ public class AESGCM {
 	 * @param cipherText The cipher text. Must not be {@code null}.
 	 * @param authData   The authenticated data. Must not be {@code null}.
 	 * @param authTag    The authentication tag. Must not be {@code null}.
+	 * @param provider   The JCA provider to use, {@code null} implies the
+	 *                   default.
 	 *
 	 * @return The decrypted plain text.
 	 *

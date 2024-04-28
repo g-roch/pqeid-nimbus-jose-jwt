@@ -36,6 +36,10 @@ public interface JWSSignerFactory extends JWSProvider {
 
 	/**
 	 * Create a JWS signer based on the key.
+	 *
+	 * @param key The JWK. Must not be {@code null}.
+	 *
+	 * @return The JWS signer.
 	 */
 	JWSSigner createJWSSigner(final JWK key)
 		throws JOSEException;
@@ -43,6 +47,11 @@ public interface JWSSignerFactory extends JWSProvider {
 	/**
 	 * Create a JWS signer based on the key and algorithm. Ensures
 	 * that the key supports the given algorithm.
+	 *
+	 * @param key The JWK. Must not be {@code null}.
+	 * @param alg The algorithm. Must not be {@code null}.
+	 *
+	 * @return The JWS signer.
 	 */
 	JWSSigner createJWSSigner(final JWK key, final JWSAlgorithm alg)
 		throws JOSEException;

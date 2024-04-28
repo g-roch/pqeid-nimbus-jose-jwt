@@ -31,7 +31,7 @@ import java.util.Set;
  * The base abstract class for JSON Web Signature (JWS) signers and verifiers.
  *
  * @author Vladimir Dzhuvinov
- * @version @version 2024-04-20
+ * @version 2024-04-20
  */
 public abstract class BaseJWSProvider implements JWSProvider {
 

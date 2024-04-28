@@ -2024,29 +2024,32 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * Creates a new public RSA JSON Web Key (JWK) with the specified
 	 * parameters.
 	 *
-	 * @param pub    The public RSA key to represent. Must not be
-	 *               {@code null}.
-	 * @param use    The key use, {@code null} if not specified or if the
-	 *               key is intended for signing as well as encryption.
-	 * @param ops    The key operations, {@code null} if not specified.
-	 * @param alg    The intended JOSE algorithm for the key, {@code null}
-	 *               if not specified.
-	 * @param kid    The key ID, {@code null} if not specified.
-	 * @param x5u    The X.509 certificate URL, {@code null} if not
-	 *               specified.
-	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
-	 *               if not specified.
-	 * @param x5t256 The X.509 certificate SHA-256 thumbprint, {@code null}
-	 *               if not specified.
-	 * @param x5c    The X.509 certificate chain, {@code null} if not
-	 *               specified.
-	 * @param exp    The key expiration time, {@code null} if not
-	 *               specified.
-	 * @param nbf    The key not-before time, {@code null} if not
-	 *               specified.
-	 * @param iat    The key issued-at time, {@code null} if not specified.
-	 * @param ks     Reference to the underlying key store, {@code null} if
-	 *               not specified.
+	 * @param pub        The public RSA key to represent. Must not be
+	 *                   {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
 	 */
 	public RSAKey(final RSAPublicKey pub,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,
@@ -2147,31 +2150,34 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 	 * specified parameters. The private RSA key is specified by its first
 	 * representation (see RFC 3447, section 3.2).
 	 *
-	 * @param pub    The public RSA key to represent. Must not be
-	 *               {@code null}.
-	 * @param priv   The private RSA key to represent. Must not be
-	 *               {@code null}.
-	 * @param use    The key use, {@code null} if not specified or if the
-	 *               key is intended for signing as well as encryption.
-	 * @param ops    The key operations, {@code null} if not specified.
-	 * @param alg    The intended JOSE algorithm for the key, {@code null}
-	 *               if not specified.
-	 * @param kid    The key ID, {@code null} if not specified.
-	 * @param x5u    The X.509 certificate URL, {@code null} if not
-	 *               specified.
-	 * @param x5t    The X.509 certificate SHA-1 thumbprint, {@code null}
-	 *               if not specified.
-	 * @param x5t256 The X.509 certificate SHA-256 thumbprint, {@code null}
-	 *               if not specified.
-	 * @param x5c    The X.509 certificate chain, {@code null} if not
-	 *               specified.
-	 * @param exp    The key expiration time, {@code null} if not
-	 *               specified.
-	 * @param nbf    The key not-before time, {@code null} if not
-	 *               specified.
-	 * @param iat    The key issued-at time, {@code null} if not specified.
-	 * @param ks     Reference to the underlying key store, {@code null} if
-	 *               not specified.
+	 * @param pub        The public RSA key to represent. Must not be
+	 *                   {@code null}.
+	 * @param priv       The private RSA key to represent. Must not be
+	 *                   {@code null}.
+	 * @param use        The key use, {@code null} if not specified or if
+	 *                   the key is intended for signing as well as
+	 *                   encryption.
+	 * @param ops        The key operations, {@code null} if not specified.
+	 * @param alg        The intended JOSE algorithm for the key,
+	 *                   {@code null} if not specified.
+	 * @param kid        The key ID, {@code null} if not specified.
+	 * @param x5u        The X.509 certificate URL, {@code null} if not
+	 *                   specified.
+	 * @param x5t        The X.509 certificate SHA-1 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5t256     The X.509 certificate SHA-256 thumbprint,
+	 *                   {@code null} if not specified.
+	 * @param x5c        The X.509 certificate chain, {@code null} if not
+	 *                   specified.
+	 * @param exp        The key expiration time, {@code null} if not
+	 *                   specified.
+	 * @param nbf        The key not-before time, {@code null} if not
+	 *                   specified.
+	 * @param iat        The key issued-at time, {@code null} if not
+	 *                   specified.
+	 * @param revocation The key revocation, {@code null} if not specified.
+	 * @param ks         Reference to the underlying key store,
+	 *                   {@code null} if not specified.
 	 */
 	public RSAKey(final RSAPublicKey pub, final RSAPrivateKey priv,
 		      final KeyUse use, final Set<KeyOperation> ops, final Algorithm alg, final String kid,

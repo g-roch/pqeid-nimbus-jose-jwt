@@ -37,8 +37,7 @@ public class AlgorithmParametersHelper {
 	 *
 	 * @param name     The name of the requested algorithm. Must not be
 	 *                 {@code null}.
-	 * @param provider The JCA provider, or {@code null} to use the default
-	 *                 one.
+	 * @param provider The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The AlgorithmParameters instance.
 	 *

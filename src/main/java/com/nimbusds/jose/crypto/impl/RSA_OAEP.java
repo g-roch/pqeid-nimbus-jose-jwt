@@ -54,8 +54,7 @@ public class RSA_OAEP {
 	 * @param pub      The public RSA key. Must not be {@code null}.
 	 * @param cek      The Content Encryption Key (CEK) to encrypt. Must
 	 *                 not be {@code null}.
-	 * @param provider The JCA provider, or {@code null} to use the default
-	 *                 one.
+	 * @param provider The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The encrypted Content Encryption Key (CEK).
 	 *
@@ -87,8 +86,8 @@ public class RSA_OAEP {
 	 * @param priv         The private RSA key. Must not be {@code null}.
 	 * @param encryptedCEK The encrypted Content Encryption Key (CEK) to
 	 *                     decrypt. Must not be {@code null}.
-	 * @param provider     The JCA provider, or {@code null} to use the
-	 *                     default one.
+	 * @param provider     The JCA provider, {@code null} to use the
+	 *                     default.
 	 *
 	 * @return The decrypted Content Encryption Key (CEK).
 	 *

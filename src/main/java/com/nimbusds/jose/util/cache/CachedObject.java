@@ -28,7 +28,7 @@ import java.util.Objects;
  *
  * @param <V> The object type.
  *
- * @version @version 2024-04-20
+ * @version 2024-04-20
  */
 @Immutable
 public final class CachedObject<V> {

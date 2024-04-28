@@ -852,6 +852,8 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 	 *               if not specified.
 	 * @param x5c    The X.509 certificate chain, {@code null} if not
 	 *               specified.
+	 * @param ks     Reference to the underlying key store, {@code null} if
+	 *               not specified.
 	 */
 	@Deprecated
 	public ECKey(final Curve crv, final Base64URL x, final Base64URL y, final PrivateKey priv,
@@ -1664,8 +1666,8 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 	 * Returns a standard {@code java.security.interfaces.ECPublicKey}
 	 * representation of this Elliptic Curve JWK.
 	 *
-	 * @param provider The specific JCA provider to use, {@code null}
-	 *                 implies the default one.
+	 * @param provider The JCA provider to use, {@code null} implies the
+	 *                 default.
 	 *
 	 * @return The public Elliptic Curve key.
 	 *
@@ -1727,8 +1729,8 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 	 * Returns a standard {@code java.security.interfaces.ECPrivateKey}
 	 * representation of this Elliptic Curve JWK.
 	 *
-	 * @param provider The specific JCA provider to use, {@code null}
-	 *                 implies the default one.
+	 * @param provider The JCA provider to use, {@code null} implies the
+	 *                 default.
 	 *
 	 * @return The private Elliptic Curve key, {@code null} if not
 	 *         specified by this JWK.
@@ -1819,8 +1821,8 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 	 * Returns a standard {@code java.security.KeyPair} representation of
 	 * this Elliptic Curve JWK.
 	 *
-	 * @param provider The specific JCA provider to use, {@code null}
-	 *                 implies the default one.
+	 * @param provider The JCA provider to use, {@code null} implies the
+	 *                 default.
 	 *
 	 * @return The Elliptic Curve key pair. The private Elliptic Curve key
 	 *         will be {@code null} if not specified.

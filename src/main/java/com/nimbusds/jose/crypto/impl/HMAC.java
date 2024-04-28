@@ -48,8 +48,7 @@ public class HMAC {
 	 *
 	 * @param secretKey The secret key, with the appropriate HMAC
 	 *                  algorithm. Must not be {@code null}.
-	 * @param provider  The JCA provider, or {@code null} to use the
-	 *                  default one.
+	 * @param provider  The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The MAC service instance.
 	 *
@@ -71,8 +70,7 @@ public class HMAC {
 	 * 	            algorithm name. Must not be {@code null}.
 	 * @param secretKey The secret key. Its algorithm name is ignored.
 	 *                  Must not be {@code null}.
-	 * @param provider  The JCA provider, or {@code null} to use the
-	 * 	            default one.
+	 * @param provider  The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The MAC service instance.
 	 *
@@ -112,8 +110,7 @@ public class HMAC {
 	 *                 algorithm name. Must not be {@code null}.
 	 * @param secret   The secret. Must not be {@code null}.
 	 * @param message  The message. Must not be {@code null}.
-	 * @param provider The JCA provider, or {@code null} to use the default
-	 *                 one.
+	 * @param provider The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The computed HMAC.
 	 *
@@ -140,8 +137,7 @@ public class HMAC {
 	 * @param secretKey The secret key. Its algorithm name is ignored.
 	 *                  Must not be {@code null}.
 	 * @param message   The message. Must not be {@code null}.
-	 * @param provider  The JCA provider, or {@code null} to use the
-	 *                  default one.
+	 * @param provider  The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The computed HMAC.
 	 *

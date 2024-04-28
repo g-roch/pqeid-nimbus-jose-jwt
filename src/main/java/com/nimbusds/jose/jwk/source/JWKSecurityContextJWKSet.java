@@ -31,7 +31,7 @@ import java.util.List;
  *
  * @author Rob Winch
  * @author Josh Cummings
- * @version @version 2024-04-20
+ * @version 2024-04-20
  */
 public class JWKSecurityContextJWKSet implements JWKSource<JWKSecurityContext> {
 

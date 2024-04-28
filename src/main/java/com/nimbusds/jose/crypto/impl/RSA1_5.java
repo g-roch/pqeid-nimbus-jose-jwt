@@ -48,8 +48,7 @@ public class RSA1_5 {
 	 * @param pub      The public RSA key. Must not be {@code null}.
 	 * @param cek      The Content Encryption Key (CEK) to encrypt. Must
 	 *                 not be {@code null}.
-	 * @param provider The JCA provider, or {@code null} to use the default
-	 *                 one.
+	 * @param provider The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The encrypted Content Encryption Key (CEK).
 	 *
@@ -79,8 +78,8 @@ public class RSA1_5 {
 	 * @param priv         The private RSA key. Must not be {@code null}.
 	 * @param encryptedCEK The encrypted Content Encryption Key (CEK) to
 	 *                     decrypt. Must not be {@code null}.
-	 * @param provider     The JCA provider, or {@code null} to use the
-	 *                     default one.
+	 * @param provider     The JCA provider, {@code null} to use the
+	 *                     default.
 	 *
 	 * @return The decrypted Content Encryption Key (CEK), {@code null} if
 	 *         there was a CEK key length mismatch.

@@ -40,8 +40,12 @@ public class CipherHelper {
 	 * Instantiates a cipher with an (optional) JCA provider.
 	 *
 	 * @param name     The name of the cipher. Must not be {@code null}.
-	 * @param provider The JCA provider, or {@code null} to use the default
-	 *                 one.
+	 * @param provider The JCA provider, {@code null} to use the default.
+	 *
+	 * @return The cipher.
+	 *
+	 * @throws NoSuchAlgorithmException On unsupported algorithm.
+	 * @throws NoSuchPaddingException   On unsupported padding.
 	 */
 	public static Cipher getInstance(String name, Provider provider)
 		throws NoSuchAlgorithmException, NoSuchPaddingException {

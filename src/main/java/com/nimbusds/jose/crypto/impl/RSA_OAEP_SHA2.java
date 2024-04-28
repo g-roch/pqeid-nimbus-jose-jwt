@@ -91,8 +91,8 @@ public class RSA_OAEP_SHA2 {
 	 * @param cek        The Content Encryption Key (CEK) to encrypt. Must
 	 *                   not be {@code null}.
 	 * @param shaBitSize The SHA-2 bit size. Must be 256, 384 or 512.
-	 * @param provider   The JCA provider, or {@code null} to use the
-	 *                   default one.
+	 * @param provider   The JCA provider, {@code null} to use the
+	 *                   default.
 	 *
 	 * @return The encrypted Content Encryption Key (CEK).
 	 *
@@ -150,8 +150,8 @@ public class RSA_OAEP_SHA2 {
 	 * @param encryptedCEK The encrypted Content Encryption Key (CEK) to
 	 *                     decrypt. Must not be {@code null}.
 	 * @param shaBitSize   The SHA-2 bit size. Must be 256 or 512.
-	 * @param provider     The JCA provider, or {@code null} to use the
-	 *                     default one.
+	 * @param provider     The JCA provider, {@code null} to use the
+	 *                     default.
 	 *
 	 * @return The decrypted Content Encryption Key (CEK).
 	 *

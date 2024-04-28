@@ -289,8 +289,8 @@ public class ECDH1PU {
      * @param privateKey The sender EC private key.
      * @param publicKey  The recipient EC public key.
      * @param epk        The sender EC ephemeral private key.
-     * @param provider   The specific JCA provider for the ECDH key
-     *                   agreement, {@code null} to use the default one.
+     * @param provider   The JCA provider for the ECDH key agreement,
+     *                   {@code null} to use the default.
      *
      * @return The derived shared secret ('Z'), with algorithm "AES".
      *
@@ -361,8 +361,8 @@ public class ECDH1PU {
      * @param privateKey The sender EC private key.
      * @param publicKey  The recipient EC public key.
      * @param epk        The sender EC ephemeral public key.
-     * @param provider   The specific JCA provider for the ECDH key
-     *                   agreement, {@code null} to use the default one.
+     * @param provider   The JCA provider for the ECDH key agreement,
+     *                   {@code null} to use the default.
      *
      * @return The derived shared secret ('Z'), with algorithm "AES".
      *

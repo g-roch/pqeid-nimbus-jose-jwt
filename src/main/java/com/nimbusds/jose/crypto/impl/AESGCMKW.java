@@ -53,8 +53,8 @@ public class AESGCMKW {
 	 *		   {@code null} either.
 	 * @param kek	   The AES Key Encryption Key (KEK). Must not be
 	 *		   {@code null}.
-	 * @param provider The specific JCA provider to use, {@code null}
-	 *                 implies the default system one.
+	 * @param provider The JCA provider to use, {@code null} implies the
+	 *                 default.
 	 *
 	 * @return The encrypted Content Encryption Key (CEK).
 	 *
@@ -80,8 +80,9 @@ public class AESGCMKW {
 	 * @param authEncrCEK  The encrypted Content Encryption Key (CEK) to
 	 *		       decrypt and authentication tag. Must not be
 	 *		       {@code null}.
-	 * @param provider     The JCA provider, or {@code null} to use the
-	 *		       default one.
+	 * @param keyLength    The expected key length, in bits.
+	 * @param provider     The JCA provider, {@code null} to use the
+	 *		       default.
 	 *
 	 * @return The decrypted Content Encryption Key (CEK).
 	 *
