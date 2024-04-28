@@ -1629,10 +1629,12 @@ version 9.38-rc3 (2024-01-15)
     * Exposes the DefaultJWTProcessor extractJWTClaimsSet, verifyJWTClaimsSet
       and selectKeys as protected.
 
-version 9.38-rc4 (2024-04-27)
+version 9.38-rc4 (2024-04-28)
     * Adds KeyRevocation class to support OpenID Federation 1.0.
     * Adds Android "SHA{256|384|512}withRSA/PSS" JCA algorithm support (iss
       #541).
     * Adds JWKSet.containsNonPublicKeys helper method.
     * Switches to Object.requireNonNull where appropriate to reduce code and
       use of exception message strings.
+    * Updates to com.google.crypto.tink:tink:1.13.0
+    * Updates to BouncyCastle 1.78 (JDK 1.8 on)
