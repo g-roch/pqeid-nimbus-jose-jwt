@@ -1,6 +1,7 @@
 module com.nimbusds.jose.jwt {
 	// ECC
 	requires jdk.crypto.ec;
+	requires jdk.crypto.cryptoki;
 
 	// shaded:
 	requires static com.google.gson;
