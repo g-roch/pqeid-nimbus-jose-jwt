@@ -318,7 +318,8 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 		 * @param d The private 'd' coordinate. It is represented as
 		 *          the Base64URL encoding of the coordinate's big
 		 *          endian representation. {@code null} if not
-		 *          specified (for a public key).
+		 *          specified (for a public key or private key
+		 *          specified otherwise).
 		 *
 		 * @return This builder.
 		 */
@@ -336,7 +337,7 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 		 * @param priv The private EC key, used to obtain the private
 		 *             'd' coordinate for the elliptic curve point.
 		 *             {@code null} if not specified (for a public 
-		 *             key).
+		 *             key or private key specified otherwise).
 		 *
 		 * @return This builder.
 		 */
@@ -344,6 +345,8 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 
 			if (priv != null) {
 				this.d = encodeCoordinate(priv.getParams().getCurve().getField().getFieldSize(), priv.getS());
+			} else {
+				this.d = null;
 			}
 			
 			return this;
@@ -356,20 +359,22 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 		 * (such as a smart card or HSM).
 		 *
 		 * @param priv The private EC key reference. Its algorithm must
-		 *             be "EC". Must not be {@code null}.
+		 *             be "EC". {@code null} if not specified (for a
+		 *             public key or private key specified otherwise).
 		 *
 		 * @return This builder.
 		 */
 		public Builder privateKey(final PrivateKey priv) {
 
 			if (priv instanceof ECPrivateKey) {
+				// We have the key material, set d coordinate instead
 				return privateKey((ECPrivateKey) priv);
 			}
 
-			if (! "EC".equalsIgnoreCase(priv.getAlgorithm())) {
+			if (priv != null && ! "EC".equalsIgnoreCase(priv.getAlgorithm())) {
 				throw new IllegalArgumentException("The private key algorithm must be EC");
 			}
-			
+
 			this.priv = priv;
 			return this;
 		}

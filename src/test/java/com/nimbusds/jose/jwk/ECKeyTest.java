@@ -21,6 +21,7 @@ package com.nimbusds.jose.jwk;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.*;
 import com.nimbusds.jwt.util.DateUtils;
@@ -513,6 +514,113 @@ public class ECKeyTest extends TestCase {
 		assertEquals(ExampleKeyP256.D, key.getD());
 
 		assertTrue(key.isPrivate());
+	}
+
+
+	public void testBuilder_ecPrivateKeyNull()
+		throws JOSEException {
+
+		ECKey ecJWK = new ECKeyGenerator(Curve.P_256).generate();
+
+		ECKey out = new ECKey.Builder(Curve.P_256, ecJWK.toECPublicKey())
+			.privateKey((ECPrivateKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getD());
+		assertNull(out.toECPrivateKey());
+	}
+
+
+	public void testBuilder_ecPrivateKey_setThenClear()
+		throws JOSEException {
+
+		ECKey ecJWK = new ECKeyGenerator(Curve.P_256).generate();
+
+		ECKey out = new ECKey.Builder(Curve.P_256, ecJWK.toECPublicKey())
+			.privateKey(ecJWK.toECPrivateKey())
+			.privateKey((ECPrivateKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getD());
+		assertNull(out.toECPrivateKey());
+	}
+
+
+	public void testBuilder_privateKeyNull()
+		throws JOSEException {
+
+		ECKey ecJWK = new ECKeyGenerator(Curve.P_256).generate();
+
+		ECKey out = new ECKey.Builder(Curve.P_256, ecJWK.toECPublicKey())
+			.privateKey((PrivateKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getD());
+		assertNull(out.toECPrivateKey());
+	}
+
+
+	public void testBuilder_privateKey_setThenClear()
+		throws JOSEException {
+
+		ECKey ecJWK = new ECKeyGenerator(Curve.P_256).generate();
+
+		ECKey out = new ECKey.Builder(Curve.P_256, ecJWK.toECPublicKey())
+			.privateKey(new PrivateKey() {
+				@Override
+				public String getAlgorithm() {
+					return "EC";
+				}
+
+				@Override
+				public String getFormat() {
+					return "";
+				}
+
+				@Override
+				public byte[] getEncoded() {
+					return new byte[0];
+				}
+			})
+			.privateKey((PrivateKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getD());
+		assertNull(out.toECPrivateKey());
+	}
+
+
+	public void testBuilder_privateKey_illegalAlgorithm()
+		throws JOSEException {
+
+		ECKey ecJWK = new ECKeyGenerator(Curve.P_256).generate();
+
+		try {
+			new ECKey.Builder(Curve.P_256, ecJWK.toECPublicKey())
+				.privateKey(new PrivateKey() {
+					@Override
+					public String getAlgorithm() {
+						return "RSA";
+					}
+
+					@Override
+					public String getFormat() {
+						return "";
+					}
+
+					@Override
+					public byte[] getEncoded() {
+						return new byte[0];
+					}
+				});
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("The private key algorithm must be EC", e.getMessage());
+		}
 	}
 
 

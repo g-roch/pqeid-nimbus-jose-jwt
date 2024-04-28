@@ -504,8 +504,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 * @param d The private RSA key exponent. It is represented as 
 		 *          the Base64URL encoding of the value's big endian 
 		 *          representation. {@code null} if not specified (for 
-		 *          a public key or a private key using the second 
-		 *          representation only).
+		 *          a public key or a private key specified otherwise).
 		 *
 		 * @return This builder.
 		 */
@@ -520,20 +519,29 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 * Sets the private RSA key, using the first representation.
 		 * 
 		 * @param priv The private RSA key, used to obtain the private
-		 *             exponent ({@code d}). Must not be {@code null}.
+		 *             exponent ({@code d}). {@code null} if not
+		 *             specified (for a public key or a private key
+		 *             specified otherwise).
 		 *
 		 * @return This builder.
 		 */
 		public Builder privateKey(final RSAPrivateKey priv) {
 
 			if (priv instanceof RSAPrivateCrtKey) {
-				return this.privateKey((RSAPrivateCrtKey) priv);
-			} else if (priv instanceof RSAMultiPrimePrivateCrtKey) {
-				return this.privateKey((RSAMultiPrimePrivateCrtKey) priv);
-			} else {
-				this.d = Base64URL.encode(priv.getPrivateExponent());
-				return this;
+				return privateKey((RSAPrivateCrtKey) priv);
 			}
+
+			if (priv instanceof RSAMultiPrimePrivateCrtKey) {
+				return privateKey((RSAMultiPrimePrivateCrtKey) priv);
+			}
+
+			if (priv != null) {
+				this.d = Base64URL.encode(priv.getPrivateExponent());
+			} else {
+				this.d = null;
+			}
+
+			return this;
 		}
 		
 		
@@ -543,16 +551,20 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 * (such as a smart card or HSM).
 		 *
 		 * @param priv The private RSA key reference. Its algorithm
-		 *             must be "RSA". Must not be {@code null}.
+		 *             must be "RSA". {@code null} if not specified
+		 *             (for a public key or private key specified
+		 *             otherwise).
 		 *
 		 * @return This builder.
 		 */
 		public Builder privateKey(final PrivateKey priv) {
+
 			if (priv instanceof RSAPrivateKey) {
+				// We have the key material
 				return privateKey((RSAPrivateKey) priv);
 			}
 
-			if (! "RSA".equalsIgnoreCase(priv.getAlgorithm())) {
+			if (priv != null && ! "RSA".equalsIgnoreCase(priv.getAlgorithm())) {
 				throw new IllegalArgumentException("The private key algorithm must be RSA");
 			}
 			
@@ -568,8 +580,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 * @param p The RSA first prime factor. It is represented as 
 		 *          the Base64URL encoding of the value's big endian 
 		 *          representation. {@code null} if not specified (for 
-		 *          a public key or a private key using the first 
-		 *          representation only).
+		 *          a public key or a private key specified otherwise).
 		 *
 		 * @return This builder.
 		 */
@@ -587,8 +598,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 * @param q The RSA second prime factor. It is represented as 
 		 *          the Base64URL encoding of the value's big endian 
 		 *          representation. {@code null} if not specified (for 
-		 *          a public key or a private key using the first 
-		 *          representation only).
+		 *          a public key or a private specified otherwise).
 		 *
 		 * @return This builder.
 		 */
@@ -607,7 +617,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 *           represented as the Base64URL encoding of the 
 		 *           value's big endian representation. {@code null} 
 		 *           if not specified (for a public key or a private
-		 *           key using the first representation only).
+		 *           key specified otherwise).
 		 *
 		 * @return This builder.
 		 */
@@ -626,7 +636,7 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 *           represented as the Base64URL encoding of the 
 		 *           value's big endian representation. {@code null} if 
 		 *           not specified (for a public key or a private key 
-		 *           using the first representation only).
+		 *           specified otherwise).
 		 *
 		 * @return This builder.
 		 */
@@ -644,8 +654,8 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 * @param qi The RSA first CRT coefficient. It is represented 
 		 *           as the Base64URL encoding of the value's big 
 		 *           endian representation. {@code null} if not 
-		 *           specified (for a public key or a private key using 
-		 *           the first representation only).
+		 *           specified (for a public key or a private key
+		 *           specified otherwise).
 		 *
 		 * @return This builder.
 		 */
@@ -682,18 +692,29 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 *             ({@code q}), the first factor CRT exponent 
 		 *             ({@code dp}), the second factor CRT exponent
 		 *             ({@code dq}) and the first CRT coefficient 
-		 *             ({@code qi}). Must not be {@code null}.
+		 *             ({@code qi}). {@code null} if not specified (for
+		 *             a public key or private key specified
+		 *             otherwise).
 		 *
 		 * @return This builder.
 		 */
 		public Builder privateKey(final RSAPrivateCrtKey priv) {
 
-			d = Base64URL.encode(priv.getPrivateExponent());
-			p = Base64URL.encode(priv.getPrimeP());
-			q = Base64URL.encode(priv.getPrimeQ());
-			dp = Base64URL.encode(priv.getPrimeExponentP());
-			dq = Base64URL.encode(priv.getPrimeExponentQ());
-			qi = Base64URL.encode(priv.getCrtCoefficient());
+			if (priv != null) {
+				d = Base64URL.encode(priv.getPrivateExponent());
+				p = Base64URL.encode(priv.getPrimeP());
+				q = Base64URL.encode(priv.getPrimeQ());
+				dp = Base64URL.encode(priv.getPrimeExponentP());
+				dq = Base64URL.encode(priv.getPrimeExponentQ());
+				qi = Base64URL.encode(priv.getCrtCoefficient());
+			} else {
+				d = null;
+				p = null;
+				q = null;
+				dp = null;
+				dq = null;
+				qi = null;
+			}
 
 			return this;
 		}
@@ -710,19 +731,31 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		 *             ({@code dp}), the second factor CRT exponent
 		 *             ({@code dq}), the first CRT coefficient 
 		 *             ({@code qi}) and the other primes info
-		 *             ({@code oth}). Must not be {@code null}.
+		 *             ({@code oth}). {@code null} if not specified
+		 *             (for a public key or private key specified
+		 *             otherwise).
 		 *
 		 * @return This builder.
 		 */
 		public Builder privateKey(final RSAMultiPrimePrivateCrtKey priv) {
-			
-			d = Base64URL.encode(priv.getPrivateExponent());
-			p = Base64URL.encode(priv.getPrimeP());
-			q = Base64URL.encode(priv.getPrimeQ());
-			dp = Base64URL.encode(priv.getPrimeExponentP());
-			dq = Base64URL.encode(priv.getPrimeExponentQ());
-			qi = Base64URL.encode(priv.getCrtCoefficient());
-			oth = OtherPrimesInfo.toList(priv.getOtherPrimeInfo());
+
+			if (priv != null) {
+				d = Base64URL.encode(priv.getPrivateExponent());
+				p = Base64URL.encode(priv.getPrimeP());
+				q = Base64URL.encode(priv.getPrimeQ());
+				dp = Base64URL.encode(priv.getPrimeExponentP());
+				dq = Base64URL.encode(priv.getPrimeExponentQ());
+				qi = Base64URL.encode(priv.getCrtCoefficient());
+				oth = OtherPrimesInfo.toList(priv.getOtherPrimeInfo());
+			} else {
+				d = null;
+				p = null;
+				q = null;
+				dp = null;
+				dq = null;
+				qi = null;
+				oth = null;
+			}
 
 			return this;
 		}

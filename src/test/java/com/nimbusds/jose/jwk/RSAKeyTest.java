@@ -628,6 +628,159 @@ public class RSAKeyTest extends TestCase {
 	}
 
 
+	public void testBuilder_rsaPrivateKeyNull()
+		throws JOSEException {
+
+		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
+
+		RSAKey out = new RSAKey.Builder(rsaJWK.toRSAPublicKey())
+			.privateKey((RSAPrivateKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getPrivateExponent());
+		assertNull(out.toRSAPrivateKey());
+	}
+
+
+	public void testBuilder_rsaPrivateKey_setThenClear()
+		throws JOSEException {
+
+		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
+
+		RSAPrivateKey exported = rsaJWK.toRSAPrivateKey();
+
+		RSAPrivateKey rsaPrivateKey = new RSAPrivateKey() {
+			@Override
+			public BigInteger getPrivateExponent() {
+				return exported.getPrivateExponent();
+			}
+
+			@Override
+			public String getAlgorithm() {
+				return exported.getAlgorithm();
+			}
+
+			@Override
+			public String getFormat() {
+				return exported.getFormat();
+			}
+
+			@Override
+			public byte[] getEncoded() {
+				return exported.getEncoded();
+			}
+
+			@Override
+			public BigInteger getModulus() {
+				return exported.getModulus();
+			}
+		};
+
+		RSAKey out = new RSAKey.Builder(rsaJWK.toRSAPublicKey())
+			.privateKey(rsaPrivateKey)
+			.privateKey((RSAPrivateKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getPrivateExponent());
+		assertNull(out.toRSAPrivateKey());
+	}
+
+
+	public void testBuilder_rsaPrivateCrtKey_setThenClear()
+		throws JOSEException {
+
+		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
+
+		RSAPrivateCrtKey rsaPrivateKeyCrt = (RSAPrivateCrtKey) rsaJWK.toRSAPrivateKey();
+
+		RSAKey out = new RSAKey.Builder(rsaJWK.toRSAPublicKey())
+			.privateKey(rsaPrivateKeyCrt)
+			.privateKey((RSAPrivateCrtKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getPrivateExponent());
+		assertNull(out.toRSAPrivateKey());
+	}
+
+
+	public void testBuilder_privateKeyNull()
+		throws JOSEException {
+
+		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
+
+		RSAKey out = new RSAKey.Builder(rsaJWK.toRSAPublicKey())
+			.privateKey((PrivateKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getPrivateExponent());
+		assertNull(out.toRSAPrivateKey());
+	}
+
+
+	public void testBuilder_privateKeyNull_setThenClear()
+		throws JOSEException {
+
+		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
+
+		RSAKey out = new RSAKey.Builder(rsaJWK.toRSAPublicKey())
+			.privateKey(new PrivateKey() {
+				@Override
+				public String getAlgorithm() {
+					return "RSA";
+				}
+
+				@Override
+				public String getFormat() {
+					return "";
+				}
+
+				@Override
+				public byte[] getEncoded() {
+					return new byte[0];
+				}
+			})
+			.privateKey((PrivateKey) null)
+			.build();
+
+		assertFalse(out.isPrivate());
+		assertNull(out.getPrivateExponent());
+		assertNull(out.toRSAPrivateKey());
+	}
+
+
+	public void testBuilder_privateKey_illegalArgument()
+		throws JOSEException {
+
+		RSAKey rsaJWK = new RSAKeyGenerator(2048).generate();
+
+		try {
+			new RSAKey.Builder(rsaJWK.toRSAPublicKey())
+				.privateKey(new PrivateKey() {
+					@Override
+					public String getAlgorithm() {
+						return "EC";
+					}
+
+					@Override
+					public String getFormat() {
+						return "";
+					}
+
+					@Override
+					public byte[] getEncoded() {
+						return new byte[0];
+					}
+				});
+		} catch (IllegalArgumentException e) {
+			assertEquals("The private key algorithm must be RSA", e.getMessage());
+		}
+	}
+
+
 	public void testRSAPublicKeyExportAndImport()
 		throws Exception {
 
