@@ -18,10 +18,13 @@
 package com.nimbusds.jose.crypto.impl;
 
 
-import java.util.Collections;
-import java.util.Set;
-
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -32,11 +35,13 @@ import com.nimbusds.jose.JWSAlgorithm;
  * <p>Supports the following algorithm:
  *
  * <ul>
- *     <li>{@link com.nimbusds.jose.JWSAlgorithm#EdDSA}
+ *     <li>{@link com.nimbusds.jose.JWSAlgorithm#Ed25519}
+ *     <li>{@link com.nimbusds.jose.JWSAlgorithm#EdDSA} with
+ *         {@link com.nimbusds.jose.jwk.Curve#Ed25519}
  * </ul>
  * 
  * @author Tim McLean
- * @version 2018-07-11
+ * @version 2024-05-07
  */
 public abstract class EdDSAProvider extends BaseJWSProvider {
 
@@ -47,8 +52,22 @@ public abstract class EdDSAProvider extends BaseJWSProvider {
 	public static final Set<JWSAlgorithm> SUPPORTED_ALGORITHMS;
 
 
+	/**
+	 * The supported curves by the EdDSA provider class.
+	 */
+	public static final Set<Curve> SUPPORTED_CURVES;
+
+
 	static {
-		SUPPORTED_ALGORITHMS = Collections.singleton(JWSAlgorithm.EdDSA);
+		SUPPORTED_ALGORITHMS = Collections.unmodifiableSet(
+			new HashSet<>(
+				Arrays.asList(
+					JWSAlgorithm.EdDSA,
+					JWSAlgorithm.Ed25519
+				)
+			));
+
+		SUPPORTED_CURVES = Collections.singleton(Curve.Ed25519);
 	}
 
 

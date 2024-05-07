@@ -18,8 +18,6 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.security.GeneralSecurityException;
-
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -30,6 +28,8 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.ThreadSafe;
+
+import java.security.GeneralSecurityException;
 
 
 /**
@@ -45,17 +45,13 @@ import net.jcip.annotations.ThreadSafe;
  * <p>Supports the following algorithm:
  *
  * <ul>
- *     <li>{@link com.nimbusds.jose.JWSAlgorithm#EdDSA}
- * </ul>
- *
- * <p>with the following curve:
- *
- * <ul>
- *     <li>{@link com.nimbusds.jose.jwk.Curve#Ed25519}
+ *     <li>{@link com.nimbusds.jose.JWSAlgorithm#Ed25519}
+ *     <li>{@link com.nimbusds.jose.JWSAlgorithm#EdDSA} with
+ *         {@link com.nimbusds.jose.jwk.Curve#Ed25519}
  * </ul>
  *
  * @author Tim McLean
- * @version 2018-07-11
+ * @version 2024-05-07
  */
 @ThreadSafe
 public class Ed25519Signer extends EdDSAProvider implements JWSSigner {
@@ -70,10 +66,11 @@ public class Ed25519Signer extends EdDSAProvider implements JWSSigner {
 	/**
 	 * Creates a new Ed25519 signer.
 	 *
-	 * @param privateKey The private key. Must be non-{@code null}, and must
-	 * be of type Ed25519 ({@code "crv": "Ed25519"}).
+	 * @param privateKey The private key. Must be of type Ed25519
+	 *                   ({@code "crv": "Ed25519"}) and not {@code null}.
 	 *
-	 * @throws JOSEException If the key subtype is not supported or if the key is not a private key
+	 * @throws JOSEException If the key subtype is not supported or if the
+	 *                       key is not a private key.
 	 */
 	public Ed25519Signer(final OctetKeyPair privateKey)
 		throws JOSEException {
@@ -117,8 +114,8 @@ public class Ed25519Signer extends EdDSAProvider implements JWSSigner {
 
 		// Check alg field in header
 		final JWSAlgorithm alg = header.getAlgorithm();
-		if (! JWSAlgorithm.EdDSA.equals(alg)) {
-			throw new JOSEException("Ed25519Signer requires alg=EdDSA in JWSHeader");
+		if (! JWSAlgorithm.Ed25519.equals(alg) && ! JWSAlgorithm.EdDSA.equals(alg)) {
+			throw new JOSEException("Ed25519Verifier requires alg=Ed25519 or alg=EdDSA in JWSHeader");
 		}
 
 		final byte[] jwsSignature;

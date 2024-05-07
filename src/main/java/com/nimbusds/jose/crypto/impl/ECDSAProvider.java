@@ -18,12 +18,13 @@
 package com.nimbusds.jose.crypto.impl;
 
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.Curve;
+
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
 
 
 /**
@@ -42,7 +43,7 @@ import com.nimbusds.jose.JWSAlgorithm;
  * 
  * @author Axel Nennker
  * @author Vladimir Dzhuvinov
- * @version 2022-04-21
+ * @version 2024-05-07
  */
 public abstract class ECDSAProvider extends BaseJWSProvider {
 
@@ -53,6 +54,12 @@ public abstract class ECDSAProvider extends BaseJWSProvider {
 	public static final Set<JWSAlgorithm> SUPPORTED_ALGORITHMS;
 
 
+	/**
+	 * The supported curves by the EC-DSA provider class.
+	 */
+	public static final Set<Curve> SUPPORTED_CURVES;
+
+
 	static {
 		Set<JWSAlgorithm> algs = new LinkedHashSet<>();
 		algs.add(JWSAlgorithm.ES256);
@@ -60,6 +67,13 @@ public abstract class ECDSAProvider extends BaseJWSProvider {
 		algs.add(JWSAlgorithm.ES384);
 		algs.add(JWSAlgorithm.ES512);
 		SUPPORTED_ALGORITHMS = Collections.unmodifiableSet(algs);
+
+		Set<Curve> curves = new LinkedHashSet<>();
+		curves.add(Curve.P_256);
+		curves.add(Curve.SECP256K1);
+		curves.add(Curve.P_384);
+		curves.add(Curve.P_521);
+		SUPPORTED_CURVES = Collections.unmodifiableSet(curves);
 	}
 
 

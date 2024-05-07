@@ -18,9 +18,6 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.security.GeneralSecurityException;
-import java.util.Set;
-
 import com.google.crypto.tink.subtle.Ed25519Verify;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
@@ -29,6 +26,9 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.ThreadSafe;
+
+import java.security.GeneralSecurityException;
+import java.util.Set;
 
 
 /**
@@ -45,16 +45,12 @@ import net.jcip.annotations.ThreadSafe;
  *
  * <ul>
  *     <li>{@link com.nimbusds.jose.JWSAlgorithm#EdDSA}
- * </ul>
- *
- * <p>with the following curve:
- *
- * <ul>
- *     <li>{@link com.nimbusds.jose.jwk.Curve#Ed25519}
+ *     <li>{@link com.nimbusds.jose.JWSAlgorithm#EdDSA} with
+ *         {@link com.nimbusds.jose.jwk.Curve#Ed25519}
  * </ul>
  *
  * @author Tim McLean
- * @version 2018-07-11
+ * @version 2024-05-07
  */
 @ThreadSafe
 public class Ed25519Verifier extends EdDSAProvider implements JWSVerifier, CriticalHeaderParamsAware {
@@ -84,9 +80,10 @@ public class Ed25519Verifier extends EdDSAProvider implements JWSVerifier, Criti
 
 
 	/**
-	 * Creates a Ed25519 verifier.
+	 * Creates an Ed25519 verifier.
 	 *
-	 * @param publicKey      The public Ed25519 key. Must not be {@code null}.
+	 * @param publicKey      The public Ed25519 key. Must not be
+	 *                       {@code null}.
 	 * @param defCritHeaders The names of the critical header parameters
 	 *                       that are deferred to the application for
 	 *                       processing, empty set or {@code null} if none.
@@ -145,8 +142,8 @@ public class Ed25519Verifier extends EdDSAProvider implements JWSVerifier, Criti
 
 		// Check alg field in header
 		final JWSAlgorithm alg = header.getAlgorithm();
-		if (! JWSAlgorithm.EdDSA.equals(alg)) {
-			throw new JOSEException("Ed25519Verifier requires alg=EdDSA in JWSHeader");
+		if (! JWSAlgorithm.Ed25519.equals(alg) && ! JWSAlgorithm.EdDSA.equals(alg)) {
+			throw new JOSEException("Ed25519Verifier requires alg=Ed25519 or alg=EdDSA in JWSHeader");
 		}
 
 		// Check for unrecognized "crit" properties

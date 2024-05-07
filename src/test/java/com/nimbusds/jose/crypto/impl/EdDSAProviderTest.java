@@ -19,13 +19,12 @@ package com.nimbusds.jose.crypto.impl;
 
 
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.crypto.impl.EdDSAProvider;
 import junit.framework.TestCase;
 
 
 /**
  * @author Tim McLean
- * @version 2018-07-12
+ * @version 2024-05-07
  */
 public class EdDSAProviderTest extends TestCase {
 
@@ -33,6 +32,7 @@ public class EdDSAProviderTest extends TestCase {
 	public void testSupportedAlgorithms() {
 
 		assertTrue(EdDSAProvider.SUPPORTED_ALGORITHMS.contains(JWSAlgorithm.EdDSA));
-		assertEquals(1, EdDSAProvider.SUPPORTED_ALGORITHMS.size());
+		assertTrue(EdDSAProvider.SUPPORTED_ALGORITHMS.contains(JWSAlgorithm.Ed25519));
+		assertEquals(2, EdDSAProvider.SUPPORTED_ALGORITHMS.size());
 	}
 }

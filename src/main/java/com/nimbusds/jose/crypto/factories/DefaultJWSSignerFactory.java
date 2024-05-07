@@ -18,10 +18,6 @@
 package com.nimbusds.jose.crypto.factories;
 
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
@@ -33,12 +29,16 @@ import com.nimbusds.jose.jca.JCAContext;
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.produce.JWSSignerFactory;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * A factory to create JWS signers from a JWK instance based on the
  * key type.
  *
  * @author Justin Richer
- * @since 2020-03-29
+ * @since 2024-05-07
  */
 public class DefaultJWSSignerFactory implements JWSSignerFactory {
 
@@ -85,17 +85,17 @@ public class DefaultJWSSignerFactory implements JWSSignerFactory {
 
 		JWSSigner signer;
 
-		// base this just on the key type alone without the algorithm check
+		// base this just on the key type (+ curve) alone without the algorithm check
 		if (key instanceof OctetSequenceKey) {
 			signer = new MACSigner((OctetSequenceKey)key);
 		} else if (key instanceof RSAKey) {
 			signer = new RSASSASigner((RSAKey)key);
-		} else if (key instanceof ECKey) {
+		} else if (key instanceof ECKey && ECDSASigner.SUPPORTED_CURVES.contains(((ECKey) key).getCurve())) {
 			signer = new ECDSASigner((ECKey)key);
-		} else if (key instanceof OctetKeyPair) {
+		} else if (key instanceof OctetKeyPair && Ed25519Signer.SUPPORTED_CURVES.contains(((OctetKeyPair) key).getCurve())) {
 			signer = new Ed25519Signer((OctetKeyPair)key);
 		} else {
-			throw new JOSEException("Unsupported JWK type: " + key);
+			throw new JOSEException("Unsupported JWK type and / or curve");
 		}
 
 		// Apply JCA context
@@ -119,37 +119,34 @@ public class DefaultJWSSignerFactory implements JWSSignerFactory {
 		JWSSigner signer;
 
 
-		if (MACSigner.SUPPORTED_ALGORITHMS.contains(alg)) {
-
-			if (!(key instanceof OctetSequenceKey)) {
-				throw JWKException.expectedClass(OctetSequenceKey.class);
-			}
+		if (
+			MACSigner.SUPPORTED_ALGORITHMS.contains(alg) &&
+			key instanceof OctetSequenceKey) {
 
 			signer = new MACSigner((OctetSequenceKey)key);
-		} else if (RSASSASigner.SUPPORTED_ALGORITHMS.contains(alg)) {
 
-			if (!(key instanceof RSAKey)) {
-				throw JWKException.expectedClass(RSAKey.class);
-			}
+		} else if (
+			RSASSASigner.SUPPORTED_ALGORITHMS.contains(alg) &&
+			key instanceof RSAKey) {
 
 			signer = new RSASSASigner((RSAKey)key);
-		} else if (ECDSASigner.SUPPORTED_ALGORITHMS.contains(alg)) {
 
-			if (!(key instanceof ECKey)) {
-				throw JWKException.expectedClass(ECKey.class);
-			}
+		} else if (
+			ECDSASigner.SUPPORTED_ALGORITHMS.contains(alg) &&
+			key instanceof ECKey &&
+			ECDSASigner.SUPPORTED_CURVES.contains(((ECKey) key).getCurve())) {
 
 			signer = new ECDSASigner((ECKey)key);
-		} else if (Ed25519Signer.SUPPORTED_ALGORITHMS.contains(alg)) {
 
-			if (!(key instanceof OctetKeyPair)) {
-				throw JWKException.expectedClass(OctetKeyPair.class);
-			}
+		} else if (
+			Ed25519Signer.SUPPORTED_ALGORITHMS.contains(alg) &&
+			key instanceof OctetKeyPair &&
+			Ed25519Signer.SUPPORTED_CURVES.contains(((OctetKeyPair) key).getCurve())) {
 
 			signer = new Ed25519Signer((OctetKeyPair)key);
 
 		} else {
-			throw new JOSEException("Unsupported JWS algorithm: " + alg);
+			throw new JOSEException("Unsupported JWK type, JWK curve and / or JWS algorithm");
 		}
 
 		// Apply JCA context

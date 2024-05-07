@@ -80,6 +80,8 @@ The library handles the following JOSE algorithms:
   Signing and Encryption (JOSE) (note, support for XC20P only)
 * draft-irtf-cfrg-xchacha-03 - XChaCha: eXtended-nonce ChaCha and 
   AEAD_XChaCha20_Poly1305
+* draft-ietf-jose-fully-specified-algorithms-02 - Fully-Specified Algorithms 
+  for JOSE and COSE
 
 
 ## System requirements and dependencies

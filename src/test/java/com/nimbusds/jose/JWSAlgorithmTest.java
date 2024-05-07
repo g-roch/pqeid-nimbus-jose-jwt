@@ -25,7 +25,7 @@ import junit.framework.TestCase;
  * Tests the JWS Algorithm class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2018-03-28
+ * @version 2024-05-07
  */
 public class JWSAlgorithmTest extends TestCase {
 
@@ -50,6 +50,8 @@ public class JWSAlgorithmTest extends TestCase {
 		assertEquals(JWSAlgorithm.PS512, JWSAlgorithm.parse("PS512"));
 		
 		assertEquals(JWSAlgorithm.EdDSA, JWSAlgorithm.parse("EdDSA"));
+		assertEquals(JWSAlgorithm.Ed25519, JWSAlgorithm.parse("Ed25519"));
+		assertEquals(JWSAlgorithm.Ed448, JWSAlgorithm.parse("Ed448"));
 	}
 
 
@@ -87,7 +89,9 @@ public class JWSAlgorithmTest extends TestCase {
 	public void testEDFamily() {
 		
 		assertTrue(JWSAlgorithm.Family.ED.contains(JWSAlgorithm.EdDSA));
-		assertEquals(1, JWSAlgorithm.Family.ED.size());
+		assertTrue(JWSAlgorithm.Family.ED.contains(JWSAlgorithm.Ed25519));
+		assertTrue(JWSAlgorithm.Family.ED.contains(JWSAlgorithm.Ed448));
+		assertEquals(3, JWSAlgorithm.Family.ED.size());
 	}
 	
 	
@@ -104,6 +108,8 @@ public class JWSAlgorithmTest extends TestCase {
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ES384));
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ES512));
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.EdDSA));
-		assertEquals(11, JWSAlgorithm.Family.SIGNATURE.size());
+		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.Ed25519));
+		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.Ed448));
+		assertEquals(13, JWSAlgorithm.Family.SIGNATURE.size());
 	}
 }

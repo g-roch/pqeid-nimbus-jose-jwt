@@ -18,11 +18,6 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.security.GeneralSecurityException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.jwk.Curve;
@@ -32,11 +27,17 @@ import com.nimbusds.jwt.JWTClaimNames;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  * @author Tim McLean
  * @version Vladimir Dzhuvinov
- * @version 2022-04-27
+ * @version 2024-05-07
  */
 public class Ed25519SignVerifyTest extends TestCase {
 
@@ -119,9 +120,9 @@ public class Ed25519SignVerifyTest extends TestCase {
 	public void testInvalidHeader() throws GeneralSecurityException {
 
 		Ed25519Sign.KeyPair tk = Ed25519Sign.KeyPair.newKeyPair();
-		OctetKeyPair k = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(tk.getPublicKey())).
-			d(Base64URL.encode(tk.getPrivateKey())).
-			build();
+		OctetKeyPair k = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(tk.getPublicKey()))
+			.d(Base64URL.encode(tk.getPrivateKey()))
+			.build();
 		Ed25519Signer signer;
 		Ed25519Verifier verifier;
 		try {
@@ -140,7 +141,7 @@ public class Ed25519SignVerifyTest extends TestCase {
 			fail("should fail with alg HS256");
 
 		} catch (JOSEException e) {
-			assertEquals("Ed25519Signer requires alg=EdDSA in JWSHeader", e.getMessage());
+			assertEquals("Ed25519Verifier requires alg=Ed25519 or alg=EdDSA in JWSHeader", e.getMessage());
 		}
 
 		try {
@@ -149,7 +150,7 @@ public class Ed25519SignVerifyTest extends TestCase {
 			fail("should fail with alg HS256");
 
 		} catch (JOSEException e) {
-			assertEquals("Ed25519Verifier requires alg=EdDSA in JWSHeader", e.getMessage());
+			assertEquals("Ed25519Verifier requires alg=Ed25519 or alg=EdDSA in JWSHeader", e.getMessage());
 		}
 
 		JWSHeader h2 = new JWSHeader.Builder(JWSAlgorithm.ES256).
@@ -160,7 +161,7 @@ public class Ed25519SignVerifyTest extends TestCase {
 			fail("should fail with alg ES256");
 
 		} catch (JOSEException e) {
-			assertEquals("Ed25519Signer requires alg=EdDSA in JWSHeader", e.getMessage());
+			assertEquals("Ed25519Verifier requires alg=Ed25519 or alg=EdDSA in JWSHeader", e.getMessage());
 		}
 
 		try {
@@ -169,7 +170,7 @@ public class Ed25519SignVerifyTest extends TestCase {
 			fail("should fail with alg ES256");
 
 		} catch (JOSEException e) {
-			assertEquals("Ed25519Verifier requires alg=EdDSA in JWSHeader", e.getMessage());
+			assertEquals("Ed25519Verifier requires alg=Ed25519 or alg=EdDSA in JWSHeader", e.getMessage());
 		}
 	}
 
@@ -178,60 +179,64 @@ public class Ed25519SignVerifyTest extends TestCase {
 		final int keyCount = 4;
 		final int messageCount = 4; // must be <= 256
 
-		JWSHeader h = new JWSHeader.Builder(JWSAlgorithm.EdDSA).
-			build();
-		byte[] m = new byte[] {
-			 1,  2,  3,  4,  5,  6,  7,  8,
-			 9, 10, 11, 12, 13, 14, 15, 16,
-			17, 18, 19, 20, 21, 22, 23, 24,
-			25, 26, 27, 28, 29, 30, 31, 32,
-			33, 34, 35, 36, 37, 38, 39, 40,
-			41, 42, 43, 44, 45, 46, 47, 48,
-			49, 50, 51, 52, 53, 54, 55, 56,
-			57, 58, 59, 60, 61, 62, 63, 64,
-			65, 66, 67, 68, 69, 70, 71, 72,
-		};
+		for (JWSAlgorithm alg: Arrays.asList(JWSAlgorithm.EdDSA, JWSAlgorithm.Ed25519)) {
 
-		Set<Base64URL> sigSet = new HashSet<>();
+			JWSHeader h = new JWSHeader.Builder(alg)
+				.build();
 
-		for (int i=0; i<keyCount; i++) {
+			byte[] m = new byte[]{
+				1, 2, 3, 4, 5, 6, 7, 8,
+				9, 10, 11, 12, 13, 14, 15, 16,
+				17, 18, 19, 20, 21, 22, 23, 24,
+				25, 26, 27, 28, 29, 30, 31, 32,
+				33, 34, 35, 36, 37, 38, 39, 40,
+				41, 42, 43, 44, 45, 46, 47, 48,
+				49, 50, 51, 52, 53, 54, 55, 56,
+				57, 58, 59, 60, 61, 62, 63, 64,
+				65, 66, 67, 68, 69, 70, 71, 72,
+			};
 
-			Ed25519Sign.KeyPair tk = Ed25519Sign.KeyPair.newKeyPair();
-			OctetKeyPair k = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(tk.getPublicKey())).
-				d(Base64URL.encode(tk.getPrivateKey())).
-				build();
-			Ed25519Signer signer = new Ed25519Signer(k);
-			Ed25519Verifier verifier = new Ed25519Verifier(k.toPublicJWK());
+			Set<Base64URL> sigSet = new HashSet<>();
 
-			for (int i2=0; i2<messageCount; i2++) {
+			for (int i = 0; i < keyCount; i++) {
 
-				// Make message unique
-				m[5] = (byte) i2;
+				Ed25519Sign.KeyPair tk = Ed25519Sign.KeyPair.newKeyPair();
+				OctetKeyPair k = new OctetKeyPair.Builder(Curve.Ed25519, Base64URL.encode(tk.getPublicKey()))
+					.d(Base64URL.encode(tk.getPrivateKey()))
+					.build();
+				Ed25519Signer signer = new Ed25519Signer(k);
+				Ed25519Verifier verifier = new Ed25519Verifier(k.toPublicJWK());
 
-				// Sign message then verify signature
-				Base64URL s = signer.sign(h, m);
-				assertTrue(verifier.verify(h, m, s));
+				for (int i2 = 0; i2 < messageCount; i2++) {
 
-				// Signature should not be same as any previous
-				// If this fails, indicates a problem with key gen or signing
-				assertFalse("Same signature generated twice!", sigSet.contains(s));
-				sigSet.add(s);
+					// Make message unique
+					m[5] = (byte) i2;
 
-				byte[] sigBytes = s.decode();
-				assertEquals(sigBytes.length, 64);
+					// Sign message then verify signature
+					Base64URL s = signer.sign(h, m);
+					assertTrue(verifier.verify(h, m, s));
 
-				// Try flipping each bit in the sig, should cause verification to fail
-				for (int sigBitIdx=0; sigBitIdx<64*8; sigBitIdx++) {
+					// Signature should not be same as any previous
+					// If this fails, indicates a problem with key gen or signing
+					assertFalse("Same signature generated twice!", sigSet.contains(s));
+					sigSet.add(s);
 
-					byte mask = (byte) (1 << (sigBitIdx % 8));
-					byte[] sigBytesModified = new byte[64];
-					System.arraycopy(sigBytes, 0, sigBytesModified, 0, 64);
-					sigBytesModified[sigBitIdx/8] ^= mask;
+					byte[] sigBytes = s.decode();
+					assertEquals(sigBytes.length, 64);
 
-					assertFalse(
-						"bit flip in signature should have caused verify fail",
-						verifier.verify(h, m, Base64URL.encode(sigBytesModified))
-					);
+					// Try flipping each bit in the sig, should cause verification to fail
+					for (int sigBitIdx = 0; sigBitIdx < 64 * 8; sigBitIdx++) {
+
+						byte mask = (byte) (1 << (sigBitIdx % 8));
+						byte[] sigBytesModified = new byte[64];
+						System.arraycopy(sigBytes, 0, sigBytesModified, 0, 64);
+						sigBytesModified[sigBitIdx / 8] ^= mask;
+
+						assertFalse(
+							"bit flip in signature should have caused verify fail",
+							verifier.verify(h, m, Base64URL.encode(sigBytesModified))
+						);
+					}
 				}
 			}
 		}

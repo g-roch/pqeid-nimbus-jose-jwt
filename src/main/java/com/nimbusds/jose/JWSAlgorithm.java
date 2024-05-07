@@ -44,13 +44,15 @@ import net.jcip.annotations.Immutable;
  *     <li>{@link #PS384}
  *     <li>{@link #PS512}
  *     <li>{@link #EdDSA}
+ *     <li>{@link #Ed25519}
+ *     <li>{@link #Ed448}
  * </ul>
  *
  * <p>Additional JWS algorithm names can be defined using the constructors.
  *
  * @author Vladimir Dzhuvinov
  * @author Aleksei Doroganov
- * @version 2018-03-28
+ * @version 2024-05-07
  */
 @Immutable
 public final class JWSAlgorithm extends Algorithm {
@@ -149,6 +151,18 @@ public final class JWSAlgorithm extends Algorithm {
 
 
 	/**
+	 * EdDSA signature algorithms using Ed25519 curve (optional).
+	 */
+	public static final JWSAlgorithm Ed25519 = new JWSAlgorithm("Ed25519", Requirement.OPTIONAL);
+
+
+	/**
+	 * EdDSA signature algorithms using Ed448 curve (optional).
+	 */
+	public static final JWSAlgorithm Ed448 = new JWSAlgorithm("Ed448", Requirement.OPTIONAL);
+
+
+	/**
 	 * JWS algorithm family.
 	 */
 	public static final class Family extends AlgorithmFamily<JWSAlgorithm> {
@@ -179,7 +193,7 @@ public final class JWSAlgorithm extends Algorithm {
 		/**
 		 * Edwards Curve signature (EdDSA).
 		 */
-		public static final Family ED = new Family(EdDSA);
+		public static final Family ED = new Family(EdDSA, Ed25519, Ed448);
 		
 		
 		/**
@@ -268,6 +282,10 @@ public final class JWSAlgorithm extends Algorithm {
 			return PS512;
 		} else if (s.equals(EdDSA.getName())) {
 			return EdDSA;
+		} else if (s.equals(Ed25519.getName())) {
+			return Ed25519;
+		} else if (s.equals(Ed448.getName())) {
+			return Ed448;
 		} else {
 			return new JWSAlgorithm(s);
 		}

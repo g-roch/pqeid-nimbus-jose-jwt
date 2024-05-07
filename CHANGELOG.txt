@@ -1640,3 +1640,7 @@ version 9.38-rc4 (2024-04-28)
       use of exception message strings.
     * Updates to com.google.crypto.tink:tink:1.13.0
     * Updates to BouncyCastle 1.78 (JDK 1.8 on)
+
+version 9.38-rc5 (2024-05-07)
+    * Adds support for the Ed25519 and Ed448 JWS algorithm identifiers
+      (draft-ietf-jose-fully-specified-algorithms-02).
