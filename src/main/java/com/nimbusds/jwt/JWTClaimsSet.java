@@ -337,7 +337,7 @@ public final class JWTClaimsSet implements Serializable {
 	/**
 	 * Gets the registered JWT claim names.
 	 *
-	 * @return The registered claim names, as a unmodifiable set.
+	 * @return The registered claim names, as an unmodifiable set.
 	 */
 	public static Set<String> getRegisteredNames() {
 
@@ -844,8 +844,8 @@ public final class JWTClaimsSet implements Serializable {
 	 * claims are serialised according to their insertion order.
 	 *
 	 * @param includeClaimsWithNullValues If {@code true} claims with
-	 *                                    {@code null} values will also be
-	 *                                    output.
+	 *                                    {@code null} values will be
+	 *                                    output, else ignored.
 	 *
 	 * @return The JSON object representation.
 	 */
