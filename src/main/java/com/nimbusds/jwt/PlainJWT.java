@@ -18,29 +18,29 @@
 package com.nimbusds.jwt;
 
 
-import java.text.ParseException;
-import java.util.Map;
-
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.JOSEObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.PlainHeader;
 import com.nimbusds.jose.PlainObject;
 import com.nimbusds.jose.util.Base64URL;
+import net.jcip.annotations.ThreadSafe;
+
+import java.text.ParseException;
+import java.util.Map;
 
 
 /**
  * Unsecured (plain) JSON Web Token (JWT).
  *
  * @author Vladimir Dzhuvinov
- * @version 2021-02-22
+ * @version 2024-05-08
  */
 @ThreadSafe
 public class PlainJWT extends PlainObject implements JWT {
 
 
 	private static final long serialVersionUID = 1L;
+
 
 	/**
 	 * The JWT claims set.
@@ -57,7 +57,7 @@ public class PlainJWT extends PlainObject implements JWT {
 	 */
 	public PlainJWT(final JWTClaimsSet claimsSet) {
 
-		super(claimsSet.toPayload());
+		super(claimsSet.toPayload(true));
 		this.claimsSet = claimsSet;
 	}
 
@@ -71,7 +71,7 @@ public class PlainJWT extends PlainObject implements JWT {
 	 */
 	public PlainJWT(final PlainHeader header, final JWTClaimsSet claimsSet) {
 
-		super(header, claimsSet.toPayload());
+		super(header, claimsSet.toPayload(true));
 		this.claimsSet = claimsSet;
 	}
 
@@ -99,18 +99,15 @@ public class PlainJWT extends PlainObject implements JWT {
 		throws ParseException {
 
 		if (claimsSet != null) {
-
 			return claimsSet;
 		}
 
-		Map<String, Object> json = getPayload().toJSONObject();
-
-		if (json == null) {
-			
+		Map<String, Object> jsonObject = getPayload().toJSONObject();
+		if (jsonObject == null) {
 			throw new ParseException("Payload of unsecured JOSE object is not a valid JSON object", 0);
 		}
 
-		claimsSet = JWTClaimsSet.parse(json);
+		claimsSet = JWTClaimsSet.parse(jsonObject);
 		return claimsSet;
 	}
 

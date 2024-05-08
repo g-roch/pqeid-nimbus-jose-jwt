@@ -18,22 +18,22 @@
 package com.nimbusds.jwt;
 
 
-import com.nimbusds.jose.Payload;
-import java.util.Date;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.PlainHeader;
 import com.nimbusds.jose.util.Base64URL;
+import junit.framework.TestCase;
+
+import java.util.Date;
+import java.util.Map;
 
 
 /**
  * Tests plain JWT object. Uses test vectors from JWT spec.
  *
  * @author Vladimir Dzhuvinov
- * @version 2017-07-11
+ * @version 2024-05-08
  */
 public class PlainJWTTest extends TestCase {
 
@@ -46,21 +46,70 @@ public class PlainJWTTest extends TestCase {
 			.issuer("http://c2id.com")
 			.audience("http://app.example.com")
 			.build();
-
-		JWTClaimsSet readOnlyClaimsSet = claimsSet;
 		
-		PlainJWT jwt = new PlainJWT(readOnlyClaimsSet);
+		PlainJWT jwt = new PlainJWT(claimsSet);
+
+		assertEquals(Algorithm.NONE, jwt.getHeader().getAlgorithm());
+		assertEquals(1, jwt.getHeader().toJSONObject().size());
 
 		assertEquals("alice", jwt.getJWTClaimsSet().getSubject());
 		assertEquals("http://c2id.com", jwt.getJWTClaimsSet().getIssuer());
 		assertEquals("http://app.example.com", jwt.getJWTClaimsSet().getAudience().get(0));
+		assertEquals(3, jwt.getJWTClaimsSet().getClaims().size());
+
+		String jwtString = jwt.serialize();
+
+		jwt = PlainJWT.parse(jwtString);
+
+		assertEquals(Algorithm.NONE, jwt.getHeader().getAlgorithm());
+		assertEquals(1, jwt.getHeader().toJSONObject().size());
+
+		assertEquals("alice", jwt.getJWTClaimsSet().getSubject());
+		assertEquals("http://c2id.com", jwt.getJWTClaimsSet().getIssuer());
+		assertEquals("http://app.example.com", jwt.getJWTClaimsSet().getAudience().get(0));
+		assertEquals(3, jwt.getJWTClaimsSet().getClaims().size());
+	}
+
+
+	public void testClaimsSetConstructor_nullClaims()
+		throws Exception {
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.subject("alice")
+			.issuer(null)
+			.claim("xxx", null)
+			.build();
+
+		PlainJWT jwt = new PlainJWT(claimsSet);
+
+		Map<String, Object> jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+		assertEquals("alice", jsonObject.get("sub"));
+		assertTrue(jsonObject.containsKey("iss"));
+		assertNull(jsonObject.get("iss"));
+		assertTrue(jsonObject.containsKey("xxx"));
+		assertNull(jsonObject.get("xxx"));
+		assertEquals(3, jsonObject.size());
+
+		String jwtString = jwt.serialize();
+
+		jwt = PlainJWT.parse(jwtString);
+
+		jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+		assertEquals("alice", jsonObject.get("sub"));
+		assertTrue(jsonObject.containsKey("iss"));
+		assertNull(jsonObject.get("iss"));
+		assertTrue(jsonObject.containsKey("xxx"));
+		assertNull(jsonObject.get("xxx"));
+		assertEquals(3, jsonObject.size());
 	}
 
 
 	public void testHeaderAndClaimsSetConstructor()
 		throws Exception {
 
-		PlainHeader header = new PlainHeader.Builder().customParam(JWTClaimNames.EXPIRATION_TIME, 1000L).build();
+		PlainHeader header = new PlainHeader.Builder()
+			.customParam(JWTClaimNames.EXPIRATION_TIME, 1000L)
+			.build();
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.subject("alice")
@@ -68,15 +117,14 @@ public class PlainJWTTest extends TestCase {
 			.audience("http://app.example.com")
 			.build();
 
-		JWTClaimsSet readOnlyClaimsSet = claimsSet;
-
-		PlainJWT jwt = new PlainJWT(header, readOnlyClaimsSet);
+		PlainJWT jwt = new PlainJWT(header, claimsSet);
 
 		assertEquals(header, jwt.getHeader());
 
 		assertEquals("alice", jwt.getJWTClaimsSet().getSubject());
 		assertEquals("http://c2id.com", jwt.getJWTClaimsSet().getIssuer());
 		assertEquals("http://app.example.com", jwt.getJWTClaimsSet().getAudience().get(0));
+		assertEquals(3, jwt.getJWTClaimsSet().getClaims().size());
 	}
 
 
@@ -107,11 +155,12 @@ public class PlainJWTTest extends TestCase {
 	public void testParse()
 		throws Exception {
 
-		String s = "eyJhbGciOiJub25lIn0" +
-				"." +
-				"eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt" +
-				"cGxlLmNvbS9pc19yb290Ijp0cnVlfQ" +
-				".";
+		String s = 
+			"eyJhbGciOiJub25lIn0" +
+			"." +
+			"eyJpc3MiOiJqb2UiLA0KICJleHAiOjEzMDA4MTkzODAsDQogImh0dHA6Ly9leGFt" +
+			"cGxlLmNvbS9pc19yb290Ijp0cnVlfQ" +
+			".";
 
 		PlainJWT jwt = PlainJWT.parse(s);
 
@@ -130,18 +179,19 @@ public class PlainJWTTest extends TestCase {
 	public void testExampleKristina()
 		throws Exception {
 
-		String jwtString = "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0=\n" +
-			".eyJleHAiOjM3NzQ4NjQwNSwiYXpwIjoiRFAwMWd5M1Frd1ZHR2RJZWpJSmdMWEN0UlRnYSIsInN1\n" +
-			"YiI6ImFkbWluQGNhcmJvbi5zdXBlciIsImF1ZCI6IkRQMDFneTNRa3dWR0dkSWVqSUpnTFhDdFJU\n" +
-			"Z2EiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMmVuZHBvaW50c1wvdG9r\n" +
-			"ZW4iLCJpYXQiOjM3Mzg4NjQwNX0=\n" +
+		String jwtString = 
+			"eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0=" +
+			".eyJleHAiOjM3NzQ4NjQwNSwiYXpwIjoiRFAwMWd5M1Frd1ZHR2RJZWpJSmdMWEN0UlRnYSIsInN1" +
+			"YiI6ImFkbWluQGNhcmJvbi5zdXBlciIsImF1ZCI6IkRQMDFneTNRa3dWR0dkSWVqSUpnTFhDdFJU" +
+			"Z2EiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMmVuZHBvaW50c1wvdG9r" +
+			"ZW4iLCJpYXQiOjM3Mzg4NjQwNX0=" +
 			".";
 
 		PlainJWT plainJWT = PlainJWT.parse(jwtString);
 
 		// Header
 		assertEquals(Algorithm.NONE, plainJWT.getHeader().getAlgorithm());
-		assertEquals(new JOSEObjectType("JWT"), plainJWT.getHeader().getType());
+		assertEquals(JOSEObjectType.JWT, plainJWT.getHeader().getType());
 
 		// Claims
 		assertEquals(new Date(377486405L * 1000), plainJWT.getJWTClaimsSet().getExpirationTime());
@@ -150,6 +200,7 @@ public class PlainJWTTest extends TestCase {
 		assertEquals("DP01gy3QkwVGGdIejIJgLXCtRTga", plainJWT.getJWTClaimsSet().getAudience().get(0));
 		assertEquals("https://localhost:9443/oauth2endpoints/token", plainJWT.getJWTClaimsSet().getIssuer());
 		assertEquals(new Date(373886405L * 1000), plainJWT.getJWTClaimsSet().getIssueTime());
+		assertEquals(6, plainJWT.getJWTClaimsSet().getClaims().size());
 	}
 	
 	
@@ -160,6 +211,7 @@ public class PlainJWTTest extends TestCase {
 		String jwtString = " " + jwt.serialize() + " ";
 		PlainJWT.parse(jwtString);
 	}
+
 
 	public void testPayloadUpdated()
 		throws Exception {

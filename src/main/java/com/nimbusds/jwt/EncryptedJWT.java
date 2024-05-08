@@ -58,7 +58,7 @@ public class EncryptedJWT extends JWEObject implements JWT {
 	 */
 	public EncryptedJWT(final JWEHeader header, final JWTClaimsSet claimsSet) {
 
-		super(header, claimsSet.toPayload());
+		super(header, claimsSet.toPayload(true));
 		this.claimsSet = claimsSet;
 	}
 

@@ -1650,3 +1650,5 @@ version 9.38-rc6 (2024-05-08)
       NoRefreshJWKSetCacheEvaluator singleton classes.
     * Adds Payload.toPayload(boolean) with argument controlling the inclusion
       of claims with null values.
+    * SignedJWT, EncryptedJWT and PlainJWT must serialise JWTClaimsSet claims
+      with null values (iss #519).
