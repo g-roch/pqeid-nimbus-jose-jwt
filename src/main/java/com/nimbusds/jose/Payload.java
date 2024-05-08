@@ -48,8 +48,6 @@ import java.util.Objects;
  *                        &lt;=&gt; SignedJWT
  * </pre>
  *
- * <p>The {@link }
- *
  * @author Vladimir Dzhuvinov
  * @version 2024-04-20
  */
