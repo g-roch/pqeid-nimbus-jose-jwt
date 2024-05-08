@@ -8,14 +8,9 @@ import com.nimbusds.jose.jwk.JWKSet;
  *
  * @author Thomas Rørvik Skjølberg
  * @author Vladimir Dzhuvinov
- * @version 2022-11-23
+ * @version 2024-05-08
  */
 public abstract class JWKSetCacheRefreshEvaluator {
-	
-	
-	private static final ForceRefreshJWKSetCacheEvaluator FORCE_REFRESH = new ForceRefreshJWKSetCacheEvaluator();
-	
-	private static final NoRefreshJWKSetCacheEvaluator NO_REFRESH = new NoRefreshJWKSetCacheEvaluator();
 	
 	
 	/**
@@ -24,7 +19,7 @@ public abstract class JWKSetCacheRefreshEvaluator {
 	 * @return The force-refresh evaluator.
 	 */
 	public static JWKSetCacheRefreshEvaluator forceRefresh() {
-		return FORCE_REFRESH;
+		return ForceRefreshJWKSetCacheEvaluator.getInstance();
 	}
 	
 	
@@ -34,7 +29,7 @@ public abstract class JWKSetCacheRefreshEvaluator {
 	 * @return The no-refresh evaluator.
 	 */
 	public static JWKSetCacheRefreshEvaluator noRefresh() {
-		return NO_REFRESH;
+		return NoRefreshJWKSetCacheEvaluator.getInstance();
 	}
 	
 	

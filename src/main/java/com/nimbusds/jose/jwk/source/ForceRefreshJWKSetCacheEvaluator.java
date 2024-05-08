@@ -26,9 +26,25 @@ import com.nimbusds.jose.jwk.JWKSet;
  *
  * @author Thomas Rørvik Skjølberg
  * @author Vladimir Dzhuvinov
- * @version 2022-11-23
+ * @version 2024-05-08
  */
 class ForceRefreshJWKSetCacheEvaluator extends JWKSetCacheRefreshEvaluator {
+
+
+	private static final ForceRefreshJWKSetCacheEvaluator INSTANCE = new ForceRefreshJWKSetCacheEvaluator();
+
+
+	/**
+	 * Returns an instance of this class.
+	 *
+	 * @return The instance.
+	 */
+	public static ForceRefreshJWKSetCacheEvaluator getInstance() {
+		return INSTANCE;
+	}
+
+
+	private ForceRefreshJWKSetCacheEvaluator() {}
 	
 	
 	@Override
@@ -38,7 +54,7 @@ class ForceRefreshJWKSetCacheEvaluator extends JWKSetCacheRefreshEvaluator {
 	
 	
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		return obj instanceof ForceRefreshJWKSetCacheEvaluator;
 	}
 	

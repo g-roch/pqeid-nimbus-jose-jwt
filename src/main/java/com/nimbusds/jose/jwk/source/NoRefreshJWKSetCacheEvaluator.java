@@ -26,19 +26,35 @@ import com.nimbusds.jose.jwk.JWKSet;
  *
  * @author Thomas Rørvik Skjølberg
  * @author Vladimir Dzhuvinov
- * @version 2022-11-23
+ * @version 2024-05-08
  */
 class NoRefreshJWKSetCacheEvaluator extends JWKSetCacheRefreshEvaluator {
+
+
+	private static final NoRefreshJWKSetCacheEvaluator INSTANCE = new NoRefreshJWKSetCacheEvaluator();
+
+
+	/**
+	 * Returns an instance of this class.
+	 *
+	 * @return The instance.
+	 */
+	public static NoRefreshJWKSetCacheEvaluator getInstance() {
+		return INSTANCE;
+	}
+
+
+	private NoRefreshJWKSetCacheEvaluator() {}
 	
 	
 	@Override
-	public boolean requiresRefresh(JWKSet jwkSet) {
+	public boolean requiresRefresh(final JWKSet jwkSet) {
 		return false;
 	}
 	
 	
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		return obj instanceof NoRefreshJWKSetCacheEvaluator;
 	}
 	
