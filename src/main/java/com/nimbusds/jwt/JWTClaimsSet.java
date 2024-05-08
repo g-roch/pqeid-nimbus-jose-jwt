@@ -73,7 +73,7 @@ import com.nimbusds.jwt.util.DateUtils;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
- * @version 2023-10-16
+ * @version 2024-04-08
  */
 @Immutable
 public final class JWTClaimsSet implements Serializable {
@@ -816,13 +816,31 @@ public final class JWTClaimsSet implements Serializable {
 	
 	
 	/**
-	 * Returns a JOSE object payload representation of this claims set.
+	 * Returns a JOSE object payload representation of this claims set. The
+	 * claims are serialised according to their insertion order. Claims
+	 * with {@code null} values are not output.
 	 *
 	 * @return The payload representation.
 	 */
 	public Payload toPayload() {
 		
 		return new Payload(toJSONObject());
+	}
+
+
+	/**
+	 * Returns a JOSE object payload representation of this claims set. The
+	 * claims are serialised according to their insertion order.
+	 *
+	 * @param includeClaimsWithNullValues If {@code true} claims with
+	 *                                    {@code null} values will be
+	 *                                    output, else ignored.
+	 *
+	 * @return The payload representation.
+	 */
+	public Payload toPayload(final boolean includeClaimsWithNullValues) {
+
+		return new Payload(toJSONObject(includeClaimsWithNullValues));
 	}
 
 

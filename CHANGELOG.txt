@@ -1648,3 +1648,5 @@ version 9.38-rc5 (2024-05-07)
 version 9.38-rc6 (2024-05-08)
     * Makes ForceRefreshJWKSetCacheEvaluator and NoRefreshJWKSetCacheEvaluator
       singleton classes.
+    * Adds Payload.toPayload(boolean) with argument controlling the inclusion
+      of claims with null values.

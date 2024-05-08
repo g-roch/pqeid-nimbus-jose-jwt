@@ -20,7 +20,6 @@ package com.nimbusds.jwt;
 
 import com.nimbusds.jose.HeaderParameterNames;
 import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jose.util.JSONArrayUtils;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.util.DateUtils;
 import junit.framework.TestCase;
@@ -163,9 +162,13 @@ public class JWTClaimsSetTest extends TestCase {
 		
 		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
 			.subject("alice")
+			.claim("xxx", null)
 			.build();
 		
 		assertEquals(jwtClaimsSet.toJSONObject(), jwtClaimsSet.toPayload().toJSONObject());
+
+		assertEquals(jwtClaimsSet.toJSONObject(false), jwtClaimsSet.toPayload(false).toJSONObject());
+		assertEquals(jwtClaimsSet.toJSONObject(true), jwtClaimsSet.toPayload(true).toJSONObject());
 	}
 
 
