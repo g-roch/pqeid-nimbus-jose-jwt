@@ -1652,3 +1652,6 @@ version 9.38-rc6 (2024-05-08)
       of claims with null values.
     * SignedJWT, EncryptedJWT and PlainJWT must serialise JWTClaimsSet claims
       with null values (iss #519).
+    * JWEObject.decrypt must reject cipher texts of compressed plain text that
+      are too large to conserve resources. A limit of 100K cipher text
+      characters is enforced (iss #545).
