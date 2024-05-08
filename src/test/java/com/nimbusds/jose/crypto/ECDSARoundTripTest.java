@@ -47,7 +47,7 @@ import com.nimbusds.jwt.SignedJWT;
  * verification.
  *
  * @author Vladimir Dzhuvinov
- * @version 2023-04-20
+ * @version 2024-05-08
  */
 public class ECDSARoundTripTest extends TestCase {
 
@@ -197,6 +197,10 @@ public class ECDSARoundTripTest extends TestCase {
 
 	public void testES256K()
 		throws Exception {
+
+		if ("fips".equals(System.getProperty("test.profile"))) {
+			return; // test case build for BC, which conflicts with BC-FIPS
+		}
 
 		// Create the public and private keys
 		KeyPair keyPair = createECKeyPair(EC256KSPEC, BouncyCastleProviderSingleton.getInstance());
@@ -453,6 +457,10 @@ public class ECDSARoundTripTest extends TestCase {
 	
 	public void testES256KWithGen()
 		throws Exception {
+
+		if ("fips".equals(System.getProperty("test.profile"))) {
+			return; // test case build for BC, which conflicts with BC-FIPS
+		}
 		
 		// Generate EC key pair on the secp256k1 curve
 		ECKey ecJWK = new ECKeyGenerator(Curve.SECP256K1)

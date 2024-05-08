@@ -42,13 +42,17 @@ import com.nimbusds.jose.util.StandardCharset;
 
 /**
  * @author Vladimir Dzhuvinov
- * @version 2023-01-29
+ * @version 2024-05-08
  */
 public class ECDSATranscodingTest extends TestCase {
 	
 	// https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/399/
 	public void testRejectIllegalSignatureSizesBeforeTranscodeToDER_oneByteOff()
 		throws JOSEException, ParseException {
+
+		if ("fips".equals(System.getProperty("test.profile"))) {
+			return; // test case build for BC, which conflicts with BC-FIPS
+		}
 		
 		for (JWSAlgorithm alg: JWSAlgorithm.Family.EC) {
 			

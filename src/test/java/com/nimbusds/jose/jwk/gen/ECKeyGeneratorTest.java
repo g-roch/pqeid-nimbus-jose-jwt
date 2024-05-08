@@ -18,18 +18,17 @@
 package com.nimbusds.jose.jwk.gen;
 
 
-import java.security.SecureRandom;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.util.DateUtils;
+import junit.framework.TestCase;
+
+import java.security.SecureRandom;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class ECKeyGeneratorTest extends TestCase {
@@ -64,6 +63,10 @@ public class ECKeyGeneratorTest extends TestCase {
 	
 	public void testWithBouncyCastleProvider()
 		throws JOSEException  {
+
+		if ("fips".equals(System.getProperty("test.profile"))) {
+			return; // test case build for BC, which conflicts with BC-FIPS
+		}
 		
 		for (Curve curve: Arrays.asList(Curve.P_256, Curve.P_384, Curve.P_521, Curve.SECP256K1)) {
 			

@@ -47,7 +47,7 @@ import com.nimbusds.jose.util.StandardCharset;
 /**
  * Tests the static ECDSA utilities.
  *
- * @version 2023-01-29
+ * @version 2024-05-08
  */
 public class ECDSATest extends TestCase {
 
@@ -83,6 +83,10 @@ public class ECDSATest extends TestCase {
 
 	public void testResolveAlgFromECKey_P256K()
 		throws Exception {
+
+		if ("fips".equals(System.getProperty("test.profile"))) {
+			return; // test case build for BC, which conflicts with BC-FIPS
+		}
 
 		KeyPair keyPair = ECDSARoundTripTest.createECKeyPair(ECDSARoundTripTest.EC256KSPEC, BouncyCastleProviderSingleton.getInstance());
 		ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
