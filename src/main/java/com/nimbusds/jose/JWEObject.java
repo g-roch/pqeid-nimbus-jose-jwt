@@ -35,13 +35,19 @@ import java.util.Objects;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2024-04-20
+ * @version 2025-05-08
  */
 @ThreadSafe
 public class JWEObject extends JOSEObject {
 
 
 	private static final long serialVersionUID = 1L;
+
+
+	/**
+	 * The maximum allowed character length of compressed cipher text.
+	 */
+	public static final int MAX_COMPRESSED_CIPHER_TEXT_LENGTH = 100_000;
 	
 	
 	/**
@@ -391,6 +397,16 @@ public class JWEObject extends JOSEObject {
 		throws JOSEException {
 
 		ensureEncryptedState();
+
+		if (getHeader().getCompressionAlgorithm() != null &&
+		    getCipherText().toString().length() > MAX_COMPRESSED_CIPHER_TEXT_LENGTH) {
+
+			throw new JOSEException(
+				"The JWE compressed cipher text exceeds the " +
+				"maximum allowed length of " +
+				MAX_COMPRESSED_CIPHER_TEXT_LENGTH +
+				" characters");
+		}
 
 		try {
 			setPayload(new Payload(decrypter.decrypt(getHeader(), 

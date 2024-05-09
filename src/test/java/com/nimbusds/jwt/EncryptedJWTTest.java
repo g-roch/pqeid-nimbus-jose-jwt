@@ -18,40 +18,35 @@
 package com.nimbusds.jwt;
 
 
-import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.DirectDecrypter;
+import com.nimbusds.jose.crypto.DirectEncrypter;
+import com.nimbusds.jose.crypto.RSADecrypter;
+import com.nimbusds.jose.crypto.RSAEncrypter;
+import com.nimbusds.jwt.util.DateUtils;
+import junit.framework.TestCase;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
-import com.nimbusds.jose.crypto.*;
-import junit.framework.TestCase;
-
-import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import java.util.*;
 
 
 /**
  * Tests an encrypted JWT object. Uses test RSA keys from the JWE spec.
  *
  * @author Vladimir Dzhuvinov
- * @version 2017-07-11
+ * @version 2024-05-08
  */
 public class EncryptedJWTTest extends TestCase {
 
 
-	private final static byte[] mod = { 
+	private final static byte[] MOD = {
 		(byte)177, (byte)119, (byte) 33, (byte) 13, (byte)164, (byte) 30, (byte)108, (byte)121, 
 		(byte)207, (byte)136, (byte)107, (byte)242, (byte) 12, (byte)224, (byte) 19, (byte)226, 
 		(byte)198, (byte)134, (byte) 17, (byte) 71, (byte)173, (byte) 75, (byte) 42, (byte) 61, 
@@ -92,10 +87,10 @@ public class EncryptedJWTTest extends TestCase {
 		(byte) 75, (byte) 55, (byte)230, (byte)132, (byte)  3, (byte) 13, (byte)239, (byte) 71  };
 
 
-	private static final byte[] exp= { 1, 0, 1 };
+	private static final byte[] EXP = { 1, 0, 1 };
 
 
-	private static final byte[] modPriv = { 
+	private static final byte[] MOD_PRIV = {
 		(byte) 84, (byte) 80, (byte)150, (byte) 58, (byte)165, (byte)235, (byte)242, (byte)123, 
 		(byte)217, (byte) 55, (byte) 38, (byte)154, (byte) 36, (byte)181, (byte)221, (byte)156, 
 		(byte)211, (byte)215, (byte)100, (byte)164, (byte) 90, (byte) 88, (byte) 40, (byte)228, 
@@ -136,25 +131,24 @@ public class EncryptedJWTTest extends TestCase {
 		(byte) 93, (byte)139, (byte) 50, (byte)182, (byte)204, (byte) 93, (byte)130, (byte)89   };
 
 
-	private static RSAPublicKey publicKey;
+	private static RSAPublicKey PUBLIC_KEY;
 
 
-	private static RSAPrivateKey privateKey;
+	private static RSAPrivateKey PRIVATE_KEY;
 
 
 	static {
 		try {
 			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
-			RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(new BigInteger(1, mod), new BigInteger(1, exp));
-			RSAPrivateKeySpec privateKeySpec = new RSAPrivateKeySpec(new BigInteger(1, mod), new BigInteger(1, modPriv));
+			RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(new BigInteger(1, MOD), new BigInteger(1, EXP));
+			RSAPrivateKeySpec privateKeySpec = new RSAPrivateKeySpec(new BigInteger(1, MOD), new BigInteger(1, MOD_PRIV));
 
-			publicKey = (RSAPublicKey) keyFactory.generatePublic(publicKeySpec);
-			privateKey = (RSAPrivateKey) keyFactory.generatePrivate(privateKeySpec);
+			PUBLIC_KEY = (RSAPublicKey) keyFactory.generatePublic(publicKeySpec);
+			PRIVATE_KEY = (RSAPrivateKey) keyFactory.generatePrivate(privateKeySpec);
 
 		} catch (Exception e) {
-
-			fail(e.getMessage());
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -165,29 +159,27 @@ public class EncryptedJWTTest extends TestCase {
 		// Compose the JWT claims set
 		String iss = "https://openid.net";
 		String sub = "alice";
-		List<String> aud = new ArrayList<>();
-		aud.add("https://app-one.com");
-		aud.add("https://app-two.com");
-		final Date NOW =  new Date(new Date().getTime() / 1000 * 1000);
-		Date exp = new Date(NOW.getTime() + 1000*60*10);
-		Date nbf = NOW;
-		Date iat = NOW;
+		List<String> aud = Arrays.asList("https://app-one.com", "https://app-two.com");
+		final Date now = DateUtils.nowWithSecondsPrecision();
+		Date exp = new Date(now.getTime() + 1000*60*10);
+		Date nbf = now;
+		Date iat = now;
 		String jti = UUID.randomUUID().toString();
 
 
-		JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder().
-			issuer(iss).
-			subject(sub).
-			audience(aud).
-			expirationTime(exp).
-			notBeforeTime(NOW).
-			issueTime(NOW).
-			jwtID(jti).
-			build();
+		JWTClaimsSet jwtClaims = new JWTClaimsSet.Builder()
+			.issuer(iss)
+			.subject(sub)
+			.audience(aud)
+			.expirationTime(exp)
+			.notBeforeTime(now)
+			.issueTime(now)
+			.jwtID(jti)
+			.build();
 
 
 		// Request JWT encrypted with RSA-OAEP and 128-bit AES/GCM
-		JWEHeader header = new JWEHeader(JWEAlgorithm.RSA_OAEP, EncryptionMethod.A128GCM);
+		JWEHeader header = new JWEHeader(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM);
 
 
 		// Create the encrypted JWT object
@@ -195,8 +187,7 @@ public class EncryptedJWTTest extends TestCase {
 
 
 		// Create an encrypter with the specified public RSA key
-		RSAEncrypter encrypter = new RSAEncrypter(publicKey);
-		encrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+		JWEEncrypter encrypter = new RSAEncrypter(PUBLIC_KEY);
 
 		// Do the actual encryption
 		jwt.encrypt(encrypter);
@@ -210,8 +201,7 @@ public class EncryptedJWTTest extends TestCase {
 
 
 		// Create an decrypter with the specified private RSA key
-		RSADecrypter decrypter = new RSADecrypter(privateKey);
-		decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+		JWEDecrypter decrypter = new RSADecrypter(PRIVATE_KEY);
 
 		// Decrypt
 		jwt.decrypt(decrypter);
@@ -232,6 +222,42 @@ public class EncryptedJWTTest extends TestCase {
 		assertEquals(iat, jwt.getJWTClaimsSet().getIssueTime());
 
 		assertEquals(jti, jwt.getJWTClaimsSet().getJWTID());
+	}
+
+
+	public void testClaimsSetConstructor_nullClaims()
+		throws Exception {
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.subject("alice")
+			.issuer(null)
+			.claim("xxx", null)
+			.build();
+
+		EncryptedJWT jwt = new EncryptedJWT(new JWEHeader(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM), claimsSet);
+
+		Map<String, Object> jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+		assertEquals("alice", jsonObject.get("sub"));
+		assertTrue(jsonObject.containsKey("iss"));
+		assertNull(jsonObject.get("iss"));
+		assertTrue(jsonObject.containsKey("xxx"));
+		assertNull(jsonObject.get("xxx"));
+		assertEquals(3, jsonObject.size());
+
+		jwt.encrypt(new RSAEncrypter(PUBLIC_KEY));
+
+		String jwtString = jwt.serialize();
+
+		jwt = EncryptedJWT.parse(jwtString);
+		jwt.decrypt(new RSADecrypter(PRIVATE_KEY));
+
+		jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+		assertEquals("alice", jsonObject.get("sub"));
+		assertTrue(jsonObject.containsKey("iss"));
+		assertNull(jsonObject.get("iss"));
+		assertTrue(jsonObject.containsKey("xxx"));
+		assertNull(jsonObject.get("xxx"));
+		assertEquals(3, jsonObject.size());
 	}
 	
 	

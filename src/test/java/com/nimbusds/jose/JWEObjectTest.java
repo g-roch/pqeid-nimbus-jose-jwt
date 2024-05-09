@@ -18,18 +18,17 @@
 package com.nimbusds.jose;
 
 
-import java.text.ParseException;
-import java.util.Collections;
-import java.util.Set;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.crypto.DirectDecrypter;
 import com.nimbusds.jose.crypto.DirectEncrypter;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
 import com.nimbusds.jose.util.Base64URL;
+import junit.framework.TestCase;
+
+import java.text.ParseException;
+import java.util.Collections;
+import java.util.Set;
 
 
 /**
@@ -37,9 +36,15 @@ import com.nimbusds.jose.util.Base64URL;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2023-03-26
+ * @version 2024-05-08
  */
 public class JWEObjectTest extends TestCase {
+
+
+	public void testConstants() {
+
+		assertEquals(100_000, JWEObject.MAX_COMPRESSED_CIPHER_TEXT_LENGTH);
+	}
 
 
 	public void testBase64URLConstructor()
@@ -215,6 +220,38 @@ public class JWEObjectTest extends TestCase {
 					" characters",
 				e.getMessage()
 			);
+		}
+	}
+
+
+	public void testPreventCompressedCipherTextAboveLengthLimit()
+		throws Exception{
+
+		assertEquals(100_000, JWEObject.MAX_COMPRESSED_CIPHER_TEXT_LENGTH);
+
+		OctetSequenceKey aesKey = new OctetSequenceKeyGenerator(128).generate();
+
+		JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128GCM)
+			.compressionAlgorithm(CompressionAlgorithm.DEF)
+			.build();
+
+		StringBuilder veryLongString = new StringBuilder();
+		for (int i=0; i<100_000_000; i++) {
+			veryLongString.append('a');
+		}
+
+		Payload payload = new Payload(veryLongString.toString());
+
+		JWEObject jweObject = new JWEObject(header, payload);
+		jweObject.encrypt(new DirectEncrypter(aesKey));
+		String jweString = jweObject.serialize();
+
+		JWEObject parse = JWEObject.parse(jweString);
+
+		try {
+			parse.decrypt(new DirectDecrypter(aesKey));
+		} catch (JOSEException e) {
+			assertEquals("The JWE compressed cipher text exceeds the maximum allowed length of 100000 characters", e.getMessage());
 		}
 	}
 }

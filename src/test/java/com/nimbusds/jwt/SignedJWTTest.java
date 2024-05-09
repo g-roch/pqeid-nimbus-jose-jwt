@@ -18,34 +18,39 @@
 package com.nimbusds.jwt;
 
 
-import java.net.URI;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
-import java.util.Date;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64URL;
+import junit.framework.TestCase;
+
+import java.net.URI;
+import java.security.SecureRandom;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.Map;
 
 
 public class SignedJWTTest extends TestCase {
 
 
-	public void testCustomClaimsAreOrderedByInsertion() throws Exception {
-		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-		kpg.initialize(2048);
+	private static final RSAKey RSA_JWK;
 
-		KeyPair kp = kpg.genKeyPair();
-		RSAPrivateKey privateKey = (RSAPrivateKey)kp.getPrivate();
+	static {
+                try {
+                        RSA_JWK = new RSAKeyGenerator(2048).generate();
+                } catch (JOSEException e) {
+                        throw new RuntimeException(e);
+                }
+        }
+
+
+	public void testCustomClaimsAreOrderedByInsertion()
+		throws Exception {
 
 		JWTClaimsSet claimsSetOne = new JWTClaimsSet.Builder()
 			.subject("alice")
@@ -54,10 +59,10 @@ public class SignedJWTTest extends TestCase {
 			.claim("scope", "openid")
 			.build();
 
-		JWSSigner signer = new RSASSASigner(privateKey);
-		SignedJWT signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSetOne);
-		signedJWT.sign(signer);
-		String orderOne = signedJWT.serialize();
+		JWSSigner signer = new RSASSASigner(RSA_JWK.toRSAPrivateKey());
+		SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSetOne);
+		jwt.sign(signer);
+		String orderOne = jwt.serialize();
 
 		JWTClaimsSet claimsSetTwo = new JWTClaimsSet.Builder()
 			.subject("alice")
@@ -66,21 +71,15 @@ public class SignedJWTTest extends TestCase {
 			.claim("scope", "openid")
 			.build();
 
-		signedJWT = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSetTwo);
-		signedJWT.sign(signer);
-		String orderTwo = signedJWT.serialize();
+		jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSetTwo);
+		jwt.sign(signer);
+		String orderTwo = jwt.serialize();
 		assertNotSame(orderOne, orderTwo);
 	}
 
+
 	public void testSignAndVerify()
 		throws Exception {
-
-		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
-		kpg.initialize(2048);
-
-		KeyPair kp = kpg.genKeyPair();
-		RSAPublicKey publicKey = (RSAPublicKey)kp.getPublic();
-		RSAPrivateKey privateKey = (RSAPrivateKey)kp.getPrivate();
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.subject("alice")
@@ -94,36 +93,71 @@ public class SignedJWTTest extends TestCase {
 			jwkURL(new URI("https://c2id.com/jwks.json")).
 			build();
 
-		SignedJWT signedJWT = new SignedJWT(header, claimsSet);
+		SignedJWT jwt = new SignedJWT(header, claimsSet);
 
-		assertEquals(JWSObject.State.UNSIGNED, signedJWT.getState());
-		assertEquals(header, signedJWT.getHeader());
-		assertEquals("alice", signedJWT.getJWTClaimsSet().getSubject());
-		assertEquals(123000L, signedJWT.getJWTClaimsSet().getIssueTime().getTime());
-		assertEquals("https://c2id.com", signedJWT.getJWTClaimsSet().getIssuer());
-		assertEquals("openid", signedJWT.getJWTClaimsSet().getStringClaim("scope"));
-		assertNull(signedJWT.getSignature());
+		assertEquals(JWSObject.State.UNSIGNED, jwt.getState());
+		assertEquals(header, jwt.getHeader());
+		assertEquals("alice", jwt.getJWTClaimsSet().getSubject());
+		assertEquals(123000L, jwt.getJWTClaimsSet().getIssueTime().getTime());
+		assertEquals("https://c2id.com", jwt.getJWTClaimsSet().getIssuer());
+		assertEquals("openid", jwt.getJWTClaimsSet().getStringClaim("scope"));
+		assertNull(jwt.getSignature());
 
-		Base64URL sigInput = Base64URL.encode(signedJWT.getSigningInput());
+		Base64URL sigInput = Base64URL.encode(jwt.getSigningInput());
 
-		JWSSigner signer = new RSASSASigner(privateKey);
+		JWSSigner signer = new RSASSASigner(RSA_JWK.toRSAPrivateKey());
 
-		signedJWT.sign(signer);
+		jwt.sign(signer);
 
-		assertEquals(JWSObject.State.SIGNED, signedJWT.getState());
-		assertNotNull(signedJWT.getSignature());
+		assertEquals(JWSObject.State.SIGNED, jwt.getState());
+		assertNotNull(jwt.getSignature());
 
-		String serializedJWT = signedJWT.serialize();
+		String serializedJWT = jwt.serialize();
 
-		signedJWT = SignedJWT.parse(serializedJWT);
-		assertEquals(serializedJWT, signedJWT.getParsedString());
+		jwt = SignedJWT.parse(serializedJWT);
+		assertEquals(serializedJWT, jwt.getParsedString());
 
-		assertEquals(JWSObject.State.SIGNED, signedJWT.getState());
-		assertNotNull(signedJWT.getSignature());
-		assertEquals(sigInput, Base64URL.encode(signedJWT.getSigningInput()));
+		assertEquals(JWSObject.State.SIGNED, jwt.getState());
+		assertNotNull(jwt.getSignature());
+		assertEquals(sigInput, Base64URL.encode(jwt.getSigningInput()));
 
-		JWSVerifier verifier = new RSASSAVerifier(publicKey);
-		assertTrue(signedJWT.verify(verifier));
+		JWSVerifier verifier = new RSASSAVerifier(RSA_JWK.toRSAPublicKey());
+		assertTrue(jwt.verify(verifier));
+	}
+
+
+	public void testClaimsSetConstructor_nullClaims()
+		throws Exception {
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.subject("alice")
+			.issuer(null)
+			.claim("xxx", null)
+			.build();
+
+		SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
+
+		Map<String, Object> jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+		assertEquals("alice", jsonObject.get("sub"));
+		assertTrue(jsonObject.containsKey("iss"));
+		assertNull(jsonObject.get("iss"));
+		assertTrue(jsonObject.containsKey("xxx"));
+		assertNull(jsonObject.get("xxx"));
+		assertEquals(3, jsonObject.size());
+
+		jwt.sign(new RSASSASigner(RSA_JWK.toRSAPrivateKey()));
+
+		String jwtString = jwt.serialize();
+
+		jwt = SignedJWT.parse(jwtString);
+
+		jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+		assertEquals("alice", jsonObject.get("sub"));
+		assertTrue(jsonObject.containsKey("iss"));
+		assertNull(jsonObject.get("iss"));
+		assertTrue(jsonObject.containsKey("xxx"));
+		assertNull(jsonObject.get("xxx"));
+		assertEquals(3, jsonObject.size());
 	}
 	
 	

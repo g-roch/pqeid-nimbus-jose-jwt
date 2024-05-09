@@ -18,23 +18,22 @@
 package com.nimbusds.jwt;
 
 
-import java.text.ParseException;
-import java.util.Map;
-
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.JOSEObject;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.util.Base64URL;
+import net.jcip.annotations.ThreadSafe;
+
+import java.text.ParseException;
+import java.util.Map;
 
 
 /**
  * Signed JSON Web Token (JWT).
  *
  * @author Vladimir Dzhuvinov
- * @version 2021-02-22
+ * @version 2024-05-08
  */
 @ThreadSafe
 public class SignedJWT extends JWSObject implements JWT {
@@ -58,7 +57,7 @@ public class SignedJWT extends JWSObject implements JWT {
 	 */
 	public SignedJWT(final JWSHeader header, final JWTClaimsSet claimsSet) {
 
-		super(header, claimsSet.toPayload());
+		super(header, claimsSet.toPayload(true));
 		this.claimsSet = claimsSet;
 	}
 

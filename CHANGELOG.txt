@@ -1615,38 +1615,35 @@ version 9.37.3 (2023-12-08)
     * Updates to com.google.crypto.tink:tink:1.12.0
     * Updates to BouncyCastle 1.77 (JDK 1.8 on)
 
-version 9.38-rc1 (2024-01-02)
+version 9.38 (2024-05-08)
     * Creates two build profiles, a "default" profile and a "fips" profile
       depending on the BouncyCastle FIPS JCA provider and the BouncyCastle FIPS
       PKIX.
     * Adds a modular Java 9 build.
     * Makes the JCIP annotation dependency optional and shades it.
-    * Removes the LegacyAESGCM which was intended for Java 6 runtimes without a
-      JCA GCMParameterSpec (iss #529).
-    * Sets the BouncyCastle FIPS dependency to the latest 1.0.2.4.
-
-version 9.38-rc3 (2024-01-15)
-    * Exposes the DefaultJWTProcessor extractJWTClaimsSet, verifyJWTClaimsSet
-      and selectKeys as protected.
-
-version 9.38-rc4 (2024-04-28)
-    * Adds KeyRevocation class to support OpenID Federation 1.0.
-    * Adds Android "SHA{256|384|512}withRSA/PSS" JCA algorithm support (iss
-      #541).
-    * Adds JWKSet.containsNonPublicKeys helper method.
-    * The RSAKey and ECKey.Builder.privateKey methods must accept and correctly
-      apply null arguments (iss #543).
-    * Switches to Object.requireNonNull where appropriate to reduce code and
-      use of exception message strings.
-    * Updates to com.google.crypto.tink:tink:1.13.0
-    * Updates to BouncyCastle 1.78 (JDK 1.8 on)
-
-version 9.38-rc5 (2024-05-07)
     * Adds support for the Ed25519 and Ed448 JWS algorithm identifiers
       (draft-ietf-jose-fully-specified-algorithms-02).
-
-version 9.38-rc6 (2024-05-08)
-    * Makes package private ForceRefreshJWKSetCacheEvaluator and
-      NoRefreshJWKSetCacheEvaluator singleton classes.
+    * Adds KeyRevocation class to support OpenID Federation 1.0.
     * Adds Payload.toPayload(boolean) with argument controlling the inclusion
       of claims with null values.
+    * Exposes the DefaultJWTProcessor extractJWTClaimsSet, verifyJWTClaimsSet
+      and selectKeys as protected.
+    * Adds JWKSet.containsNonPublicKeys helper method.
+    * Makes package private ForceRefreshJWKSetCacheEvaluator and
+      NoRefreshJWKSetCacheEvaluator singleton classes.
+    * Switches to Object.requireNonNull where appropriate to reduce code and
+      use of exception message strings.
+    * Removes the LegacyAESGCM which was intended for Java 6 runtimes without a
+      JCA GCMParameterSpec (iss #529).
+    * Adds Android "SHA{256|384|512}withRSA/PSS" JCA algorithm support (iss
+      #541).
+    * The RSAKey and ECKey.Builder.privateKey methods must accept and correctly
+      apply null arguments (iss #543).
+    * SignedJWT, EncryptedJWT and PlainJWT must serialise JWTClaimsSet claims
+      with null values (iss #519).
+    * JWEObject.decrypt must reject cipher texts of compressed plain text that
+      are too large to conserve resources. A limit of 100K cipher text
+      characters is enforced (iss #545).
+    * Updates to BouncyCastle 1.78 (JDK 1.8 on)
+    * Updates to BouncyCastle FIPS 1.0.2.4
+    * Updates to com.google.crypto.tink:tink:1.13.0
