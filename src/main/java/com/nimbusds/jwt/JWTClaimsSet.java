@@ -987,7 +987,7 @@ public final class JWTClaimsSet implements Serializable {
 					} else if (subValue == null) {
 						builder.subject(null);
 					} else {
-						throw new ParseException("Unexpected type of " + JWTClaimNames.SUBJECT + " claim", 0);
+						throw new ParseException("Illegal " + JWTClaimNames.SUBJECT + " claim", 0);
 					}
 					break;
 				case JWTClaimNames.AUDIENCE:
@@ -1001,17 +1001,17 @@ public final class JWTClaimsSet implements Serializable {
 					} else if (audValue == null) {
 						builder.audience((String) null);
 					} else {
-						throw new ParseException("Unexpected type of " + JWTClaimNames.AUDIENCE + " claim", 0);
+						throw new ParseException("Illegal " + JWTClaimNames.AUDIENCE + " claim", 0);
 					}
 					break;
 				case JWTClaimNames.EXPIRATION_TIME:
-					builder.expirationTime(new Date(JSONObjectUtils.getLong(json, JWTClaimNames.EXPIRATION_TIME) * 1000));
+					builder.expirationTime(JSONObjectUtils.getEpochSecondAsDate(json, JWTClaimNames.EXPIRATION_TIME));
 					break;
 				case JWTClaimNames.NOT_BEFORE:
-					builder.notBeforeTime(new Date(JSONObjectUtils.getLong(json, JWTClaimNames.NOT_BEFORE) * 1000));
+					builder.notBeforeTime(JSONObjectUtils.getEpochSecondAsDate(json, JWTClaimNames.NOT_BEFORE));
 					break;
 				case JWTClaimNames.ISSUED_AT:
-					builder.issueTime(new Date(JSONObjectUtils.getLong(json, JWTClaimNames.ISSUED_AT) * 1000));
+					builder.issueTime(JSONObjectUtils.getEpochSecondAsDate(json, JWTClaimNames.ISSUED_AT));
 					break;
 				case JWTClaimNames.JWT_ID:
 					builder.jwtID(JSONObjectUtils.getString(json, JWTClaimNames.JWT_ID));

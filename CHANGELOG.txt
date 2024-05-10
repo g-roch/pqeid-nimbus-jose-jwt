@@ -1647,3 +1647,8 @@ version 9.38 (2024-05-08)
     * Updates to BouncyCastle 1.78 (JDK 1.8 on)
     * Updates to BouncyCastle FIPS 1.0.2.4
     * Updates to com.google.crypto.tink:tink:1.13.0
+
+version 9.39 (2024-05-10)
+    * Adds JSONObjectUtils.getEpochSecondAsDate static method.
+    * JWTClaimsSet.parse must handle null "nbf", "iat" and "exp" claims (iss
+      #547).

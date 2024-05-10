@@ -1038,6 +1038,15 @@ public class JWTClaimsSetTest extends TestCase {
 		assertEquals("1234", jwtClaimsSet.getClaim(JWTClaimNames.SUBJECT));
 	}
 
+	public void testParseNullIssuer() throws ParseException {
+
+		String claimsJSON = "{\"iss\": null}";
+
+		JWTClaimsSet jwtClaimsSet = JWTClaimsSet.parse(claimsJSON);
+
+		assertNull(jwtClaimsSet.getIssuer());
+	}
+
 	public void testParseNullSubject() throws ParseException {
 
 		String claimsJSON = "{\"sub\": null}";
@@ -1055,6 +1064,51 @@ public class JWTClaimsSetTest extends TestCase {
 
 		assertTrue(jwtClaimsSet.getAudience().isEmpty());
 	}
+
+	public void testParseNullExpirationTime() throws ParseException {
+
+		String claimsJSON = "{\"exp\": null}";
+
+		JWTClaimsSet jwtClaimsSet = JWTClaimsSet.parse(claimsJSON);
+
+		assertNull(jwtClaimsSet.getExpirationTime());
+	}
+
+	public void testParseNullNotBeforeTime() throws ParseException {
+
+		String claimsJSON = "{\"nbf\": null}";
+
+		JWTClaimsSet jwtClaimsSet = JWTClaimsSet.parse(claimsJSON);
+
+		assertNull(jwtClaimsSet.getNotBeforeTime());
+	}
+
+	public void testParseNullIssueTime() throws ParseException {
+
+		String claimsJSON = "{\"iat\": null}";
+
+		JWTClaimsSet jwtClaimsSet = JWTClaimsSet.parse(claimsJSON);
+
+		assertNull(jwtClaimsSet.getIssueTime());
+	}
+
+	public void testParseNullJTI() throws ParseException {
+
+		String claimsJSON = "{\"jti\": null}";
+
+		JWTClaimsSet jwtClaimsSet = JWTClaimsSet.parse(claimsJSON);
+
+		assertNull(jwtClaimsSet.getJWTID());
+	}
+
+	public void testParseNullSome() throws ParseException {
+
+		String claimsJSON = "{\"xxx\": null}";
+
+		JWTClaimsSet jwtClaimsSet = JWTClaimsSet.parse(claimsJSON);
+
+		assertNull(jwtClaimsSet.getClaim("xxx"));
+	}
 	
 	
 	public void testParseBooleanSubject() {
@@ -1065,7 +1119,7 @@ public class JWTClaimsSetTest extends TestCase {
 			JWTClaimsSet.parse(claimsJSON);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Unexpected type of sub claim", e.getMessage());
+			assertEquals("Illegal sub claim", e.getMessage());
 		}
 	}
 	
@@ -1078,7 +1132,7 @@ public class JWTClaimsSetTest extends TestCase {
 			JWTClaimsSet.parse(claimsJSON);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Unexpected type of aud claim", e.getMessage());
+			assertEquals("Illegal aud claim", e.getMessage());
 		}
 	}
 

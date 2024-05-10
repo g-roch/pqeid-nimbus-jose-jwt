@@ -22,22 +22,20 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.ToNumberPolicy;
 import com.google.gson.reflect.TypeToken;
+import com.nimbusds.jwt.util.DateUtils;
 
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
  * JSON object helper methods.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-08-19
+ * @version 2024-05-10
  */
 public class JSONObjectUtils {
 	
@@ -175,7 +173,7 @@ public class JSONObjectUtils {
 		if (! clazz.isAssignableFrom(value.getClass())) {
 			throw new ParseException("Unexpected type of JSON object member with key " + key + "", 0);
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		T castValue = (T)value;
 		return castValue;
@@ -197,11 +195,11 @@ public class JSONObjectUtils {
 		throws ParseException {
 
 		Boolean value = getGeneric(o, key, Boolean.class);
-		
+
 		if (value == null) {
 			throw new ParseException("JSON object member with key " + key + " is missing or null", 0);
 		}
-		
+
 		return value;
 	}
 
@@ -221,11 +219,11 @@ public class JSONObjectUtils {
 		throws ParseException {
 
 		Number value = getGeneric(o, key, Number.class);
-		
+
 		if (value == null) {
 			throw new ParseException("JSON object member with key " + key + " is missing or null", 0);
 		}
-		
+
 		return value.intValue();
 	}
 
@@ -245,11 +243,11 @@ public class JSONObjectUtils {
 		throws ParseException {
 
 		Number value = getGeneric(o, key, Number.class);
-		
+
 		if (value == null) {
 			throw new ParseException("JSON object member with key " + key + " is missing or null", 0);
 		}
-		
+
 		return value.longValue();
 	}
 
@@ -269,11 +267,11 @@ public class JSONObjectUtils {
 		throws ParseException {
 
 		Number value = getGeneric(o, key, Number.class);
-		
+
 		if (value == null) {
 			throw new ParseException("JSON object member with key " + key + " is missing or null", 0);
 		}
-		
+
 		return value.floatValue();
 	}
 
@@ -293,11 +291,11 @@ public class JSONObjectUtils {
 		throws ParseException {
 
 		Number value = getGeneric(o, key, Number.class);
-		
+
 		if (value == null) {
 			throw new ParseException("JSON object member with key " + key + " is missing or null", 0);
 		}
-		
+
 		return value.doubleValue();
 	}
 
@@ -333,11 +331,11 @@ public class JSONObjectUtils {
 		throws ParseException {
 
 		String value = getString(o, key);
-		
+
 		if (value == null) {
 			return null;
 		}
-		
+
 		try {
 			return new URI(value);
 
@@ -360,7 +358,7 @@ public class JSONObjectUtils {
 	 */
 	public static List<Object> getJSONArray(final Map<String, Object> o, final String key)
 		throws ParseException {
-		
+
 		@SuppressWarnings("unchecked")
 		List<Object> jsonArray = getGeneric(o, key, List.class);
 		return jsonArray;
@@ -381,7 +379,7 @@ public class JSONObjectUtils {
 		throws ParseException {
 
 		List<Object> jsonArray = getJSONArray(o, key);
-		
+
 		if (jsonArray == null) {
 			return null;
 		}
@@ -415,7 +413,7 @@ public class JSONObjectUtils {
 		if (jsonArray.isEmpty()) {
 			return new HashMap[0];
 		}
-		
+
 		for (Object member: jsonArray) {
 			if (member == null) {
 				continue;
@@ -430,10 +428,10 @@ public class JSONObjectUtils {
 		}
 		throw new ParseException("JSON object member with key \"" + key + "\" is not an array of JSON objects", 0);
 	}
-	
+
 	/**
 	 * Gets a string list member of a JSON object
-	 * 
+	 *
 	 * @param o   The JSON object. Must not be {@code null}.
 	 * @param key The JSON object member key. Must not be {@code null}.
 	 *
@@ -444,14 +442,14 @@ public class JSONObjectUtils {
 	public static List<String> getStringList(final Map<String, Object> o, final String key) throws ParseException {
 
 		String[] array = getStringArray(o, key);
-		
+
 		if (array == null) {
 			return null;
 		}
 
 		return Arrays.asList(array);
 	}
-	
+
 
 	/**
 	 * Gets a JSON object member of a JSON object.
@@ -465,13 +463,13 @@ public class JSONObjectUtils {
 	 */
 	public static Map<String, Object> getJSONObject(final Map<String, Object> o, final String key)
 		throws ParseException {
-		
+
 		Map<?,?> jsonObject = getGeneric(o, key, Map.class);
-		
+
 		if (jsonObject == null) {
 			return null;
 		}
-		
+
 		// Verify keys are String
 		for (Object oKey: jsonObject.keySet()) {
 			if (! (oKey instanceof String)) {
@@ -482,8 +480,8 @@ public class JSONObjectUtils {
 		Map<String, Object> castJSONObject = (Map<String, Object>)jsonObject;
 		return castJSONObject;
 	}
-	
-	
+
+
 	/**
 	 * Gets a string member of a JSON object as {@link Base64URL}.
 	 *
@@ -496,14 +494,38 @@ public class JSONObjectUtils {
 	 */
 	public static Base64URL getBase64URL(final Map<String, Object> o, final String key)
 		throws ParseException {
-		
+
 		String value = getString(o, key);
-		
+
 		if (value == null) {
 			return null;
 		}
-		
+
 		return new Base64URL(value);
+	}
+
+
+	/**
+	 * Gets a number member of a JSON object as a {@link Date} expressed in
+	 * seconds since the Unix epoch.
+	 *
+	 * @param o   The JSON object. Must not be {@code null}.
+	 * @param key The JSON object member key. Must not be {@code null}.
+	 *
+	 * @return The JSON object member value, may be {@code null}.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static Date getEpochSecondAsDate(final Map<String, Object> o, final String key)
+		throws ParseException {
+
+		Number value = getGeneric(o, key, Number.class);
+
+		if (value == null) {
+			return null;
+		}
+
+		return DateUtils.fromSecondsSinceEpoch(value.longValue());
 	}
 	
 	
@@ -518,6 +540,7 @@ public class JSONObjectUtils {
 	public static String toJSONString(final Map<String, ?> o) {
 		return GSON.toJson(o);
 	}
+
 
 	/**
 	 * Creates a new JSON object (unordered).
