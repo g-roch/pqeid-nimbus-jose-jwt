@@ -248,7 +248,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getBoolean(jsonObject, "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 		
 		// Parsed JSON object
@@ -256,7 +256,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getBoolean(JSONObjectUtils.parse("{\"key\":null}"), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -268,7 +268,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getBoolean(JSONObjectUtils.newJSONObject(), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 		
 		// Parsed JSON object
@@ -276,7 +276,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getBoolean(JSONObjectUtils.parse("{}"), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -291,7 +291,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getInt(jsonObject, "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 		
 		// Parsed JSON object
@@ -299,7 +299,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getInt(JSONObjectUtils.parse("{\"key\":null}"), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -311,7 +311,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getInt(JSONObjectUtils.newJSONObject(), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 		
 		// Parsed JSON object
@@ -319,7 +319,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getInt(JSONObjectUtils.parse("{}"), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -334,7 +334,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getInt(jsonObject, "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Unexpected type of JSON object member with key key", e.getMessage());
+			assertEquals("Unexpected type of JSON object member key", e.getMessage());
 		}
 		
 		// Parsed JSON object
@@ -342,7 +342,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getInt(JSONObjectUtils.parse("{\"key\":\"abc\"}"), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Unexpected type of JSON object member with key key", e.getMessage());
+			assertEquals("Unexpected type of JSON object member key", e.getMessage());
 		}
 	}
 	
@@ -357,7 +357,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getLong(jsonObject, "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 		
 		// Parsed JSON object
@@ -365,7 +365,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getLong(JSONObjectUtils.parse("{\"key\":null}"), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -377,7 +377,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getLong(JSONObjectUtils.newJSONObject(), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 		
 		// Parsed JSON object
@@ -385,7 +385,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getLong(JSONObjectUtils.parse("{}"), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -399,7 +399,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getFloat(jsonObject, "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -410,7 +410,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getFloat(JSONObjectUtils.newJSONObject(), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -424,7 +424,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getDouble(jsonObject, "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -435,7 +435,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getDouble(JSONObjectUtils.newJSONObject(), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key key is missing or null", e.getMessage());
+			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
 	
@@ -567,7 +567,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getStringArray(jsonObject, "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key \"key\" is not an array of strings", e.getMessage());
+			assertEquals("JSON object member key is not an array of strings", e.getMessage());
 		}
 	}
 	
@@ -725,7 +725,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getJSONObjectArray(jsonObject, "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key \"key\" is not an array of JSON objects", e.getMessage());
+			assertEquals("JSON object member key is not an array of JSON objects", e.getMessage());
 		}
 		
 		// Parsed JSON object
@@ -733,7 +733,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getJSONObjectArray(JSONObjectUtils.parse(JSONObjectUtils.toJSONString(jsonObject)), "key");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key \"key\" is not an array of JSON objects", e.getMessage());
+			assertEquals("JSON object member key is not an array of JSON objects", e.getMessage());
 		}
 	}
 	
@@ -841,7 +841,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getJSONObject(jsonObject, "AAA");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("JSON object member with key AAA not a JSON object", e.getMessage());
+			assertEquals("JSON object member AAA not a JSON object", e.getMessage());
 		}
 	}
 	
@@ -952,7 +952,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.getEpochSecondAsDate(jsonObject, "now");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Unexpected type of JSON object member with key now", e.getMessage());
+			assertEquals("Unexpected type of JSON object member now", e.getMessage());
 		}
 	}
 	

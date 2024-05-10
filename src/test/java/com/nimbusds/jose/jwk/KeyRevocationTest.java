@@ -167,7 +167,7 @@ public class KeyRevocationTest extends TestCase {
                         KeyRevocation.parse(JSONObjectUtils.newJSONObject());
                         fail();
                 } catch (ParseException e) {
-                        assertEquals("JSON object member with key revoked_at is missing or null", e.getMessage());
+                        assertEquals("JSON object member revoked_at is missing or null", e.getMessage());
                 }
         }
 
