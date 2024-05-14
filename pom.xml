@@ -211,6 +211,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
                             <Build-Date>${timestamp}</Build-Date>
                             <Build-Number>${buildNumber}</Build-Number>
                             <Build-Tag>${project.scm.tag}</Build-Tag>

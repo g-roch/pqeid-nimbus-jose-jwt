@@ -1652,3 +1652,6 @@ version 9.39 (2024-05-10)
     * Adds JSONObjectUtils.getEpochSecondAsDate static method.
     * JWTClaimsSet.parse must handle null "nbf", "iat" and "exp" claims (iss
       #547).
+
+version 9.39.1 (2024-05-14)
+    * Adds a multi-release declaration to pom.xml (iss #548).
