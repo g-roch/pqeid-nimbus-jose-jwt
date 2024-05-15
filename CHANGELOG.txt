@@ -1655,3 +1655,4 @@ version 9.39 (2024-05-10)
 
 version 9.39.1 (2024-05-14)
     * Adds a multi-release declaration to pom.xml (iss #548).
+    * Sets the Java source to 7 in the maven-javadoc-plugin configuration.
