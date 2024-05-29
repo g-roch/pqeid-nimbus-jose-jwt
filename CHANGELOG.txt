@@ -1656,3 +1656,7 @@ version 9.39 (2024-05-10)
 version 9.39.1 (2024-05-14)
     * Adds a multi-release declaration to pom.xml (iss #548).
     * Sets the Java source to 7 in the maven-javadoc-plugin configuration.
+
+version 9.39.2 (2024-05-39)
+    * Fixes NPE in DefaultJWTClaimsVerifier.verify when checking an exact match
+      claim with a null value (iss #522).

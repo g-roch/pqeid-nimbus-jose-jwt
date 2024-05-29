@@ -600,4 +600,25 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 			assertEquals("JWT before use time", e.getMessage());
 		}
 	}
+
+
+	public void testExactMatchAgainstNullValueClaim() {
+
+		JWTClaimsSet exactMatches = new JWTClaimsSet.Builder()
+			.issuer("bob")
+			.build();
+
+		DefaultJWTClaimsVerifier verifier = new DefaultJWTClaimsVerifier(exactMatches, Collections.emptySet());
+
+		JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+			.issuer(null)
+			.build();
+
+		try {
+			verifier.verify(jwtClaimsSet, null);
+			fail();
+		} catch (BadJWTException e) {
+			assertEquals("JWT iss claim has value null, must be bob", e.getMessage());
+		}
+	}
 }
