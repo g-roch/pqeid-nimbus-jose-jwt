@@ -60,7 +60,8 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.parse("abc");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid JSON: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1 path $", e.getMessage());
+			assertEquals("Invalid JSON: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1 path $\n" +
+				"See https://github.com/google/gson/blob/main/Troubleshooting.md#unexpected-json-structure", e.getMessage());
 		}
 	}
 	
