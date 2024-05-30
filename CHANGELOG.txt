@@ -1660,3 +1660,6 @@ version 9.39.1 (2024-05-14)
 version 9.39.2 (2024-05-29)
     * Fixes NPE in DefaultJWTClaimsVerifier.verify when checking an exact match
       claim with a null value (iss #522).
+
+version 9.39.3 (2024-05-30)
+    * Bumps GSon to 2.11.0, addressing Number parsing performance issue (#546).
