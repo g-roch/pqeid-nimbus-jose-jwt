@@ -887,6 +887,83 @@ public class JWTClaimsSetTest extends TestCase {
 		
 		assertEquals(Collections.singletonList("1"), claimsSet.getAudience());
 	}
+
+
+	public void testBuilder_serializeNullClaims_true() {
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.serializeNullClaims(true)
+			.subject("alice")
+			.claim("xxx", null)
+			.build();
+
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
+		assertEquals("alice", jsonObject.get("sub"));
+		assertTrue(jsonObject.containsKey("xxx"));
+		assertNull(jsonObject.get("xxx"));
+		assertEquals(2, jsonObject.size());
+
+		jsonObject = claimsSet.toJSONObject(true);
+		assertEquals("alice", jsonObject.get("sub"));
+		assertTrue(jsonObject.containsKey("xxx"));
+		assertNull(jsonObject.get("xxx"));
+		assertEquals(2, jsonObject.size());
+
+		jsonObject = claimsSet.toJSONObject(false);
+		assertEquals("alice", jsonObject.get("sub"));
+		assertEquals(1, jsonObject.size());
+
+		assertEquals("{\"sub\":\"alice\",\"xxx\":null}", claimsSet.toPayload().toString());
+		assertEquals("{\"sub\":\"alice\",\"xxx\":null}", claimsSet.toPayload(true).toString());
+		assertEquals("{\"sub\":\"alice\"}", claimsSet.toPayload(false).toString());
+
+		assertEquals("{\"sub\":\"alice\",\"xxx\":null}", claimsSet.toString());
+		assertEquals("{\"sub\":\"alice\",\"xxx\":null}", claimsSet.toString(true));
+		assertEquals("{\"sub\":\"alice\"}", claimsSet.toString(false));
+	}
+
+
+	public void testBuilder_serializeNullClaims_false_default() {
+
+		List<JWTClaimsSet> variants = Arrays.asList(
+			// false
+			new JWTClaimsSet.Builder()
+				.serializeNullClaims(false)
+				.subject("alice")
+				.claim("xxx", null)
+				.build(),
+			// default
+			new JWTClaimsSet.Builder()
+				.subject("alice")
+				.claim("xxx", null)
+				.build()
+		);
+
+		for (JWTClaimsSet claimsSet: variants) {
+
+			Map<String, Object> jsonObject = claimsSet.toJSONObject();
+			assertEquals("alice", jsonObject.get("sub"));
+			assertEquals(1, jsonObject.size());
+
+			jsonObject = claimsSet.toJSONObject(true);
+			assertEquals("alice", jsonObject.get("sub"));
+			assertTrue(jsonObject.containsKey("xxx"));
+			assertNull(jsonObject.get("xxx"));
+			assertEquals(2, jsonObject.size());
+
+			jsonObject = claimsSet.toJSONObject(false);
+			assertEquals("alice", jsonObject.get("sub"));
+			assertEquals(1, jsonObject.size());
+
+			assertEquals("{\"sub\":\"alice\"}", claimsSet.toPayload().toString());
+			assertEquals("{\"sub\":\"alice\",\"xxx\":null}", claimsSet.toPayload(true).toString());
+			assertEquals("{\"sub\":\"alice\"}", claimsSet.toPayload(false).toString());
+
+			assertEquals("{\"sub\":\"alice\"}", claimsSet.toString());
+			assertEquals("{\"sub\":\"alice\",\"xxx\":null}", claimsSet.toString(true));
+			assertEquals("{\"sub\":\"alice\"}", claimsSet.toString(false));
+		}
+	}
 	
 	
 	// https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/236
@@ -904,7 +981,7 @@ public class JWTClaimsSetTest extends TestCase {
 	
 	
 	// https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/252/respect-explicit-set-of-null-claims
-	public void testToJSONObject_includeClaimsWithNullValues()
+	public void testToJSONObject_serializeNullClaims()
 		throws Exception {
 		
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -930,7 +1007,7 @@ public class JWTClaimsSetTest extends TestCase {
 	
 	// https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/252/respect-explicit-set-of-null-claims
 	// audience has special treatment
-	public void testToJSONObject_includeClaimsWithNullValues_audience()
+	public void testToJSONObject_serializeNullClaims_audience()
 		throws Exception {
 		
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
@@ -956,7 +1033,7 @@ public class JWTClaimsSetTest extends TestCase {
 	
 	// https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/252/respect-explicit-set-of-null-claims
 	// audience has special treatment
-	public void testToJSONObject_includeClaimsWithNullValues_audienceList()
+	public void testToJSONObject_serializeNullClaims_audienceList()
 		throws Exception {
 		
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()

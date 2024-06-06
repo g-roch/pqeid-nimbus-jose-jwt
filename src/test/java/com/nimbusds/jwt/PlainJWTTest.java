@@ -25,7 +25,9 @@ import com.nimbusds.jose.PlainHeader;
 import com.nimbusds.jose.util.Base64URL;
 import junit.framework.TestCase;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 
@@ -33,7 +35,7 @@ import java.util.Map;
  * Tests plain JWT object. Uses test vectors from JWT spec.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-05-08
+ * @version 2024-06-06
  */
 public class PlainJWTTest extends TestCase {
 
@@ -71,13 +73,14 @@ public class PlainJWTTest extends TestCase {
 	}
 
 
-	public void testClaimsSetConstructor_nullClaims()
+	public void testClaimsSetConstructor_serializeNullClaims_enable()
 		throws Exception {
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.subject("alice")
 			.issuer(null)
 			.claim("xxx", null)
+			.serializeNullClaims(true)
 			.build();
 
 		PlainJWT jwt = new PlainJWT(claimsSet);
@@ -101,6 +104,34 @@ public class PlainJWTTest extends TestCase {
 		assertTrue(jsonObject.containsKey("xxx"));
 		assertNull(jsonObject.get("xxx"));
 		assertEquals(3, jsonObject.size());
+	}
+
+
+	public void testClaimsSetConstructor_serializeNullClaims_default_disable()
+		throws Exception {
+
+		List<JWTClaimsSet> variants = Arrays.asList(
+			new JWTClaimsSet.Builder()
+				.subject("alice")
+				.issuer(null)
+				.claim("xxx", null)
+				.build(),
+			new JWTClaimsSet.Builder()
+				.subject("alice")
+				.issuer(null)
+				.claim("xxx", null)
+				.serializeNullClaims(false)
+				.build());
+
+		for (JWTClaimsSet claimsSet: variants) {
+
+			PlainJWT jwt = new PlainJWT(claimsSet);
+			String jwtString = jwt.serialize();
+			jwt = PlainJWT.parse(jwtString);
+			Map<String, Object> jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+			assertEquals("alice", jsonObject.get("sub"));
+			assertEquals(1, jsonObject.size());
+		}
 	}
 
 

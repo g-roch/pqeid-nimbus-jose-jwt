@@ -18,24 +18,23 @@
 package com.nimbusds.jwt;
 
 
+import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.util.JSONArrayUtils;
+import com.nimbusds.jose.util.JSONObjectUtils;
+import com.nimbusds.jwt.util.DateUtils;
+import net.jcip.annotations.Immutable;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.*;
 
-import net.jcip.annotations.Immutable;
-
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.util.JSONArrayUtils;
-import com.nimbusds.jose.util.JSONObjectUtils;
-import com.nimbusds.jwt.util.DateUtils;
-
 
 /**
  * JSON Web Token (JWT) claims set. This class is immutable.
  *
- * <p>Supports all {@link #getRegisteredNames()} registered claims} of the JWT
+ * <p>Supports all {@link #getRegisteredNames() registered claims} of the JWT
  * specification:
  *
  * <ul>
@@ -48,16 +47,19 @@ import com.nimbusds.jwt.util.DateUtils;
  *     <li>jti - JWT ID
  * </ul>
  *
- * <p>The set may also contain custom claims; these will be serialised and
- * parsed along the registered ones.
+ * <p>The set may also contain custom claims.
+ *
+ * <p>Claims with {@code null} values will not be serialised with
+ * {@link #toPayload()} / {@link #toJSONObject()} / {@link #toString()} unless
+ * {@link Builder#serializeNullClaims} is enabled.
  *
  * <p>Example JWT claims set:
  *
  * <pre>
  * {
- *   "sub"                        : "joe",
- *   "exp"                        : 1300819380,
- *   "http://example.com/is_root" : true
+ *   "sub"                         : "joe",
+ *   "exp"                         : 1300819380,
+ *   "https://example.com/is_root" : true
  * }
  * </pre>
  *
@@ -73,7 +75,7 @@ import com.nimbusds.jwt.util.DateUtils;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
- * @version 2024-04-08
+ * @version 2024-06-06
  */
 @Immutable
 public final class JWTClaimsSet implements Serializable {
@@ -129,6 +131,12 @@ public final class JWTClaimsSet implements Serializable {
 
 
 		/**
+		 * Controls serialisation of claims with {@code null} values.
+		 */
+		private boolean serializeNullClaims = false;
+
+
+		/**
 		 * Creates a new builder.
 		 */
 		public Builder() {
@@ -147,6 +155,24 @@ public final class JWTClaimsSet implements Serializable {
 		public Builder(final JWTClaimsSet jwtClaimsSet) {
 
 			claims.putAll(jwtClaimsSet.claims);
+		}
+
+
+		/**
+		 * Controls the serialisation of claims with {@code null}
+		 * values when {@link #toPayload()} / {@link #toJSONObject()} /
+		 * {@link #toString()} is called. Disabled by default.
+		 *
+		 * @param enable {@code true} to serialise claims with
+		 *               {@code null} values, {@code false} to omit
+		 *               them.
+		 *
+		 * @return This builder.
+		 */
+		public Builder serializeNullClaims(final boolean enable) {
+
+			serializeNullClaims = enable;
+			return this;
 		}
 
 
@@ -312,7 +338,7 @@ public final class JWTClaimsSet implements Serializable {
 		 */
 		public JWTClaimsSet build() {
 
-			return new JWTClaimsSet(claims);
+			return new JWTClaimsSet(claims, serializeNullClaims);
 		}
 	}
 
@@ -324,13 +350,21 @@ public final class JWTClaimsSet implements Serializable {
 
 
 	/**
+	 * Controls serialisation of claims with {@code null} values.
+	 */
+	private final boolean serializeNullClaims;
+
+
+	/**
 	 * Creates a new JWT claims set.
 	 *
 	 * @param claims The JWT claims set as a map. Must not be {@code null}.
 	 */
-	private JWTClaimsSet(final Map<String,Object> claims) {
+	private JWTClaimsSet(final Map<String,Object> claims,
+			     final boolean serializeNullClaims) {
 		
 		this.claims.putAll(claims);
+		this.serializeNullClaims = serializeNullClaims;
 	}
 
 
@@ -818,13 +852,14 @@ public final class JWTClaimsSet implements Serializable {
 	/**
 	 * Returns a JOSE object payload representation of this claims set. The
 	 * claims are serialised according to their insertion order. Claims
-	 * with {@code null} values are not output.
+	 * with {@code null} values are output according to
+	 * {@link Builder#serializeNullClaims(boolean)}.
 	 *
 	 * @return The payload representation.
 	 */
 	public Payload toPayload() {
 		
-		return new Payload(toJSONObject());
+		return new Payload(toJSONObject(serializeNullClaims));
 	}
 
 
@@ -832,28 +867,29 @@ public final class JWTClaimsSet implements Serializable {
 	 * Returns a JOSE object payload representation of this claims set. The
 	 * claims are serialised according to their insertion order.
 	 *
-	 * @param includeClaimsWithNullValues If {@code true} claims with
-	 *                                    {@code null} values will be
-	 *                                    output, else ignored.
+	 * @param serializeNullClaims {@code true} to serialise claims with
+	 *                            {@code null} values, {@code false} to
+	 *                            omit them.
 	 *
 	 * @return The payload representation.
 	 */
-	public Payload toPayload(final boolean includeClaimsWithNullValues) {
+	public Payload toPayload(final boolean serializeNullClaims) {
 
-		return new Payload(toJSONObject(includeClaimsWithNullValues));
+		return new Payload(toJSONObject(serializeNullClaims));
 	}
 
 
 	/**
 	 * Returns the JSON object representation of this claims set. The
 	 * claims are serialised according to their insertion order. Claims
-	 * with {@code null} values are not output.
+	 * with {@code null} values are output according to
+	 * {@link Builder#serializeNullClaims(boolean)}.
 	 *
 	 * @return The JSON object representation.
 	 */
 	public Map<String, Object> toJSONObject() {
 
-		return toJSONObject(false);
+		return toJSONObject(serializeNullClaims);
 	}
 	
 	
@@ -861,13 +897,13 @@ public final class JWTClaimsSet implements Serializable {
 	 * Returns the JSON object representation of this claims set. The
 	 * claims are serialised according to their insertion order.
 	 *
-	 * @param includeClaimsWithNullValues If {@code true} claims with
-	 *                                    {@code null} values will be
-	 *                                    output, else ignored.
+	 * @param serializeNullClaims {@code true} to serialise claims with
+	 *                            {@code null} values, {@code false} to
+	 *                            omit them.
 	 *
 	 * @return The JSON object representation.
 	 */
-	public Map<String, Object> toJSONObject(final boolean includeClaimsWithNullValues) {
+	public Map<String, Object> toJSONObject(final boolean serializeNullClaims) {
 		
 		Map<String, Object> o = JSONObjectUtils.newJSONObject();
 		
@@ -892,13 +928,13 @@ public final class JWTClaimsSet implements Serializable {
 						audArray.addAll(audList);
 						o.put(JWTClaimNames.AUDIENCE, audArray);
 					}
-				} else if (includeClaimsWithNullValues) {
+				} else if (serializeNullClaims) {
 					o.put(JWTClaimNames.AUDIENCE, null);
 				}
 				
 			} else if (claim.getValue() != null) {
 				o.put(claim.getKey(), claim.getValue());
-			} else if (includeClaimsWithNullValues) {
+			} else if (serializeNullClaims) {
 				o.put(claim.getKey(), null);
 			}
 		}
@@ -910,7 +946,8 @@ public final class JWTClaimsSet implements Serializable {
 	/**
 	 * Returns a JSON object string representation of this claims set. The
 	 * claims are serialised according to their insertion order. Claims
-	 * with {@code null} values are not output.
+	 * with {@code null} values are output according to
+	 * {@link Builder#serializeNullClaims(boolean)}.
 	 *
 	 * @return The JSON object string representation.
 	 */
@@ -925,15 +962,15 @@ public final class JWTClaimsSet implements Serializable {
 	 * Returns a JSON object string representation of this claims set. The
 	 * claims are serialised according to their insertion order.
 	 *
-	 * @param includeClaimsWithNullValues If {@code true} claims with
-	 *                                    {@code null} values will also be
-	 *                                    output.
+	 * @param serializeNullClaims {@code true} to serialise claims with
+	 *                            {@code null} values, {@code false} to
+	 *                            omit them.
 	 *
 	 * @return The JSON object string representation.
 	 */
-	public String toString(final boolean includeClaimsWithNullValues) {
+	public String toString(final boolean serializeNullClaims) {
 
-		return JSONObjectUtils.toJSONString(toJSONObject(includeClaimsWithNullValues));
+		return JSONObjectUtils.toJSONString(toJSONObject(serializeNullClaims));
 	}
 
 	

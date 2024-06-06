@@ -1662,5 +1662,16 @@ version 9.39.2 (2024-05-29)
       claim with a null value (iss #522).
 
 version 9.39.3 (2024-05-30)
-        * Bumps GSon to 2.11.0, addressing Number parsing performance issue
-          (#546).
+    * Bumps GSon to 2.11.0, addressing Number parsing performance issue (#546).
+
+version 9.40 (2024-06-06)
+    * New JWTClaimsSet.Builder.serializeNullClaims(boolean) method to control
+      the serialisation of claims with null values when
+      JWTClaimsSet.toPayload(), JWTClaimsSet.toJSONObject() or
+      JWTClaimsSet.toString() is called. The serialisation to claims with null
+      values is disabled by default. Note that with serializeNullClaims(true)
+      the previous behaviour of JWTClaimsSet.toPayload(),
+      JWTClaimsSet.toJSONObject() and JWTClaimsSet.toString() will no longer
+      apply and claims will null values will be serialised.
+    * Fixes regression, JWTClaimsSet.Builder.build() must not by default
+      serialise claims with null values (iss #549).

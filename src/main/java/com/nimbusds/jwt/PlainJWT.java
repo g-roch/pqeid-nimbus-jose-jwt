@@ -33,7 +33,7 @@ import java.util.Map;
  * Unsecured (plain) JSON Web Token (JWT).
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-05-08
+ * @version 2024-06-06
  */
 @ThreadSafe
 public class PlainJWT extends PlainObject implements JWT {
@@ -57,7 +57,7 @@ public class PlainJWT extends PlainObject implements JWT {
 	 */
 	public PlainJWT(final JWTClaimsSet claimsSet) {
 
-		super(claimsSet.toPayload(true));
+		super(claimsSet.toPayload());
 		this.claimsSet = claimsSet;
 	}
 
@@ -71,7 +71,7 @@ public class PlainJWT extends PlainObject implements JWT {
 	 */
 	public PlainJWT(final PlainHeader header, final JWTClaimsSet claimsSet) {
 
-		super(header, claimsSet.toPayload(true));
+		super(header, claimsSet.toPayload());
 		this.claimsSet = claimsSet;
 	}
 

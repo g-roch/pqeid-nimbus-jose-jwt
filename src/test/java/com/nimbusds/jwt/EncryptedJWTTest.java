@@ -225,13 +225,14 @@ public class EncryptedJWTTest extends TestCase {
 	}
 
 
-	public void testClaimsSetConstructor_nullClaims()
+	public void testClaimsSetConstructor_serializeNullClaims_enable()
 		throws Exception {
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.subject("alice")
 			.issuer(null)
 			.claim("xxx", null)
+			.serializeNullClaims(true)
 			.build();
 
 		EncryptedJWT jwt = new EncryptedJWT(new JWEHeader(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM), claimsSet);
@@ -258,6 +259,44 @@ public class EncryptedJWTTest extends TestCase {
 		assertTrue(jsonObject.containsKey("xxx"));
 		assertNull(jsonObject.get("xxx"));
 		assertEquals(3, jsonObject.size());
+	}
+
+
+	public void testClaimsSetConstructor_serializeNullClaims_default_disable()
+		throws Exception {
+
+		List<JWTClaimsSet> variants = Arrays.asList(
+			new JWTClaimsSet.Builder()
+				.subject("alice")
+				.issuer(null)
+				.claim("xxx", null)
+				.build(),
+			new JWTClaimsSet.Builder()
+				.subject("alice")
+				.issuer(null)
+				.claim("xxx", null)
+				.serializeNullClaims(false)
+				.build());
+
+		for (JWTClaimsSet claimsSet: variants) {
+
+			EncryptedJWT jwt = new EncryptedJWT(new JWEHeader(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM), claimsSet);
+
+			Map<String, Object> jsonObject = jwt.getJWTClaimsSet().toJSONObject();
+			assertEquals("alice", jsonObject.get("sub"));
+			assertEquals(1, jsonObject.size());
+
+			jwt.encrypt(new RSAEncrypter(PUBLIC_KEY));
+
+			String jwtString = jwt.serialize();
+
+			jwt = EncryptedJWT.parse(jwtString);
+			jwt.decrypt(new RSADecrypter(PRIVATE_KEY));
+
+			jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+			assertEquals("alice", jsonObject.get("sub"));
+			assertEquals(1, jsonObject.size());
+		}
 	}
 	
 	

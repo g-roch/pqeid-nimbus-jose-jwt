@@ -33,7 +33,7 @@ import java.util.Map;
  * Signed JSON Web Token (JWT).
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-05-08
+ * @version 2024-06-06
  */
 @ThreadSafe
 public class SignedJWT extends JWSObject implements JWT {
@@ -57,7 +57,7 @@ public class SignedJWT extends JWSObject implements JWT {
 	 */
 	public SignedJWT(final JWSHeader header, final JWTClaimsSet claimsSet) {
 
-		super(header, claimsSet.toPayload(true));
+		super(header, claimsSet.toPayload());
 		this.claimsSet = claimsSet;
 	}
 
@@ -103,7 +103,7 @@ public class SignedJWT extends JWSObject implements JWT {
 	
 
 	@Override
-	protected void setPayload(Payload payload) {
+	protected void setPayload(final Payload payload) {
 
 		// setPayload() changes the result of getJWTClaimsSet().
 		// set claimsSet = null and reparse payload again when called getJWTClaimsSet().

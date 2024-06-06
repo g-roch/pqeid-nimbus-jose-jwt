@@ -18,23 +18,22 @@
 package com.nimbusds.jwt;
 
 
-import java.text.ParseException;
-import java.util.Map;
-
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.JOSEObject;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.util.Base64URL;
+import net.jcip.annotations.ThreadSafe;
+
+import java.text.ParseException;
+import java.util.Map;
 
 
 /**
  * Encrypted JSON Web Token (JWT). This class is thread-safe.
  *
  * @author Vladimir Dzhuvinov
- * @version 2021-02-22
+ * @version 2024-06-06
  */
 @ThreadSafe
 public class EncryptedJWT extends JWEObject implements JWT {
@@ -58,7 +57,7 @@ public class EncryptedJWT extends JWEObject implements JWT {
 	 */
 	public EncryptedJWT(final JWEHeader header, final JWTClaimsSet claimsSet) {
 
-		super(header, claimsSet.toPayload(true));
+		super(header, claimsSet.toPayload());
 		this.claimsSet = claimsSet;
 	}
 

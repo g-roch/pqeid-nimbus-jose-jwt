@@ -31,7 +31,9 @@ import junit.framework.TestCase;
 import java.net.URI;
 import java.security.SecureRandom;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 
@@ -126,13 +128,14 @@ public class SignedJWTTest extends TestCase {
 	}
 
 
-	public void testClaimsSetConstructor_nullClaims()
+	public void testClaimsSetConstructor_serializeNullClaims_enable()
 		throws Exception {
 
 		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
 			.subject("alice")
 			.issuer(null)
 			.claim("xxx", null)
+			.serializeNullClaims(true)
 			.build();
 
 		SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
@@ -158,6 +161,43 @@ public class SignedJWTTest extends TestCase {
 		assertTrue(jsonObject.containsKey("xxx"));
 		assertNull(jsonObject.get("xxx"));
 		assertEquals(3, jsonObject.size());
+	}
+
+
+	public void testClaimsSetConstructor_serializeNullClaims_default_disable()
+		throws Exception {
+
+		List<JWTClaimsSet> variants = Arrays.asList(
+			new JWTClaimsSet.Builder()
+				.subject("alice")
+				.issuer(null)
+				.claim("xxx", null)
+				.build(),
+			new JWTClaimsSet.Builder()
+				.subject("alice")
+				.issuer(null)
+				.claim("xxx", null)
+				.serializeNullClaims(false)
+				.build());
+
+		for (JWTClaimsSet claimsSet: variants) {
+
+			SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.RS256), claimsSet);
+
+			Map<String, Object> jsonObject = jwt.getJWTClaimsSet().toJSONObject();
+			assertEquals("alice", jsonObject.get("sub"));
+			assertEquals(1, jsonObject.size());
+
+			jwt.sign(new RSASSASigner(RSA_JWK.toRSAPrivateKey()));
+
+			String jwtString = jwt.serialize();
+
+			jwt = SignedJWT.parse(jwtString);
+
+			jsonObject = jwt.getJWTClaimsSet().toJSONObject(true);
+			assertEquals("alice", jsonObject.get("sub"));
+			assertEquals(1, jsonObject.size());
+		}
 	}
 	
 	
