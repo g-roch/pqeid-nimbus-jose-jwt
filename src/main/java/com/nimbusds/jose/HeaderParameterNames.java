@@ -1,6 +1,8 @@
 package com.nimbusds.jose;
 
 
+import com.nimbusds.jwt.JWTClaimNames;
+
 /**
  * JSON Web Signature (JWS) and JSON Web Encryption (JWE) header parameter
  * names.
@@ -16,7 +18,8 @@ package com.nimbusds.jose;
  * (yet).
  *
  * @author Nathaniel Hart
- * @version 2021-09-30
+ * @author Vladimir Dzhuvinov
+ * @version 2024-06-27
  */
 public final class HeaderParameterNames {
 	
@@ -221,6 +224,31 @@ public final class HeaderParameterNames {
 	 * @see <a href="https://datatracker.ietf.org/doc/html/rfc7797#section-3">RFC 7797 "b64" (base64url-encode payload) Header Parameter</a>
 	 */
 	public static final String BASE64_URL_ENCODE_PAYLOAD = "b64";
+
+
+	////////////////////////////////////////////////////////////////////////////////
+	// RFC 7519 (JWT) claims replicated as JWE header parameters
+	////////////////////////////////////////////////////////////////////////////////
+
+	/**
+	 * Used in {@link JWEHeader} where the issuer claim is replicated as a
+	 * header parameter.
+	 */
+	public static final String ISSUER = JWTClaimNames.ISSUER;
+
+
+	/**
+	 * Used in {@link JWEHeader} where the issuer claim is replicated as a
+	 * header parameter.
+	 */
+	public static final String SUBJECT = JWTClaimNames.SUBJECT;
+
+
+	/**
+	 * Used in {@link JWEHeader} where the issuer claim is replicated as a
+	 * header parameter.
+	 */
+	public static final String AUDIENCE = JWTClaimNames.AUDIENCE;
 	
 	
 	private HeaderParameterNames() {}

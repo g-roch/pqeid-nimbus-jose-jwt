@@ -1675,3 +1675,7 @@ version 9.40 (2024-06-06)
       apply and claims will null values will be serialised.
     * Fixes regression, JWTClaimsSet.Builder.build() must not by default
       serialise claims with null values (iss #549).
+
+9.41 (2024-06-29)
+    * JWEHeader receives typed support for the "iss" (issuer), "sub" (subject)
+      and "aud" (audience) claims as replicated JWE header parameters.

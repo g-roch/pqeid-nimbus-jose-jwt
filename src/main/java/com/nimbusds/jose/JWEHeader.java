@@ -56,8 +56,11 @@ import java.util.*;
  *     <li>p2s
  *     <li>p2c
  *     <li>iv
+ *     <li>tag
  *     <li>skid
- *     <li>authTag
+ *     <li>iss
+ *     <li>sub
+ *     <li>aud
  * </ul>
  *
  * <p>The header may also include {@link #getCustomParams custom
@@ -73,7 +76,7 @@ import java.util.*;
  * </pre>
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-04-20
+ * @version 2024-06-29
  */
 @Immutable
 public final class JWEHeader extends CommonSEHeader {
@@ -112,7 +115,10 @@ public final class JWEHeader extends CommonSEHeader {
 		p.add(HeaderParameterNames.INITIALIZATION_VECTOR);
 		p.add(HeaderParameterNames.AUTHENTICATION_TAG);
 		p.add(HeaderParameterNames.SENDER_KEY_ID);
-		p.add("authTag"); // this is a non-standard header, but we should leave it for backwards compatibility
+		p.add(HeaderParameterNames.ISSUER);
+		p.add(HeaderParameterNames.SUBJECT);
+		p.add(HeaderParameterNames.AUDIENCE);
+		p.add("authTag"); // non-standard (draft / pre-RFC) header, left for backwards compatibility
 
 		REGISTERED_PARAMETER_NAMES = Collections.unmodifiableSet(p);
 	}
@@ -262,6 +268,24 @@ public final class JWEHeader extends CommonSEHeader {
 
 
 		/**
+		 * Issuer as replicated claim.
+		 */
+		private String iss;
+
+
+		/**
+		 * Subject as replicated claim.
+		 */
+		private String sub;
+
+
+		/**
+		 * Audience as replicated claim.
+		 */
+		private List<String> aud;
+
+
+		/**
 		 * Custom header parameters.
 		 */
 		private Map<String,Object> customParams;
@@ -339,9 +363,12 @@ public final class JWEHeader extends CommonSEHeader {
 
 			skid = jweHeader.getSenderKeyID();
 
+			iss = jweHeader.getIssuer();
+			sub = jweHeader.getSubject();
+			aud = jweHeader.getAudience();
+
 			customParams = jweHeader.getCustomParams();
 		}
-
 
 
 		/**
@@ -626,21 +653,6 @@ public final class JWEHeader extends CommonSEHeader {
 			return this;
 		}
 
-
-		/**
-		 * Sets the authentication tag ({@code tag}) parameter.
-		 *
-		 * @param tag The authentication tag, {@code null} if not
-		 *            specified.
-		 *
-		 * @return This builder.
-		 */
-		public Builder authTag(final Base64URL tag) {
-
-			this.tag = tag;
-			return this;
-		}
-
 		
 		/**
 		 * Sets the sender key ID ({@code skid}) parameter.
@@ -653,6 +665,66 @@ public final class JWEHeader extends CommonSEHeader {
 		public Builder senderKeyID(final String skid) {
 
 			this.skid = skid;
+			return this;
+		}
+
+
+		/**
+		 * Sets the issuer ({@code iss}) parameter as a replicated
+		 * claim.
+		 *
+		 * @param iss The issuer, {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder issuer(final String iss) {
+
+			this.iss = iss;
+			return this;
+		}
+
+
+		/**
+		 * Sets the subject ({@code sub}) parameter as a replicated
+		 * claim.
+		 *
+		 * @param sub The subject, {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder subject(final String sub) {
+
+			this.sub = sub;
+			return this;
+		}
+
+
+		/**
+		 * Sets the audience ({@code aud}) parameter as a replicated
+		 * claim.
+		 *
+		 * @param aud The audience, {@code null} if not specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder audience(final List<String> aud) {
+
+			this.aud = aud;
+			return this;
+		}
+
+
+		/**
+		 * Sets the authentication tag ({@code tag}) parameter.
+		 *
+		 * @param tag The authentication tag, {@code null} if not
+		 *            specified.
+		 *
+		 * @return This builder.
+		 */
+		public Builder authTag(final Base64URL tag) {
+
+			this.tag = tag;
 			return this;
 		}
 
@@ -732,6 +804,7 @@ public final class JWEHeader extends CommonSEHeader {
 				jku, jwk, x5u, x5t, x5t256, x5c, kid,
 				epk, zip, apu, apv, p2s, p2c,
 				iv, tag, skid,
+				iss, sub, aud,
 				customParams, parsedBase64URL);
 		}
 	}
@@ -796,6 +869,24 @@ public final class JWEHeader extends CommonSEHeader {
 	 */
 	private final String skid;
 
+
+	/**
+	 * The issuer ({@code iss}) claim parameter.
+	 */
+	private final String iss;
+
+
+	/**
+	 * The subject ({@code sub}) claim parameter.
+	 */
+	private final String sub;
+
+
+	/**
+	 * The audience ({@code aud}) claim parameter.
+	 */
+	private final List<String> aud;
+
 	
 	/**
 	 * Creates a new minimal JSON Web Encryption (JWE) header.
@@ -810,6 +901,7 @@ public final class JWEHeader extends CommonSEHeader {
 			null, null, null, null, null, null, null, null, null, null,
 			null, null, null, null, null, 0,
 			null, null,
+			null, null, null,
 			null, null, null);
 	}
 
@@ -832,6 +924,7 @@ public final class JWEHeader extends CommonSEHeader {
 			null, null, null, null, null, null, null, null, null, null,
 			null, null, null, null, null, 0,
 			null, null,
+			null, null, null,
 			null, null, null);
 	}
 
@@ -892,6 +985,7 @@ public final class JWEHeader extends CommonSEHeader {
 	 * @param parsedBase64URL The parsed Base64URL, {@code null} if the
 	 *                        header is created from scratch.
 	 */
+	@Deprecated
 	public JWEHeader(final Algorithm alg,
 			 final EncryptionMethod enc,
 			 final JOSEObjectType typ,
@@ -916,6 +1010,105 @@ public final class JWEHeader extends CommonSEHeader {
 			 final Map<String,Object> customParams,
 			 final Base64URL parsedBase64URL) {
 
+		this(alg, enc, typ, cty, crit, jku, jwk, x5u, x5t, x5t256, x5c, kid, epk, zip,
+			apu, apv, p2s, p2c, iv, tag, skid,
+			null, null, null,
+			customParams, parsedBase64URL);
+	}
+
+
+	/**
+	 * Creates a new JSON Web Encryption (JWE) header.
+	 *
+	 * <p>Note: Use {@link PlainHeader} to create a header with algorithm
+	 * {@link Algorithm#NONE none}.
+	 *
+	 * @param alg             The JWE algorithm ({@code alg}) parameter.
+	 *                        {@code null} if not specified.
+	 * @param enc             The encryption method parameter. Must not be
+	 *                        {@code null}.
+	 * @param typ             The type ({@code typ}) parameter,
+	 *                        {@code null} if not specified.
+	 * @param cty             The content type ({@code cty}) parameter,
+	 *                        {@code null} if not specified.
+	 * @param crit            The names of the critical header
+	 *                        ({@code crit}) parameters, empty set or
+	 *                        {@code null} if none.
+	 * @param jku             The JSON Web Key (JWK) Set URL ({@code jku})
+	 *                        parameter, {@code null} if not specified.
+	 * @param jwk             The X.509 certificate URL ({@code jwk})
+	 *                        parameter, {@code null} if not specified.
+	 * @param x5u             The X.509 certificate URL parameter
+	 *                        ({@code x5u}), {@code null} if not specified.
+	 * @param x5t             The X.509 certificate SHA-1 thumbprint
+	 *                        ({@code x5t}) parameter, {@code null} if not
+	 *                        specified.
+	 * @param x5t256          The X.509 certificate SHA-256 thumbprint
+	 *                        ({@code x5t#S256}) parameter, {@code null} if
+	 *                        not specified.
+	 * @param x5c             The X.509 certificate chain ({@code x5c})
+	 *                        parameter, {@code null} if not specified.
+	 * @param kid             The key ID ({@code kid}) parameter,
+	 *                        {@code null} if not specified.
+	 * @param epk             The Ephemeral Public Key ({@code epk})
+	 *                        parameter, {@code null} if not specified.
+	 * @param zip             The compression algorithm ({@code zip})
+	 *                        parameter, {@code null} if not specified.
+	 * @param apu             The agreement PartyUInfo ({@code apu})
+	 *                        parameter, {@code null} if not specified.
+	 * @param apv             The agreement PartyVInfo ({@code apv})
+	 *                        parameter, {@code null} if not specified.
+	 * @param p2s             The PBES2 salt ({@code p2s}) parameter,
+	 *                        {@code null} if not specified.
+	 * @param p2c             The PBES2 count ({@code p2c}) parameter, zero
+	 *                        if not specified. Must not be negative.
+	 * @param iv              The initialisation vector ({@code iv})
+	 *                        parameter, {@code null} if not specified.
+	 * @param tag             The authentication tag ({@code tag})
+	 *                        parameter, {@code null} if not specified.
+	 * @param skid            The sender key ID ({@code skid}) parameter,
+	 *                        {@code null} if not specified.
+	 * @param iss             The issuer ({@code iss}) parameter as a
+	 *                        replicated claim, {@code null} if not
+	 *                        specified.
+	 * @param sub             The subject ({@code sub}) parameter as a
+	 *                        replicated claim, {@code null} if not
+	 *                        specified.
+	 * @param aud             The audience ({@code aud}) parameter as a
+	 *                        replicated claim, {@code null} if not
+	 *                        specified.
+	 * @param customParams    The custom parameters, empty map or
+	 *                        {@code null} if none.
+	 * @param parsedBase64URL The parsed Base64URL, {@code null} if the
+	 *                        header is created from scratch.
+	 */
+	public JWEHeader(final Algorithm alg,
+			 final EncryptionMethod enc,
+			 final JOSEObjectType typ,
+			 final String cty,
+			 final Set<String> crit,
+			 final URI jku,
+			 final JWK jwk,
+			 final URI x5u,
+			 final Base64URL x5t,
+			 final Base64URL x5t256,
+			 final List<Base64> x5c,
+			 final String kid,
+			 final JWK epk,
+			 final CompressionAlgorithm zip,
+			 final Base64URL apu,
+			 final Base64URL apv,
+			 final Base64URL p2s,
+			 final int p2c,
+			 final Base64URL iv,
+			 final Base64URL tag,
+			 final String skid,
+			 final String iss,
+			 final String sub,
+			 final List<String> aud,
+			 final Map<String,Object> customParams,
+			 final Base64URL parsedBase64URL) {
+
 		super(alg, typ, cty, crit, jku, jwk, x5u, x5t, x5t256, x5c, kid, customParams, parsedBase64URL);
 
 		if (alg != null && alg.getName().equals(Algorithm.NONE.getName())) {
@@ -937,6 +1130,10 @@ public final class JWEHeader extends CommonSEHeader {
 		this.iv = iv;
 		this.tag = tag;
 		this.skid = skid;
+
+		this.iss = iss;
+		this.sub = sub;
+		this.aud = aud;
 	}
 
 
@@ -969,6 +1166,9 @@ public final class JWEHeader extends CommonSEHeader {
 			jweHeader.getIV(),
 			jweHeader.getAuthTag(),
 			jweHeader.getSenderKeyID(),
+			jweHeader.getIssuer(),
+			jweHeader.getSubject(),
+			jweHeader.getAudience(),
 			jweHeader.getCustomParams(),
 			jweHeader.getParsedBase64URL()
 		);
@@ -1110,6 +1310,43 @@ public final class JWEHeader extends CommonSEHeader {
 
 		return skid;
 	}
+
+
+	/**
+	 * Gets the issuer ({@code iss}) claim as a parameter.
+	 *
+	 * @return The issuer claim, {@code null} if not specified.
+	 */
+	public String getIssuer() {
+
+		return iss;
+	}
+
+
+	/**
+	 * Gets the subject ({@code sub}) claim as a parameter.
+	 *
+	 * @return The subject claim, {@code null} if not specified.
+	 */
+	public String getSubject() {
+
+		return sub;
+	}
+
+
+	/**
+	 * Gets the audience ({@code aud}) claim as a parameter.
+	 *
+	 * @return The audience claim, empty list if not specified.
+	 */
+	public List<String> getAudience() {
+
+		if (aud == null) {
+			return Collections.emptyList();
+		}
+
+		return aud;
+	}
 	
 
 	@Override
@@ -1155,6 +1392,18 @@ public final class JWEHeader extends CommonSEHeader {
 
 		if (skid != null) {
 			includedParameters.add(HeaderParameterNames.SENDER_KEY_ID);
+		}
+
+		if (iss != null) {
+			includedParameters.add(HeaderParameterNames.ISSUER);
+		}
+
+		if (sub != null) {
+			includedParameters.add(HeaderParameterNames.SUBJECT);
+		}
+
+		if (aud != null) {
+			includedParameters.add(HeaderParameterNames.AUDIENCE);
 		}
 
 		return includedParameters;
@@ -1204,6 +1453,18 @@ public final class JWEHeader extends CommonSEHeader {
 
 		if (skid != null) {
 			o.put(HeaderParameterNames.SENDER_KEY_ID, skid);
+		}
+
+		if (iss != null) {
+			o.put(HeaderParameterNames.ISSUER, iss);
+		}
+
+		if (sub != null) {
+			o.put(HeaderParameterNames.SUBJECT, sub);
+		}
+
+		if (aud != null && !aud.isEmpty()) {
+			o.put(HeaderParameterNames.AUDIENCE, aud);
 		}
 
 		return o;
@@ -1322,6 +1583,12 @@ public final class JWEHeader extends CommonSEHeader {
 				header = header.authTag(Base64URL.from(JSONObjectUtils.getString(jsonObject, name)));
 			} else if(HeaderParameterNames.SENDER_KEY_ID.equals(name)) {
 				header = header.senderKeyID(JSONObjectUtils.getString(jsonObject, name));
+			} else if(HeaderParameterNames.ISSUER.equals(name)) {
+				header = header.issuer(JSONObjectUtils.getString(jsonObject, name));
+			} else if (HeaderParameterNames.SUBJECT.equals(name)) {
+				header = header.subject(JSONObjectUtils.getString(jsonObject, name));
+			} else if (HeaderParameterNames.AUDIENCE.equals(name)) {
+				header = header.audience(JSONObjectUtils.getStringList(jsonObject, name));
 			} else {
 				header = header.customParam(name, jsonObject.get(name));
 			}

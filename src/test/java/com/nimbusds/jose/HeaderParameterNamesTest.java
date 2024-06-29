@@ -10,7 +10,7 @@ import static com.nimbusds.jose.HeaderParameterNames.*;
  * Tests the correctness of the Header Parameter Constants.
  *
  * @author Nathaniel Hart
- * @version 2021-07-02
+ * @version 2024-06-29
  */
 public class HeaderParameterNamesTest extends TestCase {
 	
@@ -42,5 +42,9 @@ public class HeaderParameterNamesTest extends TestCase {
 		assertEquals("p2c", PBES2_COUNT);
 		
 		assertEquals("b64", BASE64_URL_ENCODE_PAYLOAD);
+
+		assertEquals("iss", ISSUER);
+		assertEquals("sub", SUBJECT);
+		assertEquals("aud", AUDIENCE);
 	}
 }
