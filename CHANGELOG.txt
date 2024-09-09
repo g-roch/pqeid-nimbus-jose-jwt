@@ -1679,3 +1679,8 @@ version 9.40 (2024-06-06)
 9.41 (2024-06-29)
     * JWEHeader receives typed support for the "iss" (issuer), "sub" (subject)
       and "aud" (audience) claims as replicated JWE header parameters.
+
+9.41.1 (2024-09-09)
+    * For RSA-OAEP and RSA-OAEP-256 the cipher mode should be wither WRAP or
+      UNWRAP, not ENCRYPT or DECRYPT. Otherwise it will throw an exception when
+      used with a FIPS provider (iss #564).
