@@ -430,4 +430,27 @@ public class RSA_OAEPTest extends TestCase {
 			assertNotNull(e.getCause());
 		}
 	}
+
+	public void testKeyWrap() throws Exception{
+		RSAEncrypter encrypter = new RSAEncrypter(PUBLIC_KEY);
+		JWEObject jwe = new JWEObject(
+				new JWEHeader(JWEAlgorithm.RSA_OAEP, EncryptionMethod.A256CBC_HS512),
+				new Payload("Hello, world!"));
+
+		jwe.encrypt(encrypter);
+
+		assertEquals(JWEObject.State.ENCRYPTED, jwe.getState());
+
+		String jweString = jwe.serialize();
+
+		jwe = JWEObject.parse(jweString);
+
+		RSADecrypter decrypter = new RSADecrypter(PRIVATE_KEY);
+
+		jwe.decrypt(decrypter);
+
+		assertEquals(JWEObject.State.DECRYPTED, jwe.getState());
+
+		assertEquals("Hello, world!", jwe.getPayload().toString());
+	}
 }

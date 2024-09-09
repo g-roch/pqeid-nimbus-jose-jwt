@@ -259,7 +259,7 @@ public class RSA_OAEP_SHA2_Test extends TestCase {
 			} catch (JOSEException e) {
 				if (JWEAlgorithm.RSA_OAEP_256.equals(jweAlg) || JWEAlgorithm.RSA_OAEP_384.equals(jweAlg)) {
 					assertEquals("RSA block size exception: The RSA key is too short, use a longer one", e.getMessage());
-					assertTrue(e.getCause() instanceof IllegalBlockSizeException);
+					assertTrue(e.getCause() instanceof InvalidKeyException);
 				} else {
 					assertEquals("Key is too short for encryption using OAEPPadding with SHA-512 and MGF1SHA-512", e.getMessage());
 					assertTrue(e.getCause() instanceof InvalidKeyException);
@@ -318,5 +318,41 @@ public class RSA_OAEP_SHA2_Test extends TestCase {
 		
 		assertEquals(JWEObject.State.DECRYPTED, jweObject.getState());
 		assertEquals("Well, as of this moment, they're on DOUBLE SECRET PROBATION!", jweObject.getPayload().toString());
+	}
+
+	public void testKeyWrap() throws Exception {
+		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
+		gen.initialize(2048);
+		KeyPair kp = gen.generateKeyPair();
+		RSAPublicKey publicKey = (RSAPublicKey) kp.getPublic();
+		RSAPrivateKey privateKey = (RSAPrivateKey) kp.getPrivate();
+
+		for (JWEAlgorithm jweAlg : JWE_ALGORITHMS_TO_TEST) {
+
+			for (EncryptionMethod enc : ENCRYPTION_METHODS_TO_TEST) {
+
+				RSAEncrypter encrypter = new RSAEncrypter(publicKey);
+
+				RSADecrypter decrypter = new RSADecrypter(privateKey);
+
+				JWEObject jwe = new JWEObject(new JWEHeader(jweAlg, enc), new Payload("Hello, world!"));
+
+				assertEquals(JWEObject.State.UNENCRYPTED, jwe.getState());
+
+				jwe.encrypt(encrypter);
+
+				assertEquals(JWEObject.State.ENCRYPTED, jwe.getState());
+
+				String jweString = jwe.serialize();
+
+				jwe = JWEObject.parse(jweString);
+
+				jwe.decrypt(decrypter);
+
+				assertEquals(JWEObject.State.DECRYPTED, jwe.getState());
+
+				assertEquals("Hello, world!", jwe.getPayload().toString());
+			}
+		}
 	}
 }
