@@ -18,6 +18,7 @@
 package com.nimbusds.jose.crypto.impl;
 
 
+import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.SecureRandom;
@@ -65,10 +66,10 @@ public class RSA_OAEP {
 
 		try {
 			Cipher cipher = CipherHelper.getInstance(RSA_OEAP_JCA_ALG, provider);
-			cipher.init(Cipher.ENCRYPT_MODE, pub, new SecureRandom());
-			return cipher.doFinal(cek.getEncoded());
+			cipher.init(Cipher.WRAP_MODE, pub, new SecureRandom());
+			return cipher.wrap(cek);
 			
-		} catch (IllegalBlockSizeException e) {
+		} catch (InvalidKeyException e) {
 			throw new JOSEException("RSA block size exception: The RSA key is too short, try a longer one", e);
 		} catch (Exception e) {
 			// java.security.NoSuchAlgorithmException
@@ -99,8 +100,8 @@ public class RSA_OAEP {
 
 		try {
 			Cipher cipher = CipherHelper.getInstance(RSA_OEAP_JCA_ALG, provider);
-			cipher.init(Cipher.DECRYPT_MODE, priv);
-			return new SecretKeySpec(cipher.doFinal(encryptedCEK), "AES");
+			cipher.init(Cipher.UNWRAP_MODE, priv);
+			return (SecretKey) cipher.unwrap(encryptedCEK, "AES", Cipher.SECRET_KEY);
 
 		} catch (Exception e) {
 			// java.security.NoSuchAlgorithmException

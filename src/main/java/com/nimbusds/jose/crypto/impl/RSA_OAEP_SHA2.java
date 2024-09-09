@@ -19,6 +19,7 @@ package com.nimbusds.jose.crypto.impl;
 
 
 import java.security.AlgorithmParameters;
+import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.interfaces.RSAPublicKey;
@@ -128,11 +129,16 @@ public class RSA_OAEP_SHA2 {
 			AlgorithmParameterSpec paramSpec = new OAEPParameterSpec(jcaShaAlgName, "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
 			algp.init(paramSpec);
 			Cipher cipher = CipherHelper.getInstance(jcaAlgName, provider);
-			cipher.init(Cipher.ENCRYPT_MODE, pub, algp);
-			return cipher.doFinal(cek.getEncoded());
-			
-		} catch (IllegalBlockSizeException e) {
-			throw new JOSEException("RSA block size exception: The RSA key is too short, use a longer one", e);
+			cipher.init(Cipher.WRAP_MODE, pub, algp);
+			return cipher.wrap(cek);
+
+		} catch (InvalidKeyException e) {
+			if(512 == shaBitSize){
+				throw new JOSEException(e.getMessage(), e);
+			}
+			else{
+				throw new JOSEException("RSA block size exception: The RSA key is too short, use a longer one", e);
+			}
 		} catch (Exception e) {
 			// java.security.NoSuchAlgorithmException
 			// java.security.NoSuchPaddingException
@@ -187,8 +193,8 @@ public class RSA_OAEP_SHA2 {
 			AlgorithmParameterSpec paramSpec = new OAEPParameterSpec(jcaShaAlgName, "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
 			algp.init(paramSpec);
 			Cipher cipher = CipherHelper.getInstance(jcaAlgName, provider);
-			cipher.init(Cipher.DECRYPT_MODE, priv, algp);
-			return new SecretKeySpec(cipher.doFinal(encryptedCEK), "AES");
+			cipher.init(Cipher.UNWRAP_MODE, priv, algp);
+			return (SecretKey) cipher.unwrap(encryptedCEK, "AES", Cipher.SECRET_KEY);
 			
 		} catch (Exception e) {
 			// java.security.NoSuchAlgorithmException
