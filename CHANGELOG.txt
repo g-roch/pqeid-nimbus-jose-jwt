@@ -1683,6 +1683,6 @@ version 9.40 (2024-06-06)
       "PBES2-HS384+A192KW" and "PBES2-HS512+A256KW" to use a JCA provider
       instead of a local PBKDF2 implementation. "PBKDF2WithHmacSHA256" support
       is available since Java 8 and Android API level 26 (iss #561).
-    * For RSA-OAEP and RSA-OAEP-256 the cipher mode should be wither WRAP or
-      UNWRAP, not ENCRYPT or DECRYPT. Otherwise it will throw an exception when
-      used with a FIPS provider (iss #564).
+    * For "RSA-OAEP" and "RSA-OAEP-256" the cipher mode should be either WRAP
+      or UNWRAP, not ENCRYPT or DECRYPT. Otherwise it will throw an exception
+      when used with a FIPS provider (iss #564).
