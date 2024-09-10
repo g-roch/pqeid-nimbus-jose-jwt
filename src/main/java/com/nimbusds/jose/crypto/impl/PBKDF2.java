@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import java.security.spec.InvalidKeySpecException;
 
 
@@ -115,6 +116,8 @@ public class PBKDF2 {
 	 *                       integer.
 	 * @param prfParams      The Pseudo-Random Function (PRF) parameters.
 	 *                       Must not be {@code null}.
+	 * @param jcaProvider    The JCA provider, {@code null} if not
+	 *                       specified.
 	 *
 	 * @return The derived secret key (with "AES" algorithm).
 	 *
@@ -123,7 +126,8 @@ public class PBKDF2 {
 	public static SecretKey deriveKey(final byte[] password,
 					  final byte[] formattedSalt,
 					  final int iterationCount,
-					  final PRFParams prfParams)
+					  final PRFParams prfParams,
+					  final Provider jcaProvider)
 		throws JOSEException {
 		
 		if (formattedSalt == null) {
@@ -136,7 +140,12 @@ public class PBKDF2 {
 		int keyLengthInBits =  ByteUtils.bitLength(prfParams.getDerivedKeyByteLength());
 		PBEKeySpec spec = new PBEKeySpec(new String(password, StandardCharsets.UTF_8).toCharArray(), formattedSalt, iterationCount, keyLengthInBits);
 		try {
-			SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2With" + prfParams.getMACAlgorithm());
+			final SecretKeyFactory skf;
+			if (jcaProvider != null) {
+				skf = SecretKeyFactory.getInstance("PBKDF2With" + prfParams.getMACAlgorithm(), jcaProvider);
+			} else {
+				skf = SecretKeyFactory.getInstance("PBKDF2With" + prfParams.getMACAlgorithm());
+			}
 			return new SecretKeySpec(skf.generateSecret(spec).getEncoded(), "AES");
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
 			throw new JOSEException(ex.getLocalizedMessage(), ex);

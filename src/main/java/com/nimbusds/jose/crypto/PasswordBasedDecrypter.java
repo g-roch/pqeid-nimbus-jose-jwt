@@ -62,7 +62,7 @@ import java.util.Set;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2023-12-03
+ * @version 2024-09-10
  */
 @ThreadSafe
 public class PasswordBasedDecrypter extends PasswordBasedCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
@@ -196,7 +196,7 @@ public class PasswordBasedDecrypter extends PasswordBasedCryptoProvider implemen
 		final JWEAlgorithm alg = JWEHeaderValidation.getAlgorithmAndEnsureNotNull(header);
 		final byte[] formattedSalt = PBKDF2.formatSalt(alg, salt);
 		final PRFParams prfParams = PRFParams.resolve(alg, getJCAContext().getMACProvider());
-		final SecretKey psKey = PBKDF2.deriveKey(getPassword(), formattedSalt, iterationCount, prfParams);
+		final SecretKey psKey = PBKDF2.deriveKey(getPassword(), formattedSalt, iterationCount, prfParams, getJCAContext().getProvider());
 
 		final SecretKey cek = AESKW.unwrapCEK(psKey, encryptedKey.decode(), getJCAContext().getKeyEncryptionProvider());
 

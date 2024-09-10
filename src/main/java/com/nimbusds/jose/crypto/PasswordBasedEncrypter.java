@@ -17,14 +17,14 @@
 
 package com.nimbusds.jose.crypto;
 
-import java.util.Arrays;
-import javax.crypto.SecretKey;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.impl.*;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.StandardCharset;
 import net.jcip.annotations.ThreadSafe;
+
+import javax.crypto.SecretKey;
+import java.util.Arrays;
 
 
 /**
@@ -61,7 +61,7 @@ import net.jcip.annotations.ThreadSafe;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2023-09-10
+ * @version 2024-09-10
  */
 @ThreadSafe
 public class PasswordBasedEncrypter extends PasswordBasedCryptoProvider implements JWEEncrypter {
@@ -172,7 +172,7 @@ public class PasswordBasedEncrypter extends PasswordBasedCryptoProvider implemen
 		getJCAContext().getSecureRandom().nextBytes(salt);
 		final byte[] formattedSalt = PBKDF2.formatSalt(alg, salt);
 		final PRFParams prfParams = PRFParams.resolve(alg, getJCAContext().getMACProvider());
-		final SecretKey psKey = PBKDF2.deriveKey(getPassword(), formattedSalt, iterationCount, prfParams);
+		final SecretKey psKey = PBKDF2.deriveKey(getPassword(), formattedSalt, iterationCount, prfParams, getJCAContext().getProvider());
 
 		// We need to work on the header
 		final JWEHeader updatedHeader = new JWEHeader.Builder(header).

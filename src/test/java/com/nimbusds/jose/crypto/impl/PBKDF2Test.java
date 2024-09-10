@@ -150,7 +150,7 @@ public class PBKDF2Test extends TestCase {
 		final int iterationCount = 4096;
 		final int dkLen = 16;
 
-		SecretKey secretKey = PBKDF2.deriveKey(PASSWORD_BYTES, FORMATTED_SALT_BYTES, iterationCount, new PRFParams("HmacSHA256", null, dkLen));
+		SecretKey secretKey = PBKDF2.deriveKey(PASSWORD_BYTES, FORMATTED_SALT_BYTES, iterationCount, new PRFParams("HmacSHA256", null, dkLen), null);
 
 		assertEquals(dkLen, secretKey.getEncoded().length);
 
@@ -168,7 +168,7 @@ public class PBKDF2Test extends TestCase {
 		final int dkLen = 16;
 		
 		try {
-			PBKDF2.deriveKey(PASSWORD_BYTES, null, iterationCount, new PRFParams("HmacSHA256", null, dkLen));
+			PBKDF2.deriveKey(PASSWORD_BYTES, null, iterationCount, new PRFParams("HmacSHA256", null, dkLen), null);
 			fail();
 		} catch (JOSEException e) {
 			assertEquals("The formatted salt must not be null", e.getMessage());
@@ -182,7 +182,7 @@ public class PBKDF2Test extends TestCase {
 		final int dkLen = 16;
 
 		try {
-			PBKDF2.deriveKey(PASSWORD_BYTES, FORMATTED_SALT_BYTES, iterationCount, new PRFParams("HmacSHA256", null, dkLen));
+			PBKDF2.deriveKey(PASSWORD_BYTES, FORMATTED_SALT_BYTES, iterationCount, new PRFParams("HmacSHA256", null, dkLen), null);
 			fail();
 		} catch (JOSEException e) {
 			assertEquals("The iteration count must be greater than 0", e.getMessage());
