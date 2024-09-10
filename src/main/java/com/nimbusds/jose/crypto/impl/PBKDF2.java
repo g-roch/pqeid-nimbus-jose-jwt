@@ -18,33 +18,31 @@
 package com.nimbusds.jose.crypto.impl;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jose.util.IntegerUtils;
 import com.nimbusds.jose.util.StandardCharset;
 
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 
 /**
- * Password-Based Key Derivation Function 2 (PBKDF2) utilities. Provides static
- * methods to generate Key Encryption Keys (KEK) from passwords. Adopted from
- * jose4j by Brian Campbell.
+ * Password-Based Key Derivation Function 2 (PBKDF2) utilities.
  *
  * @author Brian Campbell
- * @author Yavor Vassilev
+ * @author Pere Bueno Yerbes
  * @author Vladimir Dzhuvinov
- * @version 2021-07-03
+ * @version 2024-09-10
  */
 public class PBKDF2 {
 	
@@ -135,7 +133,7 @@ public class PBKDF2 {
 		if (iterationCount < 1) {
 			throw new JOSEException("The iteration count must be greater than 0");
 		}
-		int keyLengthInBits =  prfParams.getDerivedKeyByteLength() * 8;
+		int keyLengthInBits =  ByteUtils.bitLength(prfParams.getDerivedKeyByteLength());
 		PBEKeySpec spec = new PBEKeySpec(new String(password, StandardCharsets.UTF_8).toCharArray(), formattedSalt, iterationCount, keyLengthInBits);
 		try {
 			SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2With" + prfParams.getMACAlgorithm());
@@ -154,7 +152,7 @@ public class PBKDF2 {
 	 *                       integer.
 	 * @param blockIndex     The block index.
 	 * @param prf            The pseudo-random function (HMAC). Must not be
-	 *                       {@code null.
+	 *                       {@code null}.
 	 *
 	 * @return The block.
 	 *
@@ -202,7 +200,5 @@ public class PBKDF2 {
 	/**
 	 * Prevents public instantiation.
 	 */
-	private PBKDF2() {
-
-	}
+	private PBKDF2() {}
 }

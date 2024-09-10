@@ -19,6 +19,7 @@ package com.nimbusds.jose.crypto.impl;
 
 
 import java.security.Provider;
+import java.util.Objects;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
@@ -30,7 +31,7 @@ import net.jcip.annotations.Immutable;
  * Based Key Derivation Function 2 (PBKDF2).
  *
  * @author Vladimir Dzhuvinov
- * @version 2015-05-26
+ * @version 2024-09-10
  */
 @Immutable
 public final class PRFParams {
@@ -64,8 +65,8 @@ public final class PRFParams {
 	 * @param dkLen       The byte length of the key to derive.
 
 	 */
-	public PRFParams(String jcaMacAlg, Provider macProvider, int dkLen) {
-		this.jcaMacAlg = jcaMacAlg;
+	public PRFParams(final String jcaMacAlg, final Provider macProvider, final int dkLen) {
+		this.jcaMacAlg = Objects.requireNonNull(jcaMacAlg);
 		this.macProvider = macProvider;
 		this.dkLen = dkLen;
 	}
@@ -117,8 +118,7 @@ public final class PRFParams {
 	 *
 	 * @throws JOSEException If the JWE algorithm is not supported.
 	 */
-	public static PRFParams resolve(final JWEAlgorithm alg,
-					   final Provider macProvider)
+	public static PRFParams resolve(final JWEAlgorithm alg, final Provider macProvider)
 		throws JOSEException {
 
 		final String jcaMagAlg;
