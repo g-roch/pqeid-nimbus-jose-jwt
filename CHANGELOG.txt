@@ -1676,7 +1676,7 @@ version 9.40 (2024-06-06)
     * Fixes regression, JWTClaimsSet.Builder.build() must not by default
       serialise claims with null values (iss #549).
 
-9.41 (2024-09-09)
+9.41 (2024-09-10)
     * JWEHeader receives typed support for the "iss" (issuer), "sub" (subject)
       and "aud" (audience) claims as replicated JWE header parameters.
     * For RSA-OAEP and RSA-OAEP-256 the cipher mode should be wither WRAP or

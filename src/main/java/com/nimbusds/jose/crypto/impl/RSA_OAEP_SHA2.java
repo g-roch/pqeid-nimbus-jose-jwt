@@ -18,6 +18,13 @@
 package com.nimbusds.jose.crypto.impl;
 
 
+import com.nimbusds.jose.JOSEException;
+import net.jcip.annotations.ThreadSafe;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
@@ -25,16 +32,6 @@ import java.security.Provider;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.MGF1ParameterSpec;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
-import javax.crypto.spec.SecretKeySpec;
-
-import net.jcip.annotations.ThreadSafe;
-
-import com.nimbusds.jose.JOSEException;
 
 
 /**
@@ -44,7 +41,8 @@ import com.nimbusds.jose.JOSEException;
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
  * @author Peter Laurina
- * @version 2021-09-24
+ * @author Pankaj Yadav
+ * @version 2024-09-10
  */
 @ThreadSafe
 public class RSA_OAEP_SHA2 {
@@ -133,16 +131,12 @@ public class RSA_OAEP_SHA2 {
 			return cipher.wrap(cek);
 
 		} catch (InvalidKeyException e) {
-			if(512 == shaBitSize){
-				throw new JOSEException(e.getMessage(), e);
-			}
-			else{
-				throw new JOSEException("RSA block size exception: The RSA key is too short, use a longer one", e);
-			}
+			throw new JOSEException("Encryption failed due to invalid RSA key for SHA-" + shaBitSize + ": "
+				+ "The RSA key may be too short, use a longer key", e);
 		} catch (Exception e) {
 			// java.security.NoSuchAlgorithmException
 			// java.security.NoSuchPaddingException
-			// java.security.InvalidKeyException
+			// javax.crypto.IllegalBlockSizeException
 			// javax.crypto.BadPaddingException
 			throw new JOSEException(e.getMessage(), e);
 		}

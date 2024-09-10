@@ -27,7 +27,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -252,18 +251,19 @@ public class RSA_OAEP_SHA2_Test extends TestCase {
 			JWEObject jwe = new JWEObject(
 				new JWEHeader(jweAlg, EncryptionMethod.A256CBC_HS512),
 				new Payload("Hello, world!"));
-			
+
 			try {
 				jwe.encrypt(new RSAEncrypter(publicKey));
 				fail();
 			} catch (JOSEException e) {
-				if (JWEAlgorithm.RSA_OAEP_256.equals(jweAlg) || JWEAlgorithm.RSA_OAEP_384.equals(jweAlg)) {
-					assertEquals("RSA block size exception: The RSA key is too short, use a longer one", e.getMessage());
-					assertTrue(e.getCause() instanceof InvalidKeyException);
-				} else {
-					assertEquals("Key is too short for encryption using OAEPPadding with SHA-512 and MGF1SHA-512", e.getMessage());
-					assertTrue(e.getCause() instanceof InvalidKeyException);
+				if (JWEAlgorithm.RSA_OAEP_256.equals(jweAlg)) {
+					assertEquals("Encryption failed due to invalid RSA key for SHA-256: The RSA key may be too short, use a longer key", e.getMessage());
+				} else if (JWEAlgorithm.RSA_OAEP_384.equals(jweAlg)) {
+					assertEquals("Encryption failed due to invalid RSA key for SHA-384: The RSA key may be too short, use a longer key", e.getMessage());
+				} else if (JWEAlgorithm.RSA_OAEP_512.equals(jweAlg)) {
+					assertEquals("Encryption failed due to invalid RSA key for SHA-512: The RSA key may be too short, use a longer key", e.getMessage());
 				}
+				assertTrue(e.getCause() instanceof InvalidKeyException);
 			}
 		}
 	}
