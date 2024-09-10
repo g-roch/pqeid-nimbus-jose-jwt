@@ -20,8 +20,13 @@ package com.nimbusds.jose.crypto.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.nimbusds.jose.JOSEException;
@@ -130,73 +135,14 @@ public class PBKDF2 {
 		if (iterationCount < 1) {
 			throw new JOSEException("The iteration count must be greater than 0");
 		}
-
-		SecretKey macKey = new SecretKeySpec(password, prfParams.getMACAlgorithm());
-
-		Mac prf = HMAC.getInitMac(macKey, prfParams.getMacProvider());
-
-		int hLen = prf.getMacLength();
-
-		//  1. If dkLen > (2^32 - 1) * hLen, output "derived key too long" and
-		//     stop.
-		if (prfParams.getDerivedKeyByteLength() > MAX_DERIVED_KEY_LENGTH) {
-			throw new JOSEException("Derived key too long: " + prfParams.getDerivedKeyByteLength());
+		int keyLengthInBits =  prfParams.getDerivedKeyByteLength() * 8;
+		PBEKeySpec spec = new PBEKeySpec(new String(password, StandardCharsets.UTF_8).toCharArray(), formattedSalt, iterationCount, keyLengthInBits);
+		try {
+			SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2With" + prfParams.getMACAlgorithm());
+			return new SecretKeySpec(skf.generateSecret(spec).getEncoded(), "AES");
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
+			throw new JOSEException(ex.getLocalizedMessage(), ex);
 		}
-
-		//  2. Let l be the number of hLen-octet blocks in the derived key,
-		//     rounding up, and let r be the number of octets in the last
-		//     block:
-		//
-		//               l = CEIL (dkLen / hLen) ,
-		//               r = dkLen - (l - 1) * hLen .
-		//
-		//     Here, CEIL (x) is the "ceiling" function, i.e. the smallest
-		//     integer greater than, or equal to, x.
-		int l = (int) Math.ceil((double) prfParams.getDerivedKeyByteLength() / (double) hLen);
-		int r = prfParams.getDerivedKeyByteLength() - (l - 1) * hLen;
-
-		//  3. For each block of the derived key apply the function F defined
-		//     below to the password P, the salt S, the iteration count c, and
-		//     the block index to compute the block:
-		//
-		//               T_1 = F (P, S, c, 1) ,
-		//               T_2 = F (P, S, c, 2) ,
-		//               ...
-		//               T_l = F (P, S, c, l) ,
-		//
-		//     where the function F is defined as the exclusive-or sum of the
-		//     first c iterates of the underlying pseudorandom function PRF
-		//     applied to the password P and the concatenation of the salt S
-		//     and the block index i:
-		//
-		//               F (P, S, c, i) = U_1 \xor U_2 \xor ... \xor U_c
-		//
-		//     where
-		//
-		//               U_1 = PRF (P, S || INT (i)) ,
-		//               U_2 = PRF (P, U_1) ,
-		//               ...
-		//               U_c = PRF (P, U_{c-1}) .
-		//
-		//     Here, INT (i) is a four-octet encoding of the integer i, most
-		//     significant octet first.
-
-		//  4. Concatenate the blocks and extract the first dkLen octets to
-		//     produce a derived key DK:
-		//
-		//               DK = T_1 || T_2 ||  ...  || T_l<0..r-1>
-		//
-		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-		for (int i = 0; i < l; i++) {
-			byte[] block = extractBlock(formattedSalt, iterationCount, i + 1, prf);
-			if (i == (l - 1)) {
-				block = ByteUtils.subArray(block, 0, r);
-			}
-			byteArrayOutputStream.write(block, 0, block.length);
-		}
-
-		//  5. Output the derived key DK.
-		return new SecretKeySpec(byteArrayOutputStream.toByteArray(), "AES");
 	}
 
 
