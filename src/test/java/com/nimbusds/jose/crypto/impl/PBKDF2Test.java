@@ -18,20 +18,22 @@
 package com.nimbusds.jose.crypto.impl;
 
 
-import java.security.SecureRandom;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import static org.junit.Assert.assertArrayEquals;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jose.util.StandardCharset;
+import junit.framework.TestCase;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Provider;
+import java.security.SecureRandom;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertArrayEquals;
 
 
 /**
@@ -150,15 +152,23 @@ public class PBKDF2Test extends TestCase {
 		final int iterationCount = 4096;
 		final int dkLen = 16;
 
-		SecretKey secretKey = PBKDF2.deriveKey(PASSWORD_BYTES, FORMATTED_SALT_BYTES, iterationCount, new PRFParams("HmacSHA256", null, dkLen), null);
+		for (Provider jcaProvider: Arrays.asList(null, BouncyCastleProviderSingleton.getInstance())) {
 
-		assertEquals(dkLen, secretKey.getEncoded().length);
+			SecretKey secretKey = PBKDF2.deriveKey(
+				PASSWORD_BYTES,
+				FORMATTED_SALT_BYTES,
+				iterationCount,
+				new PRFParams("HmacSHA256", null, dkLen),
+				jcaProvider);
 
-		final byte[] expectedKey = {
-			(byte)110, (byte)171, (byte)169, (byte) 92, (byte)129, (byte) 92, (byte)109, (byte)117,
-			(byte)233, (byte)242, (byte)116, (byte)233, (byte)170, (byte) 14, (byte) 24, (byte) 75 };
-		
-		assertArrayEquals(expectedKey, secretKey.getEncoded());
+			assertEquals(dkLen, secretKey.getEncoded().length);
+
+			final byte[] expectedKey = {
+				(byte) 110, (byte) 171, (byte) 169, (byte) 92, (byte) 129, (byte) 92, (byte) 109, (byte) 117,
+				(byte) 233, (byte) 242, (byte) 116, (byte) 233, (byte) 170, (byte) 14, (byte) 24, (byte) 75};
+
+			assertArrayEquals(expectedKey, secretKey.getEncoded());
+		}
 	}
 	
 	
