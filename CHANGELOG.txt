@@ -1688,6 +1688,11 @@ version 9.40 (2024-06-06)
       when used with a FIPS provider (iss #564).
 
 9.41.1 (2024-09-12)
+    * Fixes JSONObjectUtils.parse((String)null) regression, must throw
+      ParseException, not NullPointerException. Regression introduced in 9.24
+      after dependency switch from JSON Smart to Gson (iss #557).
+    * Fixes JWKSet.parse((String)null) regression, must throw ParseException,
+      not NullPointerException (iss #557).
     * The ParseException thrown by X509CertChainUtils.parse(List<Base64>) must
       include the message from the underlying
       java.security.cert.CertificateException (iss #565).

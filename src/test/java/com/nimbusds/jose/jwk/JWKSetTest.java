@@ -98,7 +98,7 @@ public class JWKSetTest {
 			JWKSet.parse((String) null);
 			fail();
 		} catch (ParseException e) {
-			assertEquals("", e.getMessage());
+			assertEquals("The JSON object string must not be null", e.getMessage());
 		}
 	}
 

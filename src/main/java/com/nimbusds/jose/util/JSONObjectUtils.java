@@ -110,7 +110,11 @@ public class JSONObjectUtils {
 	 */
 	public static Map<String, Object> parse(final String s, final int sizeLimit)
 		throws ParseException {
-		
+
+		if (s == null) {
+			throw new ParseException("The JSON object string must not be null", 0);
+		}
+
 		if (s.trim().isEmpty()) {
 			throw new ParseException("Invalid JSON object", 0);
 		}
