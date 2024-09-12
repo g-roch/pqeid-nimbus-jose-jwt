@@ -18,6 +18,9 @@
 package com.nimbusds.jose.util;
 
 
+import com.nimbusds.jose.jwk.SampleCertificates;
+import junit.framework.TestCase;
+
 import java.io.File;
 import java.io.IOException;
 import java.security.KeyStore;
@@ -28,10 +31,6 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.*;
-
-import junit.framework.TestCase;
-
-import com.nimbusds.jose.jwk.SampleCertificates;
 
 
 public class X509CertChainUtilsTest extends TestCase {
@@ -49,8 +48,10 @@ public class X509CertChainUtilsTest extends TestCase {
 		byte[] randomBytes = new byte[1024];
 		new SecureRandom().nextBytes(randomBytes);
 
+		List<Base64> certChain = Collections.singletonList(Base64.encode(randomBytes));
+
                 try {
-                        X509CertChainUtils.parse(Collections.singletonList(Base64URL.encode(randomBytes)));
+                        X509CertChainUtils.parse(certChain);
 			fail();
                 } catch (ParseException e) {
 			assertEquals("Invalid X.509 certificate at position 0: Could not parse certificate: java.io.IOException: Empty input", e.getMessage());
