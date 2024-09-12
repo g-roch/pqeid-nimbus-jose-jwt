@@ -1686,3 +1686,8 @@ version 9.40 (2024-06-06)
     * For "RSA-OAEP" and "RSA-OAEP-256" the cipher mode should be either WRAP
       or UNWRAP, not ENCRYPT or DECRYPT. Otherwise it will throw an exception
       when used with a FIPS provider (iss #564).
+
+9.41.1 (2024-09-12)
+    * The ParseException thrown by X509CertChainUtils.parse(List<Base64>) must
+      include the message from the underlying
+      java.security.cert.CertificateException (iss #565).

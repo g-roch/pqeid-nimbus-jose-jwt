@@ -23,13 +23,11 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import junit.framework.TestCase;
 
@@ -44,6 +42,21 @@ public class X509CertChainUtilsTest extends TestCase {
 		
 		assertNull(X509CertChainUtils.toBase64List(null));
 	}
+
+
+	public void testParse_includeUnderlyingCertificateException() {
+
+		byte[] randomBytes = new byte[1024];
+		new SecureRandom().nextBytes(randomBytes);
+
+                try {
+                        X509CertChainUtils.parse(Collections.singletonList(Base64URL.encode(randomBytes)));
+			fail();
+                } catch (ParseException e) {
+			assertEquals("Invalid X.509 certificate at position 0: Could not parse certificate: java.io.IOException: Empty input", e.getMessage());
+			assertNull(e.getCause());
+		}
+        }
 	
 	
 	public void testParseSample()

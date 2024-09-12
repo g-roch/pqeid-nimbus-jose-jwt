@@ -18,6 +18,9 @@
 package com.nimbusds.jose.util;
 
 
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.openssl.PEMParser;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
@@ -32,15 +35,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.openssl.PEMParser;
-
 
 /**
  * X.509 certificate chain utilities.
  *
  * @author Vladimir Dzhuvinov
- * @version 2020-02-22
+ * @version 2024-09-12
  */
 public class X509CertChainUtils {
 
@@ -84,7 +84,7 @@ public class X509CertChainUtils {
 	
 	
 	/**
-	 * Parses a X.509 certificate chain from the specified Base64-encoded
+	 * Parses an X.509 certificate chain from the specified Base64-encoded
 	 * DER-encoded representation.
 	 *
 	 * @param b64List The Base64-encoded DER-encoded X.509 certificate
@@ -106,10 +106,11 @@ public class X509CertChainUtils {
 			
 			if (b64List.get(i)== null) continue; // skip
 			
-			X509Certificate cert = X509CertUtils.parse(b64List.get(i).decode());
-			
-			if (cert == null) {
-				throw new ParseException("Invalid X.509 certificate at position " + i, 0);
+			X509Certificate cert;
+			try {
+				cert = X509CertUtils.parseWithException(b64List.get(i).decode());
+			} catch (CertificateException e) {
+				throw new ParseException("Invalid X.509 certificate at position " + i + ": " + e.getMessage(), 0);
 			}
 			
 			out.add(cert);
@@ -142,7 +143,7 @@ public class X509CertChainUtils {
 	
 	
 	/**
-	 * Parses a X.509 certificate chain from the specified PEM-encoded
+	 * Parses an X.509 certificate chain from the specified PEM-encoded
 	 * representation. PEM-encoded objects that are not X.509 certificates
 	 * are ignored. Requires BouncyCastle.
 	 *
@@ -182,8 +183,8 @@ public class X509CertChainUtils {
 	
 	
 	/**
-	 * Stores a X.509 certificate chain into the specified Java trust (key)
-	 * store. The name (alias) for each certificate in the store is a
+	 * Stores an X.509 certificate chain into the specified Java trust
+	 * (key) store. The name (alias) for each certificate in the store is a
 	 * generated UUID.
 	 *
 	 * @param trustStore The trust (key) store. Must be initialised and not
