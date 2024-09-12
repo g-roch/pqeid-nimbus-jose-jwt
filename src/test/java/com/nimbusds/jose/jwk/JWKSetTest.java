@@ -92,6 +92,18 @@ public class JWKSetTest {
 
 
 	@Test
+	public void testParseNullString() {
+
+		try {
+			JWKSet.parse((String) null);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("", e.getMessage());
+		}
+	}
+
+
+	@Test
 	public void testParsePublicJWKSet()
 		throws Exception {
 
