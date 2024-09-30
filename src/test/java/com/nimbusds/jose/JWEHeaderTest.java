@@ -196,7 +196,7 @@ public class JWEHeaderTest extends TestCase {
 			.senderKeyID(skid)
 			.issuer("issuer")
 			.subject("subject")
-			.audience(Collections.singletonList("audience"))
+			.audience(Arrays.asList("audience1", "audience2"))
 			.customParam("xCustom", "+++")
 			.build();
 
@@ -244,7 +244,7 @@ public class JWEHeaderTest extends TestCase {
 
 		assertEquals("issuer", h.getIssuer());
 		assertEquals("subject", h.getSubject());
-		assertEquals(Collections.singletonList("audience"), h.getAudience());
+		assertEquals(Arrays.asList("audience1", "audience2"), h.getAudience());
 
 		assertEquals("+++", (String)h.getCustomParam("xCustom"));
 		assertEquals(1, h.getCustomParams().size());
@@ -315,7 +315,7 @@ public class JWEHeaderTest extends TestCase {
 
 		assertEquals("issuer", h.getIssuer());
 		assertEquals("subject", h.getSubject());
-		assertEquals(Collections.singletonList("audience"), h.getAudience());
+		assertEquals(Arrays.asList("audience1", "audience2"), h.getAudience());
 
 		assertEquals("+++", (String)h.getCustomParam("xCustom"));
 		assertEquals(1, h.getCustomParams().size());
