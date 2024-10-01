@@ -1696,3 +1696,7 @@ version 9.40 (2024-06-06)
     * The ParseException thrown by X509CertChainUtils.parse(List<Base64>) must
       include the message from the underlying
       java.security.cert.CertificateException (iss #565).
+
+9.41.2 (2024-10-01)
+    * JWEHeader must support the special case of an "aud" header value of type
+      string (iss #535).

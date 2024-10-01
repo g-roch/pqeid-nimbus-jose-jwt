@@ -76,7 +76,7 @@ import java.util.*;
  * </pre>
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-06-29
+ * @version 2024-10-01
  */
 @Immutable
 public final class JWEHeader extends CommonSEHeader {
@@ -1593,10 +1593,7 @@ public final class JWEHeader extends CommonSEHeader {
 				header = header.subject(JSONObjectUtils.getString(jsonObject, name));
 			} else if (HeaderParameterNames.AUDIENCE.equals(name)) {
 				if (jsonObject.get(name) instanceof String) {
-					String aud = JSONObjectUtils.getString(jsonObject, name);
-					if (aud != null) {
-						header = header.audience(Collections.singletonList(aud));
-					}
+					header = header.audience(Collections.singletonList(JSONObjectUtils.getString(jsonObject, name)));
 				} else {
 					header = header.audience(JSONObjectUtils.getStringList(jsonObject, name));
 				}

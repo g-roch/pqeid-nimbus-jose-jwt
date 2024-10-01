@@ -18,12 +18,6 @@
 package com.nimbusds.jose;
 
 
-import java.net.URI;
-import java.text.ParseException;
-import java.util.*;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -32,13 +26,18 @@ import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.JWTClaimNames;
+import junit.framework.TestCase;
+
+import java.net.URI;
+import java.text.ParseException;
+import java.util.*;
 
 
 /**
  * Tests JWE header parsing and serialisation.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-06-29
+ * @version 2024-10-01
  */
 public class JWEHeaderTest extends TestCase {
 
@@ -522,6 +521,54 @@ public class JWEHeaderTest extends TestCase {
 		assertTrue(h.getIncludedParams().contains(JWTClaimNames.EXPIRATION_TIME));
 		assertTrue(h.getIncludedParams().contains(JWTClaimNames.NOT_BEFORE));
 		assertEquals(25, h.getIncludedParams().size());
+	}
+
+
+	public void testAudienceHeaderSpecialCase() throws ParseException {
+
+		JWEHeader h = new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM)
+			.audience(Collections.singletonList("ABC"))
+			.build();
+
+		assertEquals(Collections.singletonList("ABC"), h.getAudience());
+
+		assertTrue(h.getIncludedParams().contains("aud"));
+
+		Map<String, Object> jsonObject = h.toJSONObject();
+		assertEquals("ABC", jsonObject.get("aud"));
+
+		h = JWEHeader.parse(jsonObject);
+		assertEquals(Collections.singletonList("ABC"), h.getAudience());
+	}
+
+
+	public void testParseAudienceHeaderNullValue() throws ParseException {
+
+		JWEHeader h = new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM)
+			.build();
+
+		Map<String, Object> jsonObject = h.toJSONObject();
+		jsonObject.put("aud", null);
+
+		h = JWEHeader.parse(jsonObject);
+		assertTrue(h.getAudience().isEmpty());
+	}
+
+
+	public void testParseAudienceHeaderNumberValue() {
+
+		JWEHeader h = new JWEHeader.Builder(JWEAlgorithm.RSA_OAEP_256, EncryptionMethod.A128GCM)
+			.build();
+
+		Map<String, Object> jsonObject = h.toJSONObject();
+		jsonObject.put("aud", 10);
+
+		try {
+			JWEHeader.parse(jsonObject);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Unexpected type of JSON object member aud", e.getMessage());
+		}
 	}
 
 
