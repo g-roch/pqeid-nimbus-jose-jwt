@@ -1463,8 +1463,12 @@ public final class JWEHeader extends CommonSEHeader {
 			o.put(HeaderParameterNames.SUBJECT, sub);
 		}
 
-		if (aud != null && !aud.isEmpty()) {
-			o.put(HeaderParameterNames.AUDIENCE, aud);
+		if (aud != null) {
+			if (aud.size() == 1) {
+				o.put(HeaderParameterNames.AUDIENCE, aud.get(0));
+			} else if (!aud.isEmpty()) {
+				o.put(HeaderParameterNames.AUDIENCE, aud);
+			}
 		}
 
 		return o;
@@ -1588,7 +1592,14 @@ public final class JWEHeader extends CommonSEHeader {
 			} else if (HeaderParameterNames.SUBJECT.equals(name)) {
 				header = header.subject(JSONObjectUtils.getString(jsonObject, name));
 			} else if (HeaderParameterNames.AUDIENCE.equals(name)) {
-				header = header.audience(JSONObjectUtils.getStringList(jsonObject, name));
+				if (jsonObject.get(name) instanceof String) {
+					String aud = JSONObjectUtils.getString(jsonObject, name);
+					if (aud != null) {
+						header = header.audience(Collections.singletonList(aud));
+					}
+				} else {
+					header = header.audience(JSONObjectUtils.getStringList(jsonObject, name));
+				}
 			} else {
 				header = header.customParam(name, jsonObject.get(name));
 			}
