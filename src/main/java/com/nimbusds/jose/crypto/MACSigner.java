@@ -26,7 +26,6 @@ import com.nimbusds.jose.crypto.impl.HMAC;
 import com.nimbusds.jose.crypto.impl.MACProvider;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jose.util.StandardCharset;
 import net.jcip.annotations.ThreadSafe;
 
@@ -74,7 +73,7 @@ public class MACSigner extends MACProvider implements JWSSigner {
 	public MACSigner(final byte[] secret)
 		throws KeyLengthException {
 
-		super(secret, getCompatibleAlgorithms(ByteUtils.bitLength(secret.length)));
+		super(secret);
 	}
 
 
@@ -106,15 +105,7 @@ public class MACSigner extends MACProvider implements JWSSigner {
 	public MACSigner(final SecretKey secretKey)
 		throws KeyLengthException {
 
-		super(
-			secretKey,
-			secretKey.getEncoded() != null ?
-				// Get the compatible HSxxx algs for the secret key length
-				getCompatibleAlgorithms(ByteUtils.bitLength(secretKey.getEncoded()))
-				:
-				// HSM-based SecretKey will not expose its key material, assume support for all algs
-				SUPPORTED_ALGORITHMS
-			);
+		super(secretKey);
 	}
 
 

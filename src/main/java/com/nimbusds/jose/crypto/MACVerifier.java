@@ -81,7 +81,7 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 	public MACVerifier(final byte[] secret)
 		throws JOSEException {
 
-		super(secret, getCompatibleAlgorithms(ByteUtils.bitLength(secret.length)));
+		super(secret);
 	}
 
 
@@ -145,11 +145,10 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 	 * @throws JOSEException If the secret length is shorter than the
 	 *                       minimum 256-bit requirement.
 	 */
-	public MACVerifier(final byte[] secret,
-			   final Set<String> defCritHeaders)
+	public MACVerifier(final byte[] secret, final Set<String> defCritHeaders)
 		throws JOSEException {
 
-		super(secret, SUPPORTED_ALGORITHMS);
+		super(secret);
 
 		critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
 	}
@@ -171,15 +170,7 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 			   final Set<String> defCritHeaders)
 		throws JOSEException {
 
-		super(
-			secretKey,
-			secretKey.getEncoded() != null ?
-				// Get the compatible HSxxx algs for the secret key length
-				getCompatibleAlgorithms(ByteUtils.bitLength(secretKey.getEncoded()))
-				:
-				// HSM-based SecretKey will not expose its key material, assume support for all algs
-				SUPPORTED_ALGORITHMS
-		);
+		super(secretKey);
 
 		critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
 	}

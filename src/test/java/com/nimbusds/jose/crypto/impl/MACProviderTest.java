@@ -19,6 +19,7 @@ package com.nimbusds.jose.crypto.impl;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.KeyLengthException;
+import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jose.util.StandardCharset;
 import junit.framework.TestCase;
 import org.junit.Assert;
@@ -46,14 +47,14 @@ public class MACProviderTest {
         static class RegularProvider extends MACProvider {
 
                 RegularProvider(final SecretKey secretKey) throws KeyLengthException {
-                        super(secretKey, Collections.singleton(JWSAlgorithm.HS256));
+                        super(secretKey);
                 }
         }
 
         static class HSMProvider extends MACProvider {
 
                 HSMProvider(final SecretKey secretKey) throws KeyLengthException {
-                        super(secretKey, Collections.singleton(JWSAlgorithm.HS256));
+                        super(secretKey);
                 }
         }
 
@@ -106,7 +107,7 @@ public class MACProviderTest {
         @Test
         public void testSecretKeyConstructor_secretKeyTooShort() {
 
-                byte[] keyBytes = new byte[(256 - 1) / 8];
+                byte[] keyBytes = new byte[ByteUtils.byteLength(256) - 1];
                 new SecureRandom().nextBytes(keyBytes);
                 SecretKey secretKey = new SecretKeySpec(keyBytes, "HMACSHA256");
 
@@ -123,7 +124,7 @@ public class MACProviderTest {
         public void testSecretKeyConstructor_256BitSecretKey()
                 throws KeyLengthException {
 
-                byte[] keyBytes = new byte[256 / 8];
+                byte[] keyBytes = new byte[ByteUtils.byteLength(256)];
                 new SecureRandom().nextBytes(keyBytes);
                 SecretKey secretKey = new SecretKeySpec(keyBytes, "HMACSHA256");
 

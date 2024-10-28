@@ -163,19 +163,16 @@ public abstract class MACProvider extends BaseJWSProvider {
 	/**
 	 * Creates a new Message Authentication (MAC) provider.
 	 *
-	 * @param secret        The secret. Must be at least 256 bits long and
-	 *                      not {@code null}.
-	 * @param supportedAlgs The supported HMAC JWS algorithms. Must not be
-	 *                      {@code null}.
+	 * @param secret The secret. Must be at least 256 bits long and not
+	 *               {@code null}.
 	 *
 	 * @throws KeyLengthException If the secret length is shorter than the
 	 *                            minimum 256-bit requirement.
 	 */
-	protected MACProvider(final byte[] secret,
-			      final Set<JWSAlgorithm> supportedAlgs)
+	protected MACProvider(final byte[] secret)
 		throws KeyLengthException {
 
-		super(supportedAlgs);
+		super(getCompatibleAlgorithms(ByteUtils.bitLength(secret.length)));
 
 		if (ByteUtils.bitLength(secret) < 256) {
 			// First minimum check. The sign and verify methods
@@ -192,19 +189,24 @@ public abstract class MACProvider extends BaseJWSProvider {
 	/**
 	 * Creates a new Message Authentication (MAC) provider.
 	 *
-	 * @param secretKey     The secret key. Must be at least 256 bits long
-	 *                      and not {@code null}.
-	 * @param supportedAlgs The supported HMAC JWS algorithms. Must not be
-	 *                      {@code null}.
+	 * @param secretKey The secret key. Must be at least 256 bits long and
+	 *                  not {@code null}.S algorithms. Must not be
+	 *                  {@code null}.
 	 *
 	 * @throws KeyLengthException If the secret length is shorter than the
 	 *                            minimum 256-bit requirement.
 	 */
-	protected MACProvider(final SecretKey secretKey,
-			      final Set<JWSAlgorithm> supportedAlgs)
+	protected MACProvider(final SecretKey secretKey)
 		throws KeyLengthException {
 
-		super(supportedAlgs);
+		super(
+			secretKey.getEncoded() != null ?
+			// Get the compatible HSxxx algs for the secret key length
+			getCompatibleAlgorithms(ByteUtils.bitLength(secretKey.getEncoded()))
+			:
+			// HSM-based SecretKey will not expose its key material, assume support for all algs
+			SUPPORTED_ALGORITHMS
+		);
 
 		// An HSM based key will not expose its material and return null
 		if (secretKey.getEncoded() != null && ByteUtils.bitLength(secretKey.getEncoded()) < 256) {
