@@ -1710,3 +1710,4 @@ version 9.40 (2024-06-06)
     * MACVerifier must enforce a minimum secret key length of 384 bits for
       HS384 and of 512 bits for HS512 (iss #563).
     * OctetSequenceKeyGenerator must support "exp", "nbf" and "iat" (iss #575).
+    * Updates to com.google.crypto.tink:tink:1.15.0
