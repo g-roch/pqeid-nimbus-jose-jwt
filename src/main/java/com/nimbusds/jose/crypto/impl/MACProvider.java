@@ -21,6 +21,7 @@ package com.nimbusds.jose.crypto.impl;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.KeyLengthException;
+import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jose.util.StandardCharset;
 
 import javax.crypto.SecretKey;
@@ -44,7 +45,7 @@ import java.util.Set;
  * 
  * @author Vladimir Dzhuvinov
  * @author Ulrich Winter
- * @version 2019-09-14
+ * @version 2024-10-28
  */
 public abstract class MACProvider extends BaseJWSProvider {
 
@@ -61,6 +62,61 @@ public abstract class MACProvider extends BaseJWSProvider {
 		algs.add(JWSAlgorithm.HS384);
 		algs.add(JWSAlgorithm.HS512);
 		SUPPORTED_ALGORITHMS = Collections.unmodifiableSet(algs);
+	}
+
+
+	/**
+	 * Returns the compatible JWS HMAC algorithms for the specified secret
+	 * length.
+	 *
+	 * @param secretLength The secret length in bits. Must not be negative.
+	 *
+	 * @return The compatible HMAC algorithms, empty set if the secret
+	 *         length is too short for any algorithm.
+	 */
+	public static Set<JWSAlgorithm> getCompatibleAlgorithms(final int secretLength) {
+
+		Set<JWSAlgorithm> hmacAlgs = new LinkedHashSet<>();
+
+		if (secretLength >= 256)
+			hmacAlgs.add(JWSAlgorithm.HS256);
+
+		if (secretLength >= 384)
+			hmacAlgs.add(JWSAlgorithm.HS384);
+
+		if (secretLength >= 512)
+			hmacAlgs.add(JWSAlgorithm.HS512);
+
+		return Collections.unmodifiableSet(hmacAlgs);
+	}
+
+
+	/**
+	 * Returns the minimal required secret length for the specified HMAC
+	 * JWS algorithm.
+	 *
+	 * @param alg The HMAC JWS algorithm. Must be
+	 *            {@link #SUPPORTED_ALGORITHMS supported} and not
+	 *            {@code null}.
+	 *
+	 * @return The minimal required secret length, in bits.
+	 *
+	 * @throws JOSEException If the algorithm is not supported.
+	 */
+	public static int getMinRequiredSecretLength(final JWSAlgorithm alg)
+		throws JOSEException {
+
+		if (JWSAlgorithm.HS256.equals(alg)) {
+			return 256;
+		} else if (JWSAlgorithm.HS384.equals(alg)) {
+			return 384;
+		} else if (JWSAlgorithm.HS512.equals(alg)) {
+			return 512;
+		} else {
+			throw new JOSEException(AlgorithmSupportMessage.unsupportedJWSAlgorithm(
+				alg,
+				SUPPORTED_ALGORITHMS));
+		}
 	}
 
 
@@ -109,7 +165,7 @@ public abstract class MACProvider extends BaseJWSProvider {
 	 *
 	 * @param secret        The secret. Must be at least 256 bits long and
 	 *                      not {@code null}.
-	 * @param supportedAlgs The supported HMAC algorithms. Must not be
+	 * @param supportedAlgs The supported HMAC JWS algorithms. Must not be
 	 *                      {@code null}.
 	 *
 	 * @throws KeyLengthException If the secret length is shorter than the
@@ -121,7 +177,10 @@ public abstract class MACProvider extends BaseJWSProvider {
 
 		super(supportedAlgs);
 
-		if (secret.length < 256 / 8) {
+		if (ByteUtils.bitLength(secret) < 256) {
+			// First minimum check. The sign and verify methods
+			// check whether the secret matches the concrete HMAC
+			// algorithm secret length requirement
 			throw new KeyLengthException("The secret length must be at least 256 bits");
 		}
 
@@ -135,7 +194,7 @@ public abstract class MACProvider extends BaseJWSProvider {
 	 *
 	 * @param secretKey     The secret key. Must be at least 256 bits long
 	 *                      and not {@code null}.
-	 * @param supportedAlgs The supported HMAC algorithms. Must not be
+	 * @param supportedAlgs The supported HMAC JWS algorithms. Must not be
 	 *                      {@code null}.
 	 *
 	 * @throws KeyLengthException If the secret length is shorter than the
@@ -148,7 +207,10 @@ public abstract class MACProvider extends BaseJWSProvider {
 		super(supportedAlgs);
 
 		// An HSM based key will not expose its material and return null
-		if (secretKey.getEncoded() != null && secretKey.getEncoded().length < 256 / 8) {
+		if (secretKey.getEncoded() != null && ByteUtils.bitLength(secretKey.getEncoded()) < 256) {
+			// First minimum check. The sign and verify methods
+			// check whether the secret matches the concrete HMAC
+			// algorithm secret length requirement
 			throw new KeyLengthException("The secret length must be at least 256 bits");
 		}
 
@@ -207,5 +269,33 @@ public abstract class MACProvider extends BaseJWSProvider {
 		}
 
 		return new String(secret, StandardCharset.UTF_8);
+	}
+
+
+	/**
+	 * Ensures the secret length satisfies the minimum required for the
+	 * specified HMAC JWS algorithm.
+	 *
+	 * @param alg The HMAC JWS algorithm. Must be
+	 *            {@link #SUPPORTED_ALGORITHMS supported} and not
+	 *            {@code null}.
+	 *
+	 * @throws JOSEException      If the algorithm is not supported.
+	 * @throws KeyLengthException If the secret length is shorter than the
+	 *                            minimum required.
+	 */
+	protected void ensureSecretLengthSatisfiesAlgorithm(final JWSAlgorithm alg)
+		throws JOSEException {
+
+		if (getSecret() == null) {
+			// Secret not available (HSM)
+			return;
+		}
+
+		final int minRequiredBitLength = getMinRequiredSecretLength(alg);
+
+		if (ByteUtils.bitLength(getSecret()) < minRequiredBitLength) {
+			throw new KeyLengthException("The secret length for " + alg + " must be at least " + minRequiredBitLength + " bits");
+		}
 	}
 }

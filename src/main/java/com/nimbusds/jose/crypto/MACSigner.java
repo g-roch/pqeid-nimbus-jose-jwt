@@ -18,8 +18,10 @@
 package com.nimbusds.jose.crypto;
 
 
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.impl.AlgorithmSupportMessage;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSSigner;
+import com.nimbusds.jose.KeyLengthException;
 import com.nimbusds.jose.crypto.impl.HMAC;
 import com.nimbusds.jose.crypto.impl.MACProvider;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
@@ -29,9 +31,6 @@ import com.nimbusds.jose.util.StandardCharset;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.crypto.SecretKey;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 
 
@@ -57,65 +56,10 @@ import java.util.Set;
  * 
  * @author Vladimir Dzhuvinov
  * @author Ulrich Winter
- * @version 2023-09-14
+ * @version 2024-10-28
  */
 @ThreadSafe
 public class MACSigner extends MACProvider implements JWSSigner {
-
-
-	/**
-	 * Returns the minimal required secret length for the specified HMAC
-	 * JWS algorithm.
-	 *
-	 * @param alg The HMAC JWS algorithm. Must be
-	 *            {@link #SUPPORTED_ALGORITHMS supported} and not
-	 *            {@code null}.
-	 *
-	 * @return The minimal required secret length, in bits.
-	 *
-	 * @throws JOSEException If the algorithm is not supported.
-	 */
-	public static int getMinRequiredSecretLength(final JWSAlgorithm alg)
-		throws JOSEException {
-
-		if (JWSAlgorithm.HS256.equals(alg)) {
-			return 256;
-		} else if (JWSAlgorithm.HS384.equals(alg)) {
-			return 384;
-		} else if (JWSAlgorithm.HS512.equals(alg)) {
-			return 512;
-		} else {
-			throw new JOSEException(AlgorithmSupportMessage.unsupportedJWSAlgorithm(
-				alg,
-				SUPPORTED_ALGORITHMS));
-		}
-	}
-
-
-	/**
-	 * Returns the compatible JWS HMAC algorithms for the specified secret
-	 * length.
-	 *
-	 * @param secretLength The secret length in bits. Must not be negative.
-	 *
-	 * @return The compatible HMAC algorithms, empty set if the secret
-	 *         length is too short for any algorithm.
-	 */
-	public static Set<JWSAlgorithm> getCompatibleAlgorithms(final int secretLength) {
-
-		Set<JWSAlgorithm> hmacAlgs = new LinkedHashSet<>();
-
-		if (secretLength >= 256)
-			hmacAlgs.add(JWSAlgorithm.HS256);
-
-		if (secretLength >= 384)
-			hmacAlgs.add(JWSAlgorithm.HS384);
-
-		if (secretLength >= 512)
-			hmacAlgs.add(JWSAlgorithm.HS512);
-
-		return Collections.unmodifiableSet(hmacAlgs);
-	}
 
 
 	/**
@@ -194,14 +138,7 @@ public class MACSigner extends MACProvider implements JWSSigner {
 	public Base64URL sign(final JWSHeader header, final byte[] signingInput)
 		throws JOSEException {
 
-		if (getSecret() != null) {
-
-			final int minRequiredLength = getMinRequiredSecretLength(header.getAlgorithm());
-
-			if (getSecret().length < ByteUtils.byteLength(minRequiredLength)) {
-				throw new KeyLengthException("The secret length for " + header.getAlgorithm() + " must be at least " + minRequiredLength + " bits");
-			}
-		}
+		ensureSecretLengthSatisfiesAlgorithm(header.getAlgorithm());
 
 		String jcaAlg = getJCAAlgorithmName(header.getAlgorithm());
 		byte[] hmac = HMAC.compute(jcaAlg, getSecretKey(), signingInput, getJCAContext().getProvider());

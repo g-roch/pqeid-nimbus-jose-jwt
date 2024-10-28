@@ -28,6 +28,7 @@ import com.nimbusds.jose.crypto.impl.MACProvider;
 import com.nimbusds.jose.crypto.utils.ConstantTimeUtils;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jose.util.StandardCharset;
 import net.jcip.annotations.ThreadSafe;
 
@@ -56,7 +57,7 @@ import java.util.Set;
  <p>Tested with the AWS CloudHSM JCE provider.
  * 
  * @author Vladimir Dzhuvinov
- * @version 2016-06-26
+ * @version 2024-10-28
  */
 @ThreadSafe
 public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHeaderParamsAware {
@@ -80,7 +81,7 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 	public MACVerifier(final byte[] secret)
 		throws JOSEException {
 
-		this(secret, null);
+		super(secret, getCompatibleAlgorithms(ByteUtils.bitLength(secret.length)));
 	}
 
 
@@ -170,7 +171,15 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 			   final Set<String> defCritHeaders)
 		throws JOSEException {
 
-		super(secretKey, SUPPORTED_ALGORITHMS);
+		super(
+			secretKey,
+			secretKey.getEncoded() != null ?
+				// Get the compatible HSxxx algs for the secret key length
+				getCompatibleAlgorithms(ByteUtils.bitLength(secretKey.getEncoded()))
+				:
+				// HSM-based SecretKey will not expose its key material, assume support for all algs
+				SUPPORTED_ALGORITHMS
+		);
 
 		critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
 	}
@@ -215,6 +224,8 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 		              final byte[] signedContent, 
 		              final Base64URL signature)
 		throws JOSEException {
+
+		ensureSecretLengthSatisfiesAlgorithm(header.getAlgorithm());
 
 		if (! critPolicy.headerPasses(header)) {
 			return false;

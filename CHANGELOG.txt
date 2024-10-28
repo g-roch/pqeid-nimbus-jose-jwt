@@ -1701,5 +1701,9 @@ version 9.40 (2024-06-06)
     * JWEHeader must support the special case of an "aud" header value of type
       string (iss #569).
 
-9.41.3 (2024-10-28)
+9.42 (2024-10-28)
+    * Promotes getCompatibleAlgorithms from MACSigner to MACProvider.
+    * Promotes getMinRequiredSecretLength from MACSigner to MACProvider.
+    * MACVerifier must enforce a minimum secret key length of 384 bits for
+      HS384 and of 512 bits for HS512 (iss #563).
     * OctetSequenceKeyGenerator must support "exp", "nbf" and "iat" (iss #575).
