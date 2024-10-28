@@ -18,17 +18,19 @@
 package com.nimbusds.jose.jwk.gen;
 
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWEAlgorithm;
+import com.nimbusds.jose.jwk.KeyOperation;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
+import com.nimbusds.jose.jwk.ThumbprintUtils;
+import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jwt.util.DateUtils;
+import junit.framework.TestCase;
+
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.jwk.*;
-import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jwt.util.DateUtils;
-
-import junit.framework.TestCase;
 
 
 public class OctetSequenceKeyGeneratorTest extends TestCase {
@@ -159,5 +161,19 @@ public class OctetSequenceKeyGeneratorTest extends TestCase {
 			OctetSequenceKey k = gen.generate();
 			assertTrue(keys.add(k.getKeyValue()));
 		}
+	}
+
+
+	public void testGenWithTimestamps() throws JOSEException {
+
+		OctetSequenceKey octJWK = new OctetSequenceKeyGenerator(128)
+			.expirationTime(EXP)
+			.notBeforeTime(NBF)
+			.issueTime(IAT)
+			.generate();
+
+		assertEquals(EXP, octJWK.getExpirationTime());
+		assertEquals(NBF, octJWK.getNotBeforeTime());
+		assertEquals(IAT, octJWK.getIssueTime());
 	}
 }

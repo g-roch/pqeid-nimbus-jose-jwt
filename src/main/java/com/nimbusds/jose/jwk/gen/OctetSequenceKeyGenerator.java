@@ -30,7 +30,7 @@ import com.nimbusds.jose.util.Base64URL;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Cranford
- * @version 2023-01-02
+ * @version 2024-10-28
  */
 public class OctetSequenceKeyGenerator extends JWKGenerator<OctetSequenceKey> {
 	
@@ -81,6 +81,9 @@ public class OctetSequenceKeyGenerator extends JWKGenerator<OctetSequenceKey> {
 			.keyUse(use)
 			.keyOperations(ops)
 			.algorithm(alg)
+			.expirationTime(exp)
+			.notBeforeTime(nbf)
+			.issueTime(iat)
 			.keyStore(keyStore);
 		
 		if (x5tKid) {
