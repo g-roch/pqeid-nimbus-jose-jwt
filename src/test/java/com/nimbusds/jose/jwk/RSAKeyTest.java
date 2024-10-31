@@ -53,7 +53,7 @@ import com.nimbusds.jwt.util.DateUtils;
  * Tests the RSA JWK class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-04-27
+ * @version 2024-10-31
  */
 public class RSAKeyTest extends TestCase {
 
@@ -1941,6 +1941,117 @@ public class RSAKeyTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("The public exponent value must not be null", e.getMessage());
+		}
+	}
+
+
+	public void testToRevokedJWK() throws JOSEException {
+
+		RSAKey jwk = new RSAKeyGenerator(2048).generate();
+
+		jwk = jwk.toRevokedJWK(KEY_REVOCATION);
+
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+	}
+
+
+	public void testToRevokedJWK_fullySpecified()
+		throws Exception {
+
+		URI x5u = new URI("http://example.com/jwk.json");
+		Base64URL x5t = new Base64URL("abc");
+		Base64URL x5t256 = new Base64URL("abc256");
+		List<Base64> x5c = null; // not specified here
+
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+		RSAKey jwk = new RSAKey.Builder(new Base64URL(n), new Base64URL(e))
+			.privateExponent(new Base64URL(d))
+			.firstPrimeFactor(new Base64URL(p))
+			.secondPrimeFactor(new Base64URL(q))
+			.firstFactorCRTExponent(new Base64URL(dp))
+			.secondFactorCRTExponent(new Base64URL(dq))
+			.firstCRTCoefficient(new Base64URL(qi))
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.RS256)
+			.keyID("1")
+			.x509CertURL(x5u)
+			.x509CertThumbprint(x5t)
+			.x509CertSHA256Thumbprint(x5t256)
+			.x509CertChain(x5c)
+			.expirationTime(EXP)
+			.notBeforeTime(NBF)
+			.issueTime(IAT)
+			.keyStore(keyStore)
+			.build();
+
+
+		jwk = jwk.toRevokedJWK(KEY_REVOCATION);
+
+		assertEquals(KeyUse.SIGNATURE, jwk.getKeyUse());
+		assertNull(jwk.getKeyOperations());
+		assertEquals(JWSAlgorithm.RS256, jwk.getAlgorithm());
+		assertEquals("1", jwk.getKeyID());
+		assertEquals(x5u.toString(), jwk.getX509CertURL().toString());
+		assertEquals(x5t.toString(), jwk.getX509CertThumbprint().toString());
+		assertEquals(x5t256.toString(), jwk.getX509CertSHA256Thumbprint().toString());
+		assertNull(jwk.getX509CertChain());
+		assertNull(jwk.getParsedX509CertChain());
+		assertEquals(EXP, jwk.getExpirationTime());
+		assertEquals(NBF, jwk.getNotBeforeTime());
+		assertEquals(IAT, jwk.getIssueTime());
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+		assertEquals(keyStore, jwk.getKeyStore());
+
+		assertEquals(new Base64URL(n), jwk.getModulus());
+		assertEquals(new Base64URL(e), jwk.getPublicExponent());
+
+		assertEquals(new Base64URL(d), jwk.getPrivateExponent());
+
+		assertEquals(new Base64URL(p), jwk.getFirstPrimeFactor());
+		assertEquals(new Base64URL(q), jwk.getSecondPrimeFactor());
+
+		assertEquals(new Base64URL(dp), jwk.getFirstFactorCRTExponent());
+		assertEquals(new Base64URL(dq), jwk.getSecondFactorCRTExponent());
+
+		assertEquals(new Base64URL(qi), jwk.getFirstCRTCoefficient());
+
+		assertTrue(jwk.getOtherPrimes().isEmpty());
+
+		assertTrue(jwk.isPrivate());
+	}
+
+
+	public void testToRevokedJWK_alreadyRevoked() throws JOSEException {
+
+		RSAKey jwk = new RSAKeyGenerator(2048).generate();
+
+		KeyRevocation revocation = new KeyRevocation(DateUtils.nowWithSecondsPrecision(), KeyRevocation.Reason.SUPERSEDED);
+
+		jwk = new RSAKey.Builder(jwk)
+			.keyRevocation(KEY_REVOCATION)
+			.build();
+
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+
+		try {
+			jwk.toRevokedJWK(revocation);
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Already revoked", e.getMessage());
+		}
+	}
+
+
+	public void testToRevokedJWK_nullKeyRevocation() throws JOSEException {
+
+		RSAKey jwk = new RSAKeyGenerator(2048).generate();
+
+		try {
+			jwk.toRevokedJWK(null);
+			fail();
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 	}
 

@@ -125,7 +125,7 @@ import java.util.*;
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
  * @author Cedric Staub
- * @version 2024-04-27
+ * @version 2024-10-31
  */
 @Immutable
 public final class RSAKey extends JWK implements AsymmetricJWK {
@@ -2949,8 +2949,21 @@ public final class RSAKey extends JWK implements AsymmetricJWK {
 		
 		return new KeyPair(toRSAPublicKey(), toPrivateKey());
 	}
-	
-	
+
+
+	@Override
+	public RSAKey toRevokedJWK(final KeyRevocation keyRevocation) {
+
+		if (getKeyRevocation() != null) {
+			throw new IllegalStateException("Already revoked");
+		}
+
+		return new RSAKey.Builder(this)
+			.keyRevocation(Objects.requireNonNull(keyRevocation))
+			.build();
+	}
+
+
 	@Override
 	public boolean matches(final X509Certificate cert) {
 		

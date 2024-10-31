@@ -22,6 +22,7 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.*;
 import com.nimbusds.jwt.util.DateUtils;
@@ -54,7 +55,7 @@ import static org.junit.Assert.assertNotEquals;
  * Tests the EC JWK class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-04-27
+ * @version 2024-10-31
  */
 public class ECKeyTest extends TestCase {
 
@@ -1389,6 +1390,95 @@ public class ECKeyTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("The y coordinate must not be null", e.getMessage());
+		}
+	}
+
+
+	public void testToRevokedJWK() throws JOSEException {
+
+		ECKey jwk = new ECKeyGenerator(Curve.P_256).generate();
+
+		jwk = jwk.toRevokedJWK(KEY_REVOCATION);
+
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+	}
+
+
+	public void testToRevokedJWK_fullySpecced() throws Exception {
+
+		URI x5u = new URI("http://example.com/jwk.json");
+		Base64URL x5t = new Base64URL("abc");
+		List<Base64> x5c = null;
+
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+		ECKey jwk = new ECKey.Builder(Curve.P_256, ExampleKeyP256.X, ExampleKeyP256.Y)
+			.d(ExampleKeyP256.D)
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.ES256)
+			.keyID("1")
+			.x509CertURL(x5u)
+			.x509CertThumbprint(x5t)
+			.x509CertChain(x5c)
+			.expirationTime(EXP)
+			.notBeforeTime(NBF)
+			.issueTime(IAT)
+			.keyStore(keyStore)
+			.build();
+
+		jwk = jwk.toRevokedJWK(KEY_REVOCATION);
+
+		// Test getters
+		assertEquals(KeyUse.SIGNATURE, jwk.getKeyUse());
+		assertEquals(JWSAlgorithm.ES256, jwk.getAlgorithm());
+		assertEquals("1", jwk.getKeyID());
+		assertEquals(x5u.toString(), jwk.getX509CertURL().toString());
+		assertEquals(x5t.toString(), jwk.getX509CertThumbprint().toString());
+		assertNull(jwk.getX509CertChain());
+		assertNull(jwk.getParsedX509CertChain());
+		assertEquals(EXP, jwk.getExpirationTime());
+		assertEquals(NBF, jwk.getNotBeforeTime());
+		assertEquals(IAT, jwk.getIssueTime());
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+		assertEquals(keyStore, jwk.getKeyStore());
+
+		assertEquals(Curve.P_256, jwk.getCurve());
+		assertEquals(ExampleKeyP256.X, jwk.getX());
+		assertEquals(ExampleKeyP256.Y, jwk.getY());
+		assertEquals(ExampleKeyP256.D, jwk.getD());
+
+		assertTrue(jwk.isPrivate());
+	}
+
+
+	public void testToRevokedJWK_alreadyRevoked() throws JOSEException {
+
+		ECKey jwk = new ECKeyGenerator(Curve.P_256).generate();
+
+		jwk = new ECKey.Builder(jwk)
+			.keyRevocation(KEY_REVOCATION)
+			.build();
+
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+
+		try {
+			jwk.toRevokedJWK(KEY_REVOCATION);
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Already revoked", e.getMessage());
+		}
+	}
+
+
+	public void testToRevokedJWK_nullKeyRevocation() throws JOSEException {
+
+		ECKey jwk = new ECKeyGenerator(Curve.P_256).generate();
+
+		try {
+			jwk.toRevokedJWK(null);
+			fail();
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 	}
 }

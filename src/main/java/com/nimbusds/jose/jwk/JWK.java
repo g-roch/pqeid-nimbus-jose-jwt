@@ -75,7 +75,7 @@ import java.util.*;
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
  * @author Stefan Larsson
- * @version 2024-04-27
+ * @version 2024-10-31
  */
 public abstract class JWK implements Serializable {
 
@@ -606,6 +606,18 @@ public abstract class JWK implements Serializable {
 	 *         created.
 	 */
 	public abstract JWK toPublicJWK();
+
+
+	/**
+	 * Creates a copy of this JWK with the specified key revocation.
+	 *
+	 * @param keyRevocation The key revocation. Must not be {@code null}.
+	 *
+	 * @return The new JWK with the specified revocation.
+	 *
+	 * @throws IllegalStateException If the JWK is already revoked.
+	 */
+	public abstract JWK toRevokedJWK(final KeyRevocation keyRevocation);
 
 
 	/**

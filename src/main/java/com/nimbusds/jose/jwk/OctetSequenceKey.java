@@ -60,7 +60,7 @@ import java.util.*;
  * 
  * @author Justin Richer
  * @author Vladimir Dzhuvinov
- * @version 2024-04-27
+ * @version 2024-10-31
  */
 @Immutable
 public final class OctetSequenceKey extends JWK implements SecretJWK {
@@ -710,6 +710,19 @@ public final class OctetSequenceKey extends JWK implements SecretJWK {
 	public OctetSequenceKey toPublicJWK() {
 
 		return null;
+	}
+
+
+	@Override
+	public OctetSequenceKey toRevokedJWK(final KeyRevocation keyRevocation) {
+
+		if (getKeyRevocation() != null) {
+			throw new IllegalStateException("Already revoked");
+		}
+
+		return new OctetSequenceKey.Builder(this)
+			.keyRevocation(Objects.requireNonNull(keyRevocation))
+			.build();
 	}
 
 

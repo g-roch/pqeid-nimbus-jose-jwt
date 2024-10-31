@@ -102,7 +102,7 @@ import java.util.*;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
- * @version 2024-04-27
+ * @version 2024-10-31
  */
 @Immutable
 public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
@@ -1847,8 +1847,21 @@ public final class ECKey extends JWK implements AsymmetricJWK, CurveBasedJWK {
 			return new KeyPair(toECPublicKey(provider), toECPrivateKey(provider));
 		}
 	}
-	
-	
+
+
+	@Override
+	public ECKey toRevokedJWK(final KeyRevocation keyRevocation) {
+
+		if (getKeyRevocation() != null) {
+			throw new IllegalStateException("Already revoked");
+		}
+
+		return new ECKey.Builder(this)
+			.keyRevocation(Objects.requireNonNull(keyRevocation))
+			.build();
+	}
+
+
 	@Override
 	public boolean matches(final X509Certificate cert) {
 		

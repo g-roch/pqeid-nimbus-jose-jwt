@@ -1711,3 +1711,6 @@ version 9.40 (2024-06-06)
       HS384 and of 512 bits for HS512 (iss #563).
     * OctetSequenceKeyGenerator must support "exp", "nbf" and "iat" (iss #575).
     * Updates to com.google.crypto.tink:tink:1.15.0
+
+9.43 (2024-10-31)
+    * Adds JWK.toRevokedJWK(KeyRevocation) method.

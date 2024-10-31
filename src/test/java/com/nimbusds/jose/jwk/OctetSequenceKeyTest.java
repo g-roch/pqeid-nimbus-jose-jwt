@@ -32,6 +32,10 @@ import javax.crypto.spec.SecretKeySpec;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
+import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import junit.framework.TestCase;
 
 import com.nimbusds.jose.EncryptionMethod;
@@ -47,7 +51,7 @@ import com.nimbusds.jwt.util.DateUtils;
  * Tests the Octet Sequence JWK class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-04-27
+ * @version 2024-10-31
  */
 public class OctetSequenceKeyTest extends TestCase {
 	
@@ -897,6 +901,98 @@ public class OctetSequenceKeyTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("The key value must not be null", e.getMessage());
+		}
+	}
+
+
+	public void testToRevokedJWK() throws JOSEException {
+
+		OctetSequenceKey jwk = new OctetSequenceKeyGenerator(128).generate();
+
+		jwk = jwk.toRevokedJWK(KEY_REVOCATION);
+
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+	}
+
+
+	public void testToRevokedJWK_fullySpecced() throws Exception {
+
+		Base64URL k = new Base64URL("GawgguFyGrWKav7AX4VKUg");
+		URI x5u = new URI("http://example.com/jwk.json");
+		Base64URL x5t = new Base64URL("abc");
+		List<Base64> x5c = SampleCertificates.SAMPLE_X5C_RSA;
+
+		Set<KeyOperation> ops = new LinkedHashSet<>(Arrays.asList(KeyOperation.SIGN, KeyOperation.VERIFY));
+
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+		OctetSequenceKey jwk = new OctetSequenceKey.Builder(k)
+			.keyOperations(ops)
+			.algorithm(JWSAlgorithm.HS256)
+			.keyID("1")
+			.x509CertURL(x5u)
+			.x509CertThumbprint(x5t)
+			.x509CertChain(x5c)
+			.expirationTime(EXP)
+			.notBeforeTime(NBF)
+			.issueTime(IAT)
+			.keyStore(keyStore)
+			.build();
+
+		jwk = jwk.toRevokedJWK(KEY_REVOCATION);
+
+		assertEquals(KeyType.OCT, jwk.getKeyType());
+		assertNull(jwk.getKeyUse());
+		assertTrue(jwk.getKeyOperations().contains(KeyOperation.SIGN));
+		assertTrue(jwk.getKeyOperations().contains(KeyOperation.VERIFY));
+		assertEquals(2, jwk.getKeyOperations().size());
+		assertEquals(JWSAlgorithm.HS256, jwk.getAlgorithm());
+		assertEquals("1", jwk.getKeyID());
+		assertEquals(x5u.toString(), jwk.getX509CertURL().toString());
+		assertEquals(x5t.toString(), jwk.getX509CertThumbprint().toString());
+		assertEquals(x5c.size(), jwk.getX509CertChain().size());
+		assertEquals(EXP, jwk.getExpirationTime());
+		assertEquals(NBF, jwk.getNotBeforeTime());
+		assertEquals(IAT, jwk.getIssueTime());
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+		assertEquals(keyStore, jwk.getKeyStore());
+
+		assertEquals(k, jwk.getKeyValue());
+
+		assertNull(jwk.toPublicJWK());
+
+		assertTrue(jwk.isPrivate());
+	}
+
+
+	public void testToRevokedJWK_alreadyRevoked() throws JOSEException {
+
+		OctetSequenceKey jwk = new OctetSequenceKeyGenerator(128).generate();
+
+		jwk = new OctetSequenceKey.Builder(jwk)
+			.keyRevocation(KEY_REVOCATION)
+			.build();
+
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+
+		try {
+			jwk.toRevokedJWK(KEY_REVOCATION);
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Already revoked", e.getMessage());
+		}
+	}
+
+
+	public void testToRevokedJWK_nullKeyRevocation() throws JOSEException {
+
+		OctetSequenceKey jwk = new OctetSequenceKeyGenerator(128).generate();
+
+		try {
+			jwk.toRevokedJWK(null);
+			fail();
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 	}
 }

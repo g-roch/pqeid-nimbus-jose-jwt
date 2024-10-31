@@ -18,6 +18,16 @@
 package com.nimbusds.jose.jwk;
 
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
+import com.nimbusds.jose.util.Base64;
+import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jose.util.JSONObjectUtils;
+import com.nimbusds.jwt.util.DateUtils;
+import junit.framework.TestCase;
+import org.junit.Assert;
+
 import java.net.URI;
 import java.security.KeyStore;
 import java.text.ParseException;
@@ -25,16 +35,13 @@ import java.util.*;
 
 import static org.junit.Assert.assertNotEquals;
 
-import junit.framework.TestCase;
-import org.junit.Assert;
 
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.util.Base64;
-import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jose.util.JSONObjectUtils;
-import com.nimbusds.jwt.util.DateUtils;
-
-
+/**
+ * Tests the Octet Key Pair JWK class.
+ *
+ * @author Vladimir Dzhuvinov
+ * @version 2024-10-31
+ */
 public class OctetKeyPairTest extends TestCase {
 	
 	
@@ -798,6 +805,101 @@ public class OctetKeyPairTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("The x parameter must not be null", e.getMessage());
+		}
+	}
+
+
+	public void testToRevokedJWK() throws JOSEException {
+
+		OctetKeyPair jwk = new OctetKeyPairGenerator(Curve.X25519).generate();
+
+		KeyRevocation revocation = new KeyRevocation(DateUtils.nowWithSecondsPrecision(), KeyRevocation.Reason.SUPERSEDED);
+
+		jwk = jwk.toRevokedJWK(revocation);
+
+		assertEquals(revocation, jwk.getKeyRevocation());
+	}
+
+
+	public void testToRevokedJWK_fullySpecced() throws Exception {
+
+		URI x5u = new URI("http://example.com/jwk.json");
+		Base64URL x5t = new Base64URL("abc");
+		Base64URL x5tS256 = new Base64URL("ghi");
+		List<Base64> x5c = SampleCertificates.SAMPLE_X5C_RSA;
+
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+		OctetKeyPair jwk = new OctetKeyPair.Builder(Curve.Ed25519, EXAMPLE_OKP_ED25519.X)
+			.d(EXAMPLE_OKP_ED25519.D)
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.EdDSA)
+			.keyID("1")
+			.x509CertURL(x5u)
+			.x509CertThumbprint(x5t)
+			.x509CertSHA256Thumbprint(x5tS256)
+			.x509CertChain(x5c)
+			.expirationTime(EXP)
+			.notBeforeTime(NBF)
+			.issueTime(IAT)
+			.keyStore(keyStore)
+			.build();
+
+		jwk = jwk.toRevokedJWK(KEY_REVOCATION);
+
+		assertEquals(KeyUse.SIGNATURE, jwk.getKeyUse());
+		assertEquals(JWSAlgorithm.EdDSA, jwk.getAlgorithm());
+		assertEquals("1", jwk.getKeyID());
+		assertEquals(x5u, jwk.getX509CertURL());
+		assertEquals(x5t, jwk.getX509CertThumbprint());
+		assertEquals(x5tS256, jwk.getX509CertSHA256Thumbprint());
+		assertEquals(x5c.size(), jwk.getX509CertChain().size());
+		assertEquals(EXP, jwk.getExpirationTime());
+		assertEquals(NBF, jwk.getNotBeforeTime());
+		assertEquals(IAT, jwk.getIssueTime());
+		assertEquals(KEY_REVOCATION, jwk.getKeyRevocation());
+		assertEquals(keyStore, jwk.getKeyStore());
+
+		assertEquals(Curve.Ed25519, jwk.getCurve());
+		assertEquals(EXAMPLE_OKP_ED25519.X, jwk.getX());
+		Assert.assertArrayEquals(EXAMPLE_OKP_ED25519.X.decode(), jwk.getDecodedX());
+		assertEquals(EXAMPLE_OKP_ED25519.D, jwk.getD());
+		Assert.assertArrayEquals(EXAMPLE_OKP_ED25519.D.decode(), jwk.getDecodedD());
+
+		assertTrue(jwk.isPrivate());
+	}
+
+
+	public void testToRevokedJWK_alreadyRevoked() throws JOSEException {
+
+		OctetKeyPair jwk = new OctetKeyPairGenerator(Curve.X25519).generate();
+
+		KeyRevocation revocation = new KeyRevocation(DateUtils.nowWithSecondsPrecision(), KeyRevocation.Reason.SUPERSEDED);
+
+		jwk = new OctetKeyPair.Builder(jwk)
+			.keyRevocation(revocation)
+			.build();
+
+		assertEquals(revocation, jwk.getKeyRevocation());
+
+		try {
+			jwk.toRevokedJWK(revocation);
+			fail();
+		} catch (IllegalStateException e) {
+			assertEquals("Already revoked", e.getMessage());
+		}
+	}
+
+
+	public void testToRevokedJWK_nullKeyRevocation() throws JOSEException {
+
+		OctetKeyPair jwk = new OctetKeyPairGenerator(Curve.X25519).generate();
+
+		try {
+			jwk.toRevokedJWK(null);
+			fail();
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
 		}
 	}
 }

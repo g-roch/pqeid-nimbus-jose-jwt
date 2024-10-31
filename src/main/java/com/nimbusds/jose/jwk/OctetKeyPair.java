@@ -84,7 +84,7 @@ import java.util.*;
  * </pre>
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-04-27
+ * @version 2024-10-31
  */
 @Immutable
 public class OctetKeyPair extends JWK implements AsymmetricJWK, CurveBasedJWK {
@@ -958,8 +958,21 @@ public class OctetKeyPair extends JWK implements AsymmetricJWK, CurveBasedJWK {
 			getExpirationTime(), getNotBeforeTime(), getIssueTime(), getKeyRevocation(),
 			getKeyStore());
 	}
-	
-	
+
+
+	@Override
+	public OctetKeyPair toRevokedJWK(final KeyRevocation keyRevocation) {
+
+		if (getKeyRevocation() != null) {
+			throw new IllegalStateException("Already revoked");
+		}
+
+		return new OctetKeyPair.Builder(this)
+			.keyRevocation(Objects.requireNonNull(keyRevocation))
+			.build();
+	}
+
+
 	@Override
 	public Map<String, Object> toJSONObject() {
 		
