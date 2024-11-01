@@ -1722,3 +1722,6 @@ version 9.40 (2024-06-06)
     * Adds JWKMatcher.Builder.withKeyIDOnly, deprecating hasKeyID.
     * Adds JWKMatcher.Builder.withX509CertChainOnly, deprecating
       hasX509CertChain.
+
+9.45 (2024-11-01)
+    * New JWKMatcher.Builder(JWKMatcher) constructor.

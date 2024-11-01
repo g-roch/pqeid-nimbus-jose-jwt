@@ -509,6 +509,9 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(curves, matcher.getCurves());
 		assertEquals(thumbprints, matcher.getX509CertSHA256Thumbprints());
 		assertFalse(matcher.isWithX509CertChainOnly());
+
+		// Builder copy constructor
+		assertEquals(matcher.toString(), new JWKMatcher.Builder(matcher).build().toString());
 	}
 	
 	
@@ -572,7 +575,11 @@ public class JWKMatcherTest extends TestCase {
 		Set<Base64URL> thumbprints = matcher.getX509CertSHA256Thumbprints();
 		assertTrue(thumbprints.containsAll(Arrays.asList(Base64URL.encode("thumbprint"), null)));
 		assertEquals(2, thumbprints.size());
+		assertFalse(matcher.isWithX509CertChainOnly());
 		assertFalse(matcher.hasX509CertChain());
+
+		// Builder copy constructor
+		assertEquals(matcher.toString(), new JWKMatcher.Builder(matcher).build().toString());
 	}
 
 
@@ -582,6 +589,9 @@ public class JWKMatcherTest extends TestCase {
 
 		assertFalse(matcher.isPrivateOnly());
 		assertFalse(matcher.isPublicOnly());
+
+		// Builder copy constructor
+		assertEquals(matcher.toString(), new JWKMatcher.Builder(matcher).build().toString());
 	}
 
 

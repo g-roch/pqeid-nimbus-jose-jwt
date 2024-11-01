@@ -285,7 +285,42 @@ public class JWKMatcher {
 		 */
 		private boolean withX5COnly = false;
 
-		
+
+		/**
+		 * Creates a new builder for constructing JWK matchers.
+		 */
+		public Builder() {
+		}
+
+
+		/**
+		 * Creates a new builder for constructing JWK matchers using
+		 * the specified matcher.
+		 *
+		 * @param jwkMatcher The JWK matcher to use. Must not be
+		 *                   {@code null}.
+		 */
+		public Builder(final JWKMatcher jwkMatcher) {
+			types = jwkMatcher.getKeyTypes();
+			uses = jwkMatcher.getKeyUses();
+			ops = jwkMatcher.getKeyOperations();
+			algs = jwkMatcher.getAlgorithms();
+			ids = jwkMatcher.getKeyIDs();
+			withUseOnly = jwkMatcher.isWithKeyUseOnly();
+			withIDOnly = jwkMatcher.isWithKeyIDOnly();
+			privateOnly = jwkMatcher.isPrivateOnly();
+			publicOnly = jwkMatcher.isPublicOnly();
+			nonRevokedOnly = jwkMatcher.isNonRevokedOnly();
+			revokedOnly = jwkMatcher.isNonRevokedOnly();
+			minSizeBits = jwkMatcher.getMinKeySize();
+			maxSizeBits = jwkMatcher.getMaxKeySize();
+			sizesBits = jwkMatcher.getKeySizes();
+			curves = jwkMatcher.getCurves();
+			x5tS256s = jwkMatcher.getX509CertSHA256Thumbprints();
+			withX5COnly = jwkMatcher.isWithX509CertChainOnly();
+		}
+
+
 		/**
 		 * Sets a single key type to match.
 		 *
