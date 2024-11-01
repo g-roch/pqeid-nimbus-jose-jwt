@@ -31,6 +31,8 @@ import java.security.spec.ECParameterSpec;
 import java.util.*;
 import javax.crypto.KeyGenerator;
 
+import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
+import com.nimbusds.jwt.util.DateUtils;
 import junit.framework.TestCase;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -50,7 +52,7 @@ import com.nimbusds.jose.util.X509CertUtils;
  * Tests the JWK matcher.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-05-28
+ * @version 2024-11-01
  */
 public class JWKMatcherTest extends TestCase {
 	
@@ -114,7 +116,8 @@ public class JWKMatcherTest extends TestCase {
 	}
 
 
-	public void testMinimalConstructor() {
+	@Deprecated
+	public void testMinimalDeprecatedConstructor() {
 
 		JWKMatcher matcher = new JWKMatcher(null, null, null, null, null, false, false, 0, 0, null);
 
@@ -124,9 +127,13 @@ public class JWKMatcherTest extends TestCase {
 		assertNull(matcher.getAlgorithms());
 		assertNull(matcher.getKeyIDs());
 		assertFalse(matcher.hasKeyUse());
+		assertFalse(matcher.isWithKeyUseOnly());
 		assertFalse(matcher.hasKeyID());
+		assertFalse(matcher.isWithKeyIDOnly());
 		assertFalse(matcher.isPrivateOnly());
 		assertFalse(matcher.isPublicOnly());
+		assertFalse(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 		assertEquals(0, matcher.getMinKeySize());
 		assertEquals(0, matcher.getMinSize());
 		assertEquals(0, matcher.getMaxKeySize());
@@ -134,9 +141,11 @@ public class JWKMatcherTest extends TestCase {
 		assertNull(matcher.getKeySizes());
 		assertNull(matcher.getCurves());
 		assertFalse(matcher.hasX509CertChain());
+		assertFalse(matcher.isWithX509CertChainOnly());
 	}
 	
-	
+
+	@Deprecated
 	public void testAllSetDeprecatedConstructor() {
 
 		Set<KeyType> types = new HashSet<>();
@@ -163,9 +172,13 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(algs, matcher.getAlgorithms());
 		assertEquals(ids, matcher.getKeyIDs());
 		assertFalse(matcher.hasKeyUse());
+		assertFalse(matcher.isWithKeyUseOnly());
 		assertFalse(matcher.hasKeyID());
+		assertFalse(matcher.isWithKeyIDOnly());
 		assertTrue(matcher.isPrivateOnly());
 		assertTrue(matcher.isPublicOnly());
+		assertFalse(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 		assertEquals(0, matcher.getMinKeySize());
 		assertEquals(0, matcher.getMinSize());
 		assertEquals(0, matcher.getMaxKeySize());
@@ -173,9 +186,11 @@ public class JWKMatcherTest extends TestCase {
 		assertNull(matcher.getKeySizes());
 		assertNull(matcher.getCurves());
 		assertFalse(matcher.hasX509CertChain());
+		assertFalse(matcher.isWithX509CertChainOnly());
 	}
 	
-	
+
+	@Deprecated
 	public void testAllSet2ndDeprecatedConstructor() {
 
 		Set<KeyType> types = new HashSet<>();
@@ -202,9 +217,13 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(algs, matcher.getAlgorithms());
 		assertEquals(ids, matcher.getKeyIDs());
 		assertFalse(matcher.hasKeyUse());
+		assertFalse(matcher.isWithKeyUseOnly());
 		assertFalse(matcher.hasKeyID());
+		assertFalse(matcher.isWithKeyIDOnly());
 		assertTrue(matcher.isPrivateOnly());
 		assertTrue(matcher.isPublicOnly());
+		assertFalse(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 		assertEquals(0, matcher.getMinKeySize());
 		assertEquals(0, matcher.getMinSize());
 		assertEquals(0, matcher.getMaxKeySize());
@@ -212,9 +231,11 @@ public class JWKMatcherTest extends TestCase {
 		assertNull(matcher.getKeySizes());
 		assertNull(matcher.getCurves());
 		assertFalse(matcher.hasX509CertChain());
+		assertFalse(matcher.isWithX509CertChainOnly());
 	}
 
 
+	@Deprecated
 	public void testAllSet3rdDeprecatedConstructor() {
 
 		Set<KeyType> types = new HashSet<>();
@@ -245,9 +266,13 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(algs, matcher.getAlgorithms());
 		assertEquals(ids, matcher.getKeyIDs());
 		assertFalse(matcher.hasKeyUse());
+		assertFalse(matcher.isWithKeyUseOnly());
 		assertFalse(matcher.hasKeyID());
+		assertFalse(matcher.isWithKeyIDOnly());
 		assertTrue(matcher.isPrivateOnly());
 		assertTrue(matcher.isPublicOnly());
+		assertFalse(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 		assertEquals(128, matcher.getMinKeySize());
 		assertEquals(128, matcher.getMinSize());
 		assertEquals(256, matcher.getMaxKeySize());
@@ -255,9 +280,11 @@ public class JWKMatcherTest extends TestCase {
 		assertNull(matcher.getKeySizes());
 		assertEquals(curves, matcher.getCurves());
 		assertFalse(matcher.hasX509CertChain());
+		assertFalse(matcher.isWithX509CertChainOnly());
 	}
 
 
+	@Deprecated
 	public void testAllSet4thDeprecatedConstructor() {
 
 		Set<KeyType> types = new HashSet<>();
@@ -290,9 +317,13 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(algs, matcher.getAlgorithms());
 		assertEquals(ids, matcher.getKeyIDs());
 		assertFalse(matcher.hasKeyUse());
+		assertFalse(matcher.isWithKeyUseOnly());
 		assertFalse(matcher.hasKeyID());
+		assertFalse(matcher.isWithKeyIDOnly());
 		assertTrue(matcher.isPrivateOnly());
 		assertTrue(matcher.isPublicOnly());
+		assertFalse(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 		assertEquals(128, matcher.getMinKeySize());
 		assertEquals(128, matcher.getMinSize());
 		assertEquals(256, matcher.getMaxKeySize());
@@ -302,9 +333,11 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(2, matcher.getKeySizes().size());
 		assertEquals(curves, matcher.getCurves());
 		assertFalse(matcher.hasX509CertChain());
+		assertFalse(matcher.isWithX509CertChainOnly());
 	}
 
 
+	@Deprecated
 	public void testAllSet5thDeprecatedConstructor() {
 
 		Set<KeyType> types = new HashSet<>();
@@ -340,9 +373,13 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(algs, matcher.getAlgorithms());
 		assertEquals(ids, matcher.getKeyIDs());
 		assertTrue(matcher.hasKeyUse());
+		assertTrue(matcher.isWithKeyUseOnly());
 		assertTrue(matcher.hasKeyID());
+		assertTrue(matcher.isWithKeyIDOnly());
 		assertTrue(matcher.isPrivateOnly());
 		assertTrue(matcher.isPublicOnly());
+		assertFalse(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 		assertEquals(128, matcher.getMinKeySize());
 		assertEquals(128, matcher.getMinSize());
 		assertEquals(256, matcher.getMaxKeySize());
@@ -353,6 +390,7 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(curves, matcher.getCurves());
 		assertEquals(thumbprints, matcher.getX509CertSHA256Thumbprints());
 		assertFalse(matcher.hasX509CertChain());
+		assertFalse(matcher.isWithX509CertChainOnly());
 	}
 
 
@@ -383,7 +421,7 @@ public class JWKMatcherTest extends TestCase {
 		Set<Base64URL> thumbprints = new HashSet<>();
 		thumbprints.add(Base64URL.encode("thumbprint"));
 
-		JWKMatcher matcher = new JWKMatcher(types, uses, ops, algs, ids, true, true, true, true, 128, 256, sizes, curves, thumbprints, true);
+		JWKMatcher matcher = new JWKMatcher(types, uses, ops, algs, ids, true, true, true, true, true, false, 128, 256, sizes, curves, thumbprints, true);
 
 		assertEquals(types, matcher.getKeyTypes());
 		assertEquals(uses, matcher.getKeyUses());
@@ -391,9 +429,13 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(algs, matcher.getAlgorithms());
 		assertEquals(ids, matcher.getKeyIDs());
 		assertTrue(matcher.hasKeyUse());
+		assertTrue(matcher.isWithKeyUseOnly());
 		assertTrue(matcher.hasKeyID());
+		assertTrue(matcher.isWithKeyIDOnly());
 		assertTrue(matcher.isPrivateOnly());
 		assertTrue(matcher.isPublicOnly());
+		assertTrue(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 		assertEquals(128, matcher.getMinKeySize());
 		assertEquals(128, matcher.getMinSize());
 		assertEquals(256, matcher.getMaxKeySize());
@@ -404,6 +446,7 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(curves, matcher.getCurves());
 		assertEquals(thumbprints, matcher.getX509CertSHA256Thumbprints());
 		assertTrue(matcher.hasX509CertChain());
+		assertTrue(matcher.isWithX509CertChainOnly());
 	}
 	
 	
@@ -440,8 +483,8 @@ public class JWKMatcherTest extends TestCase {
 			.keyOperations(ops)
 			.algorithms(algs)
 			.keyIDs(ids)
-			.hasKeyUse(true)
-			.hasKeyID(true)
+			.withKeyUseOnly(true)
+			.withKeyIDOnly(true)
 			.privateOnly(true)
 			.publicOnly(true)
 			.keySizes(sizes)
@@ -454,16 +497,18 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals(ops, matcher.getKeyOperations());
 		assertEquals(algs, matcher.getAlgorithms());
 		assertEquals(ids, matcher.getKeyIDs());
-		assertTrue(matcher.hasKeyUse());
-		assertTrue(matcher.hasKeyID());
+		assertTrue(matcher.isWithKeyUseOnly());
+		assertTrue(matcher.isWithKeyUseOnly());
 		assertTrue(matcher.isPrivateOnly());
 		assertTrue(matcher.isPublicOnly());
+		assertFalse(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 		assertEquals(0, matcher.getMinKeySize());
 		assertEquals(0, matcher.getMaxKeySize());
 		assertEquals(sizes, matcher.getKeySizes());
 		assertEquals(curves, matcher.getCurves());
 		assertEquals(thumbprints, matcher.getX509CertSHA256Thumbprints());
-		assertFalse(matcher.hasX509CertChain());
+		assertFalse(matcher.isWithX509CertChainOnly());
 	}
 	
 	
@@ -477,6 +522,8 @@ public class JWKMatcherTest extends TestCase {
 			.keyIDs("1", "2", "3", null)
 			.privateOnly(true)
 			.publicOnly(true)
+			.nonRevokedOnly(false)
+			.revokedOnly(false)
 			.keySizes(128, 256)
 			.curves(Curve.P_256, null)
 			.x509CertSHA256Thumbprints(Base64URL.encode("thumbprint"), null)
@@ -507,6 +554,9 @@ public class JWKMatcherTest extends TestCase {
 
 		assertTrue(matcher.isPrivateOnly());
 		assertTrue(matcher.isPublicOnly());
+
+		assertFalse(matcher.isNonRevokedOnly());
+		assertFalse(matcher.isRevokedOnly());
 
 		assertEquals(0, matcher.getMinKeySize());
 		assertEquals(0, matcher.getMaxKeySize());
@@ -672,6 +722,52 @@ public class JWKMatcherTest extends TestCase {
 		assertFalse(matcher.matches(new OctetSequenceKey.Builder(new Base64URL("k")).build()));
 		
 		assertEquals("public_only=true", matcher.toString());
+	}
+
+
+	public void testMatchNonRevokedOnly() throws JOSEException {
+
+		JWKMatcher matcher = new JWKMatcher.Builder().nonRevokedOnly(true).build();
+		assertTrue(matcher.isNonRevokedOnly());
+
+		OctetSequenceKey oct = new OctetSequenceKeyGenerator(128).generate();
+
+		assertTrue(matcher.matches(oct));
+
+		assertFalse(matcher.matches(oct.toRevokedJWK(new KeyRevocation(DateUtils.nowWithSecondsPrecision(), KeyRevocation.Reason.SUPERSEDED))));
+
+		assertEquals("non_revoked_only=true", matcher.toString());
+	}
+
+
+	public void testMatchRevokedOnly() throws JOSEException {
+
+		JWKMatcher matcher = new JWKMatcher.Builder().revokedOnly(true).build();
+		assertTrue(matcher.isRevokedOnly());
+
+		OctetSequenceKey oct = new OctetSequenceKeyGenerator(128).generate();
+
+		assertFalse(matcher.matches(oct));
+
+		assertTrue(matcher.matches(oct.toRevokedJWK(new KeyRevocation(DateUtils.nowWithSecondsPrecision(), KeyRevocation.Reason.SUPERSEDED))));
+
+		assertEquals("revoked_only=true", matcher.toString());
+	}
+
+
+	public void testMatchNonRevokedOnly_plus_revokedOnly() throws JOSEException {
+
+		JWKMatcher matcher = new JWKMatcher.Builder().nonRevokedOnly(true).revokedOnly(true).build();
+		assertTrue(matcher.isNonRevokedOnly());
+		assertTrue(matcher.isRevokedOnly());
+
+		OctetSequenceKey oct = new OctetSequenceKeyGenerator(128).generate();
+
+		assertFalse(matcher.matches(oct));
+
+		assertFalse(matcher.matches(oct.toRevokedJWK(new KeyRevocation(DateUtils.nowWithSecondsPrecision(), KeyRevocation.Reason.SUPERSEDED))));
+
+		assertEquals("non_revoked_only=true revoked_only=true", matcher.toString());
 	}
 
 
@@ -863,7 +959,8 @@ public class JWKMatcherTest extends TestCase {
 		assertEquals("size=[128, 256]", matcher.toString());
 	}
 	
-	
+
+	@Deprecated
 	public void testMatchHasKeyUse()
 		throws Exception {
 		
@@ -883,10 +980,34 @@ public class JWKMatcherTest extends TestCase {
 		
 		assertTrue(matcher.matches(jwk));
 		
-		assertEquals("has_use=true", matcher.toString());
+		assertEquals("with_use_only=true", matcher.toString());
+	}
+
+
+	public void testMatchWithKeyUseOnly()
+		throws Exception {
+
+		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		keyGen.init(128);
+		JWK jwk = new OctetSequenceKey.Builder(keyGen.generateKey()).build();
+
+		JWKMatcher matcher = new JWKMatcher.Builder().withKeyUseOnly(false).build();
+
+		assertTrue(matcher.matches(jwk));
+
+		matcher = new JWKMatcher.Builder().withKeyUseOnly(true).build();
+
+		assertFalse(matcher.matches(jwk));
+
+		jwk = new OctetSequenceKey.Builder(keyGen.generateKey()).keyUse(KeyUse.ENCRYPTION).build();
+
+		assertTrue(matcher.matches(jwk));
+
+		assertEquals("with_use_only=true", matcher.toString());
 	}
 	
-	
+
+	@Deprecated
 	public void testMatchHasKeyID()
 		throws Exception {
 		
@@ -906,22 +1027,45 @@ public class JWKMatcherTest extends TestCase {
 		
 		assertTrue(matcher.matches(jwk));
 		
-		assertEquals("has_id=true", matcher.toString());
+		assertEquals("with_id_only=true", matcher.toString());
+	}
+
+
+	public void testMatchWithKeyIDOnly()
+		throws Exception {
+
+		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+		keyGen.init(128);
+		JWK jwk = new OctetSequenceKey.Builder(keyGen.generateKey()).build();
+
+		JWKMatcher matcher = new JWKMatcher.Builder().withKeyIDOnly(false).build();
+
+		assertTrue(matcher.matches(jwk));
+
+		matcher = new JWKMatcher.Builder().withKeyIDOnly(true).build();
+
+		assertFalse(matcher.matches(jwk));
+
+		jwk = new OctetSequenceKey.Builder(keyGen.generateKey()).keyID("1").build();
+
+		assertTrue(matcher.matches(jwk));
+
+		assertEquals("with_id_only=true", matcher.toString());
 	}
 	
 	
-	public void testMatchHasKeyID_empty()
+	public void testMatchWithKeyIDOnly_empty()
 		throws Exception {
 		
 		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 		keyGen.init(128);
 		JWK jwk = new OctetSequenceKey.Builder(keyGen.generateKey()).keyID("").build();
 		
-		JWKMatcher matcher = new JWKMatcher.Builder().hasKeyID(false).build();
+		JWKMatcher matcher = new JWKMatcher.Builder().withKeyIDOnly(false).build();
 		
 		assertTrue(matcher.matches(jwk));
 		
-		matcher = new JWKMatcher.Builder().hasKeyID(true).build();
+		matcher = new JWKMatcher.Builder().withKeyIDOnly(true).build();
 		
 		assertFalse(matcher.matches(jwk));
 		
@@ -931,18 +1075,18 @@ public class JWKMatcherTest extends TestCase {
 	}
 	
 	
-	public void testMatchHasKeyID_blank()
+	public void testMatchWithKeyIDOnly_blank()
 		throws Exception {
 		
 		KeyGenerator keyGen = KeyGenerator.getInstance("AES");
 		keyGen.init(128);
 		JWK jwk = new OctetSequenceKey.Builder(keyGen.generateKey()).keyID("   ").build();
 		
-		JWKMatcher matcher = new JWKMatcher.Builder().hasKeyID(false).build();
+		JWKMatcher matcher = new JWKMatcher.Builder().withKeyIDOnly(false).build();
 		
 		assertTrue(matcher.matches(jwk));
 		
-		matcher = new JWKMatcher.Builder().hasKeyID(true).build();
+		matcher = new JWKMatcher.Builder().withKeyIDOnly(true).build();
 		
 		assertFalse(matcher.matches(jwk));
 		
@@ -1055,18 +1199,20 @@ public class JWKMatcherTest extends TestCase {
 			.build();
 		
 		assertFalse(matcher.hasX509CertChain());
+		assertFalse(matcher.isWithX509CertChainOnly());
 	}
 	
 	
 	public void testMatchWithX5C() {
 		
 		JWKMatcher matcher = new JWKMatcher.Builder()
-			.hasX509CertChain(true)
+			.withX509CertChainOnly(true)
 			.build();
 		
 		assertTrue(matcher.hasX509CertChain());
-		
-		assertEquals("has_x5c=true", matcher.toString());
+		assertTrue(matcher.isWithX509CertChainOnly());
+
+		assertEquals("with_x5c_only=true", matcher.toString());
 		
 		assertTrue(matcher.matches(RSA_JWK_WITH_X5C));
 		

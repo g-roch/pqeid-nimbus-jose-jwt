@@ -44,12 +44,14 @@ import com.nimbusds.jose.util.X509CertUtils;
  *     <li>Any, unspecified, one or more key operations (key_ops).
  *     <li>Any, unspecified, one or more key algorithms (alg).
  *     <li>Any, unspecified, one or more key identifiers (kid).
- *     <li>Private only key.
- *     <li>Public only key.
+ *     <li>Private key only.
+ *     <li>Public key only.
+ *     <li>Non-revoked key only.
+ *     <li>Revoked key only.
  *     <li>Minimum, maximum or exact key sizes.
  *     <li>Any, unspecified, one or more curves for EC and OKP keys (crv).
  *     <li>X.509 certificate SHA-256 thumbprint.
- *     <li>Has X.509 certificate.
+ *     <li>With X.509 certificate only.
  * </ul>
  *
  * <p>Matching by JWK thumbprint (RFC 7638), X.509 certificate URL and X.509
@@ -58,7 +60,7 @@ import com.nimbusds.jose.util.X509CertUtils;
  * @author Vladimir Dzhuvinov
  * @author Josh Cummings
  * @author Ben Arena
- * @version 2022-05-28
+ * @version 2024-11-01
  */
 @Immutable
 public class JWKMatcher {
@@ -95,37 +97,49 @@ public class JWKMatcher {
 	
 	
 	/**
-	 * {@code true} to match a key with a set use.
+	 * {@code true} to match a key with a specified use only.
 	 */
-	private final boolean hasUse;
+	private final boolean withUseOnly;
 	
 	
 	/**
-	 * {@code true} to match a key with a set ID.
+	 * {@code true} to match a key with a specified ID only.
 	 */
-	private final boolean hasID;
+	private final boolean withIDOnly;
 
 
 	/**
-	 * {@code true} to match a private key.
+	 * {@code true} to match a private key only.
 	 */
 	private final boolean privateOnly;
 
 
 	/**
-	 * {@code true} to match a public only key.
+	 * {@code true} to match a public key only.
 	 */
 	private final boolean publicOnly;
 
 
 	/**
-	 * The minimum key size in bits, zero implies no minimum size limit.
+	 * {@code true} to match a non-revoked key only.
+	 */
+	private final boolean nonRevokedOnly;
+
+
+	/**
+	 * {@code true} to match a revoked key only.
+	 */
+	private final boolean revokedOnly;
+
+
+	/**
+	 * The minimum key size in bits, zero implies no minimum size.
 	 */
 	private final int minSizeBits;
 
 
 	/**
-	 * The maximum key size in bits, zero implies no maximum size limit.
+	 * The maximum key size in bits, zero implies no maximum size.
 	 */
 	private final int maxSizeBits;
 	
@@ -149,9 +163,10 @@ public class JWKMatcher {
 	
 	
 	/**
-	 * {@code true} to match a key with a set X.509 certificate chain.
+	 * {@code true} to match a key with a specified X.509 certificate chain
+	 * only.
 	 */
-	private final boolean hasX5C;
+	private final boolean withX5COnly;
 
 	
 	/**
@@ -197,27 +212,39 @@ public class JWKMatcher {
 		
 		
 		/**
-		 * {@code true} to match a key with a set use.
+		 * {@code true} to match a key with specified use only.
 		 */
-		private boolean hasUse = false;
+		private boolean withUseOnly = false;
 		
 		
 		/**
-		 * {@code true} to match a key with a set ID.
+		 * {@code true} to match a key with a specified ID only.
 		 */
-		private boolean hasID = false;
+		private boolean withIDOnly = false;
 
 
 		/**
-		 * {@code true} to match a private key.
+		 * {@code true} to match a private key only.
 		 */
 		private boolean privateOnly = false;
 
 
 		/**
-		 * {@code true} to match a public only key.
+		 * {@code true} to match a public key only.
 		 */
 		private boolean publicOnly = false;
+
+
+		/**
+		 * {@code true} to match a non-revoked key only.
+		 */
+		private boolean nonRevokedOnly = false;
+
+
+		/**
+		 * {@code true} to match a revoked key only.
+		 */
+		private boolean revokedOnly = false;
 
 
 		/**
@@ -253,10 +280,10 @@ public class JWKMatcher {
 		
 		
 		/**
-		 * {@code true} to match a key with a set X.509 certificate
-		 * chain.
+		 * {@code true} to match a key with a specified X.509
+		 * certificate chain only.
 		 */
-		private boolean hasX5C = false;
+		private boolean withX5COnly = false;
 
 		
 		/**
@@ -496,37 +523,69 @@ public class JWKMatcher {
 		
 		
 		/**
-		 * Sets key use presence matching.
+		 * Sets the key use presence matching.
 		 *
-		 * @param hasUse {@code true} to match a key with a set use.
+		 * @param hasUse {@code true} to match a key with a specified
+		 *               use only.
 		 *
 		 * @return This builder.
 		 */
+		@Deprecated
 		public Builder hasKeyUse(final boolean hasUse) {
 			
-			this.hasUse = hasUse;
-			return this;
+			return withKeyUseOnly(hasUse);
 		}
-		
-		
+
+
 		/**
-		 * Sets key ID presence matching.
+		 * Sets the key use presence matching.
 		 *
-		 * @param hasID {@code true} to match a key with a set ID.
+		 * @param withUseOnly {@code true} to match a key with a
+		 *                    specified use only.
 		 *
 		 * @return This builder.
 		 */
+		public Builder withKeyUseOnly(final boolean withUseOnly) {
+
+			this.withUseOnly = withUseOnly;
+			return this;
+		}
+		
+		
+		/**
+		 * Sets the key ID presence matching.
+		 *
+		 * @param hasID {@code true} to match a key a specified ID
+		 *              only.
+		 *
+		 * @return This builder.
+		 */
+		@Deprecated
 		public Builder hasKeyID(final boolean hasID) {
 			
-			this.hasID = hasID;
+			return withKeyIDOnly(hasID);
+		}
+
+
+		/**
+		 * Sets the key ID presence matching.
+		 *
+		 * @param withIDOnly {@code true} to match a key a specified ID
+		 *                   only.
+		 *
+		 * @return This builder.
+		 */
+		public Builder withKeyIDOnly(final boolean withIDOnly) {
+
+			this.withIDOnly = withIDOnly;
 			return this;
 		}
 
 
 		/**
-		 * Sets the private key matching policy.
+		 * Sets the private key matching.
 		 *
-		 * @param privateOnly {@code true} to match a private key.
+		 * @param privateOnly {@code true} to match a private key only.
 		 *
 		 * @return This builder.
 		 */
@@ -538,15 +597,44 @@ public class JWKMatcher {
 
 
 		/**
-		 * Sets the public key matching policy.
+		 * Sets the public key matching.
 		 *
-		 * @param publicOnly {@code true} to match a public only key.
+		 * @param publicOnly {@code true} to match a public key only.
 		 *
 		 * @return This builder.
 		 */
 		public Builder publicOnly(final boolean publicOnly) {
 
 			this.publicOnly = publicOnly;
+			return this;
+		}
+
+
+		/**
+		 * Sets the non-revoked key matching.
+		 *
+		 * @param nonRevokedOnly {@code true} to match a non-revoked
+		 *                       key only.
+		 *
+		 * @return This builder.
+		 */
+		public Builder nonRevokedOnly(final boolean nonRevokedOnly) {
+
+			this.nonRevokedOnly = nonRevokedOnly;
+			return this;
+		}
+
+
+		/**
+		 * Sets the revoked key matching.
+		 *
+		 * @param revokedOnly {@code true} to match a revoked key only.
+		 *
+		 * @return This builder.
+		 */
+		public Builder revokedOnly(final boolean revokedOnly) {
+
+			this.revokedOnly = revokedOnly;
 			return this;
 		}
 
@@ -724,15 +812,31 @@ public class JWKMatcher {
 		
 		
 		/**
-		 * Sets X.509 certificate chain presence matching.
+		 * Sets the X.509 certificate chain presence matching.
 		 *
-		 * @param hasX5C {@code true} to match a key with a set X.509
-		 *               certificate chain.
+		 * @param hasX5C {@code true} to match a key with a specified
+		 *               X.509 certificate chain only.
 		 *
 		 * @return This builder.
 		 */
+		@Deprecated
 		public Builder hasX509CertChain(final boolean hasX5C) {
-			this.hasX5C = hasX5C;
+
+			return withX509CertChainOnly(hasX5C);
+		}
+
+
+		/**
+		 * Sets the X.509 certificate chain presence matching.
+		 *
+		 * @param withX5CONly {@code true} to match a key with a
+		 *                    specified X.509 certificate chain only.
+		 *
+		 * @return This builder.
+		 */
+		public Builder withX509CertChainOnly(final boolean withX5CONly) {
+
+			this.withX5COnly = withX5CONly;
 			return this;
 		}
 
@@ -744,7 +848,14 @@ public class JWKMatcher {
 		 */
 		public JWKMatcher build() {
 
-			return new JWKMatcher(types, uses, ops, algs, ids, hasUse, hasID, privateOnly, publicOnly, minSizeBits, maxSizeBits, sizesBits, curves, x5tS256s, hasX5C);
+			return new JWKMatcher(
+				types, uses, ops, algs, ids,
+				withUseOnly, withIDOnly,
+				privateOnly, publicOnly,
+				nonRevokedOnly, revokedOnly,
+				minSizeBits, maxSizeBits, sizesBits,
+				curves,
+				x5tS256s, withX5COnly);
 		}
 	}
 
@@ -905,8 +1016,8 @@ public class JWKMatcher {
 	 *                    specified.
 	 * @param ids         The key IDs to match, {@code null} if not
 	 *                    specified.
-	 * @param hasUse      {@code true} to match a key with a set use.
-	 * @param hasID       {@code true} to match a key with a set ID.
+	 * @param withUseOnly      {@code true} to match a key with a set use.
+	 * @param withIDOnly       {@code true} to match a key with a set ID.
 	 * @param privateOnly {@code true} to match a private key.
 	 * @param publicOnly  {@code true} to match a public only key.
 	 * @param minSizeBits The minimum key size in bits, zero implies no
@@ -924,8 +1035,8 @@ public class JWKMatcher {
 			  final Set<KeyOperation> ops,
 			  final Set<Algorithm> algs,
 			  final Set<String> ids,
-			  final boolean hasUse,
-			  final boolean hasID,
+			  final boolean withUseOnly,
+			  final boolean withIDOnly,
 			  final boolean privateOnly,
 			  final boolean publicOnly,
 			  final int minSizeBits,
@@ -933,7 +1044,7 @@ public class JWKMatcher {
 			  final Set<Integer> sizesBits,
 			  final Set<Curve> curves) {
 
-		this(types, uses, ops, algs, ids, hasUse, hasID, privateOnly, publicOnly, minSizeBits, maxSizeBits, sizesBits, curves, null);
+		this(types, uses, ops, algs, ids, withUseOnly, withIDOnly, privateOnly, publicOnly, minSizeBits, maxSizeBits, sizesBits, curves, null);
 	}
 
 	
@@ -950,8 +1061,8 @@ public class JWKMatcher {
 	 *                    specified.
 	 * @param ids         The key IDs to match, {@code null} if not
 	 *                    specified.
-	 * @param hasUse      {@code true} to match a key with a set use.
-	 * @param hasID       {@code true} to match a key with a set ID.
+	 * @param withUseOnly      {@code true} to match a key with a set use.
+	 * @param withIDOnly       {@code true} to match a key with a set ID.
 	 * @param privateOnly {@code true} to match a private key.
 	 * @param publicOnly  {@code true} to match a public only key.
 	 * @param minSizeBits The minimum key size in bits, zero implies no
@@ -971,8 +1082,8 @@ public class JWKMatcher {
 			  final Set<KeyOperation> ops,
 			  final Set<Algorithm> algs,
 			  final Set<String> ids,
-			  final boolean hasUse,
-			  final boolean hasID,
+			  final boolean withUseOnly,
+			  final boolean withIDOnly,
 			  final boolean privateOnly,
 			  final boolean publicOnly,
 			  final int minSizeBits,
@@ -981,7 +1092,7 @@ public class JWKMatcher {
 			  final Set<Curve> curves,
 			  final Set<Base64URL> x5tS256s) {
 
-		this(types, uses, ops, algs, ids, hasUse, hasID, privateOnly, publicOnly, minSizeBits, maxSizeBits, sizesBits, curves, x5tS256s, false);
+		this(types, uses, ops, algs, ids, withUseOnly, withIDOnly, privateOnly, publicOnly, minSizeBits, maxSizeBits, sizesBits, curves, x5tS256s, false);
 	}
 
 	
@@ -998,8 +1109,8 @@ public class JWKMatcher {
 	 *                    specified.
 	 * @param ids         The key IDs to match, {@code null} if not
 	 *                    specified.
-	 * @param hasUse      {@code true} to match a key with a set use.
-	 * @param hasID       {@code true} to match a key with a set ID.
+	 * @param withUseOnly      {@code true} to match a key with a set use.
+	 * @param withIDOnly       {@code true} to match a key with a set ID.
 	 * @param privateOnly {@code true} to match a private key.
 	 * @param publicOnly  {@code true} to match a public only key.
 	 * @param minSizeBits The minimum key size in bits, zero implies no
@@ -1012,16 +1123,17 @@ public class JWKMatcher {
 	 *                    {@code null} if not specified.
 	 * @param x5tS256s    The X.509 certificate thumbprints to match,
 	 *                    {@code null} if not specified.
-	 * @param hasX5C      {@code true} to match a key with a set X.509
+	 * @param withX5COnly      {@code true} to match a key with a set X.509
 	 *                    certificate chain.
 	 */
+	@Deprecated
 	public JWKMatcher(final Set<KeyType> types,
 					  final Set<KeyUse> uses,
 					  final Set<KeyOperation> ops,
 					  final Set<Algorithm> algs,
 					  final Set<String> ids,
-					  final boolean hasUse,
-					  final boolean hasID,
+					  final boolean withUseOnly,
+					  final boolean withIDOnly,
 					  final boolean privateOnly,
 					  final boolean publicOnly,
 					  final int minSizeBits,
@@ -1029,23 +1141,79 @@ public class JWKMatcher {
 					  final Set<Integer> sizesBits,
 					  final Set<Curve> curves,
 					  final Set<Base64URL> x5tS256s,
-			  		  final boolean hasX5C) {
+			  		  final boolean withX5COnly) {
+
+		this(types, uses, ops, algs, ids, withUseOnly, withIDOnly, privateOnly, publicOnly, false, false, minSizeBits, maxSizeBits, sizesBits, curves, x5tS256s, withX5COnly);
+	}
+
+
+	/**
+	 * Creates a new JSON Web Key (JWK) matcher.
+	 *
+	 * @param types          The key types to match, {@code null} if not
+	 *                       specified.
+	 * @param uses           The public key uses to match, {@code null} if
+	 *                       not specified.
+	 * @param ops            The key operations to match, {@code null} if
+	 *                       not specified.
+	 * @param algs           The JOSE algorithms to match, {@code null} if
+	 *                       not specified.
+	 * @param ids            The key IDs to match, {@code null} if not
+	 *                       specified.
+	 * @param withUseOnly         {@code true} to match a key with a set use.
+	 * @param withIDOnly          {@code true} to match a key with a set ID.
+	 * @param privateOnly    {@code true} to match a private key only.
+	 * @param publicOnly     {@code true} to match a public key only.
+	 * @param nonRevokedOnly {@code true} to match a non-revoked key only.
+	 * @param revokedOnly    {@code true} to match a revoked key only.
+	 * @param minSizeBits    The minimum key size in bits, zero implies no
+	 *                       minimum size.
+	 * @param maxSizeBits    The maximum key size in bits, zero implies no
+	 *                       maximum size.
+	 * @param sizesBits      The key sizes in bits, {@code null} if not
+	 *                       specified.
+	 * @param curves         The curves to match (for EC and OKP keys),
+	 *                       {@code null} if not specified.
+	 * @param x5tS256s       The X.509 certificate thumbprints to match,
+	 *                       {@code null} if not specified.
+	 * @param withX5COnly         {@code true} to match a key with a set X.509
+	 *                       certificate chain.
+	 */
+	public JWKMatcher(final Set<KeyType> types,
+			  final Set<KeyUse> uses,
+			  final Set<KeyOperation> ops,
+			  final Set<Algorithm> algs,
+			  final Set<String> ids,
+			  final boolean withUseOnly,
+			  final boolean withIDOnly,
+			  final boolean privateOnly,
+			  final boolean publicOnly,
+			  final boolean nonRevokedOnly,
+			  final boolean revokedOnly,
+			  final int minSizeBits,
+			  final int maxSizeBits,
+			  final Set<Integer> sizesBits,
+			  final Set<Curve> curves,
+			  final Set<Base64URL> x5tS256s,
+			  final boolean withX5COnly) {
 
 		this.types = types;
 		this.uses = uses;
 		this.ops = ops;
 		this.algs = algs;
 		this.ids = ids;
-		this.hasUse = hasUse;
-		this.hasID = hasID;
+		this.withUseOnly = withUseOnly;
+		this.withIDOnly = withIDOnly;
 		this.privateOnly = privateOnly;
 		this.publicOnly = publicOnly;
+		this.nonRevokedOnly = nonRevokedOnly;
+		this.revokedOnly = revokedOnly;
 		this.minSizeBits = minSizeBits;
 		this.maxSizeBits = maxSizeBits;
 		this.sizesBits = sizesBits;
 		this.curves = curves;
 		this.x5tS256s = x5tS256s;
-		this.hasX5C = hasX5C;
+		this.withX5COnly = withX5COnly;
 	}
 
 	
@@ -1196,26 +1364,52 @@ public class JWKMatcher {
 	
 	
 	/**
-	 * Returns {@code true} if keys with a set use are matched.
+	 * Returns {@code true} if keys with a specified use are matched.
 	 *
-	 * @return {@code true} if keys with a set use are matched, else
+	 * @return {@code true} if keys with a specified use are matched, else
 	 *         {@code false}.
 	 */
+	@Deprecated
 	public boolean hasKeyUse() {
 		
-		return hasUse;
+		return isWithKeyUseOnly();
+	}
+
+
+	/**
+	 * Returns {@code true} if keys with a specified use are matched.
+	 *
+	 * @return {@code true} if keys with a specified use are matched, else
+	 *         {@code false}.
+	 */
+	public boolean isWithKeyUseOnly() {
+
+		return withUseOnly;
 	}
 	
 	
 	/**
-	 * Returns {@code true} if keys with a set use are matched.
+	 * Returns {@code true} if keys with a specified ID are matched.
 	 *
-	 * @return {@code true} if keys with a set ID are matched, else
+	 * @return {@code true} if keys with a specified ID are matched, else
 	 *         {@code false}.
 	 */
+	@Deprecated
 	public boolean hasKeyID() {
 		
-		return hasID;
+		return isWithKeyIDOnly();
+	}
+
+
+	/**
+	 * Returns {@code true} if keys with a specified ID are matched.
+	 *
+	 * @return {@code true} if keys with a specified ID are matched, else
+	 *         {@code false}.
+	 */
+	public boolean isWithKeyIDOnly() {
+
+		return withIDOnly;
 	}
 
 
@@ -1234,12 +1428,36 @@ public class JWKMatcher {
 	/**
 	 * Returns {@code true} if only public keys are matched.
 	 *
-	 * @return {@code true} if only public keys are selected, else
+	 * @return {@code true} if only public keys are matched, else
 	 *         {@code false}.
 	 */
 	public boolean isPublicOnly() {
 
 		return publicOnly;
+	}
+
+
+	/**
+	 * Returns {@code true} if only non-revoked keys are matched.
+	 * 
+	 * @return {@code true} if only non-revoked keys are matched, else
+	 *         {@code false}.
+	 */
+	public boolean isNonRevokedOnly() {
+		
+		return nonRevokedOnly;
+	}
+
+
+	/**
+	 * Returns {@code true} if only revoked keys are matched.
+	 *
+	 * @return {@code true} if only revoked keys are matched, else
+	 *         {@code false}.
+	 */
+	public boolean isRevokedOnly() {
+
+		return revokedOnly;
 	}
 
 
@@ -1326,15 +1544,29 @@ public class JWKMatcher {
 	
 	
 	/**
-	 * Returns {@code true} if keys with a set X.509 certificate chain are
-	 * matched.
+	 * Returns {@code true} if keys with a specified X.509 certificate
+	 * chain are matched.
 	 *
-	 * @return {@code true} if keys with a set X.509 certificate are
+	 * @return {@code true} if keys with a specified X.509 certificate are
 	 *         matched, else {@code false}.
 	 */
+	@Deprecated
 	public boolean hasX509CertChain() {
 		
-		return hasX5C;
+		return isWithX509CertChainOnly();
+	}
+
+
+	/**
+	 * Returns {@code true} if keys with a specified X.509 certificate
+	 * chain are matched.
+	 *
+	 * @return {@code true} if keys with a specified X.509 certificate
+	 *         chain are matched, else {@code false}.
+	 */
+	public boolean isWithX509CertChainOnly() {
+
+		return withX5COnly;
 	}
 	
 
@@ -1347,16 +1579,22 @@ public class JWKMatcher {
 	 */
 	public boolean matches(final JWK key) {
 		
-		if (hasUse && key.getKeyUse() == null)
+		if (withUseOnly && key.getKeyUse() == null)
 			return false;
 		
-		if (hasID && (key.getKeyID() == null || key.getKeyID().trim().isEmpty()))
+		if (withIDOnly && (key.getKeyID() == null || key.getKeyID().trim().isEmpty()))
 			return false;
 
 		if (privateOnly && ! key.isPrivate())
 			return false;
 
 		if (publicOnly && key.isPrivate())
+			return false;
+
+		if (nonRevokedOnly && key.getKeyRevocation() != null)
+			return false;
+
+		if (revokedOnly && key.getKeyRevocation() == null)
 			return false;
 
 		if (types != null && ! types.contains(key.getKeyType()))
@@ -1430,7 +1668,7 @@ public class JWKMatcher {
 			}
 		}
 		
-		if (hasX5C) {
+		if (withX5COnly) {
 			return key.getX509CertChain() != null && !key.getX509CertChain().isEmpty();
 		}
 
@@ -1448,12 +1686,12 @@ public class JWKMatcher {
 		append(sb, JWKParameterNames.ALGORITHM, algs);
 		append(sb, JWKParameterNames.KEY_ID, ids);
 		
-		if (hasUse) {
-			sb.append("has_use=true ");
+		if (withUseOnly) {
+			sb.append("with_use_only=true ");
 		}
 		
-		if (hasID) {
-			sb.append("has_id=true ");
+		if (withIDOnly) {
+			sb.append("with_id_only=true ");
 		}
 		
 		if (privateOnly) {
@@ -1462,6 +1700,14 @@ public class JWKMatcher {
 		
 		if (publicOnly) {
 			sb.append("public_only=true ");
+		}
+
+		if (nonRevokedOnly) {
+			sb.append("non_revoked_only=true ");
+		}
+
+		if (revokedOnly) {
+			sb.append("revoked_only=true ");
 		}
 		
 		if (minSizeBits > 0) {
@@ -1475,8 +1721,8 @@ public class JWKMatcher {
 		append(sb, "size", sizesBits);
 		append(sb, JWKParameterNames.ELLIPTIC_CURVE, curves);
 		append(sb, JWKParameterNames.X_509_CERT_SHA_256_THUMBPRINT, x5tS256s);
-		if (hasX5C) {
-			sb.append("has_x5c=true" );
+		if (withX5COnly) {
+			sb.append("with_x5c_only=true" );
 		}
 			
 		return sb.toString().trim();

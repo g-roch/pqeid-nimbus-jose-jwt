@@ -1714,3 +1714,11 @@ version 9.40 (2024-06-06)
 
 9.43 (2024-10-31)
     * Adds JWK.toRevokedJWK(KeyRevocation) method.
+
+9.44 (2024-11-01)
+    * JWKMatcher receives a capability to match non-revoked and revoked keys
+      only, with JWKMatcher.Builder.nonRevokedOnly and revokedOnly.
+    * Adds JWKMatcher.Builder.withKeyUseOnly, deprecating hasKeyUse.
+    * Adds JWKMatcher.Builder.withKeyIDOnly, deprecating hasKeyID.
+    * Adds JWKMatcher.Builder.withX509CertChainOnly, deprecating
+      hasX509CertChain.
