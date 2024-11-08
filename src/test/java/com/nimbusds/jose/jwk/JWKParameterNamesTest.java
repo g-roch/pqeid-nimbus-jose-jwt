@@ -10,7 +10,7 @@ import junit.framework.TestCase;
  * Tests the correctness of the JWK Parameter Constants.
  *
  * @author Nathaniel Hart
- * @version 2024-04-27
+ * @version 2024-11-08
  */
 public class JWKParameterNamesTest extends TestCase {
 	
@@ -54,5 +54,38 @@ public class JWKParameterNamesTest extends TestCase {
 		assertEquals("crv", OKP_SUBTYPE);
 		assertEquals("x", OKP_PUBLIC_KEY);
 		assertEquals("d", OKP_PRIVATE_KEY);
+	}
+
+
+	public void testPublicParameterNames() {
+
+		// 13
+		assertTrue(PUBLIC.contains("kty"));
+		assertTrue(PUBLIC.contains("use"));
+		assertTrue(PUBLIC.contains("key_ops"));
+		assertTrue(PUBLIC.contains("alg"));
+		assertTrue(PUBLIC.contains("kid"));
+		assertTrue(PUBLIC.contains("x5u"));
+		assertTrue(PUBLIC.contains("x5c"));
+		assertTrue(PUBLIC.contains("x5t"));
+		assertTrue(PUBLIC.contains("x5t#S256"));
+		assertTrue(PUBLIC.contains("exp"));
+		assertTrue(PUBLIC.contains("nbf"));
+		assertTrue(PUBLIC.contains("iat"));
+		assertTrue(PUBLIC.contains("revoked"));
+
+		// 3
+		assertTrue(PUBLIC.contains("crv"));
+		assertTrue(PUBLIC.contains("x"));
+		assertTrue(PUBLIC.contains("y"));
+
+		// 2
+		assertTrue(PUBLIC.contains("n"));
+		assertTrue(PUBLIC.contains("e"));
+
+		assertTrue(PUBLIC.contains("crv"));
+		assertTrue(PUBLIC.contains("x"));
+
+		assertEquals(18, PUBLIC.size());
 	}
 }

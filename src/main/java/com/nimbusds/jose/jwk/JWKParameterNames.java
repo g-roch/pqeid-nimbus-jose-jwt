@@ -4,6 +4,11 @@ package com.nimbusds.jose.jwk;
 import com.nimbusds.jose.HeaderParameterNames;
 import com.nimbusds.jwt.JWTClaimNames;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 
 /**
  * JSON Web Key (JWK) parameter names. The JWK parameter names defined in
@@ -14,7 +19,7 @@ import com.nimbusds.jwt.JWTClaimNames;
  * parameters registry</a> administered by IANA.
  *
  * @author Nathaniel Hart
- * @version 2024-04-27
+ * @version 2024-11-08
  */
 public final class JWKParameterNames {
 	
@@ -276,6 +281,38 @@ public final class JWKParameterNames {
 	 * @see <a href="https://datatracker.ietf.org/doc/html/rfc8037#section-2">RFC 8037 "d" (OKP Private Key) Parameter</a>
 	 */
 	public static final String OKP_PRIVATE_KEY = ELLIPTIC_CURVE_PRIVATE_KEY;
+
+
+	/**
+	 * The names of public JWK parameters.
+	 */
+	public static final Set<String> PUBLIC = new HashSet<>(
+		Arrays.asList(
+			KEY_TYPE,
+			PUBLIC_KEY_USE,
+			KEY_OPS,
+			ALGORITHM,
+			KEY_ID,
+			X_509_CERT_URL,
+			X_509_CERT_CHAIN,
+			X_509_CERT_SHA_1_THUMBPRINT,
+			X_509_CERT_SHA_256_THUMBPRINT,
+			EXPIRATION_TIME,
+			NOT_BEFORE,
+			ISSUED_AT,
+			REVOKED,
+
+			ELLIPTIC_CURVE,
+			ELLIPTIC_CURVE_X_COORDINATE,
+			ELLIPTIC_CURVE_Y_COORDINATE,
+
+			RSA_MODULUS,
+			RSA_EXPONENT,
+
+			OKP_SUBTYPE,
+			OKP_PUBLIC_KEY
+		)
+	);
 	
 	
 	private JWKParameterNames() {}

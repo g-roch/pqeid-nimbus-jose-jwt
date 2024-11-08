@@ -1725,3 +1725,7 @@ version 9.40 (2024-06-06)
 
 9.45 (2024-11-01)
     * New JWKMatcher.Builder(JWKMatcher) constructor.
+
+9.46 (2024-11-08)
+    * Adds JWKParameterNames.PUBLIC constant Set with the standard public JWK
+      parameter names.
