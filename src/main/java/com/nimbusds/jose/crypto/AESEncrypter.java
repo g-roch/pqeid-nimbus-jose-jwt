@@ -73,7 +73,7 @@ import net.jcip.annotations.ThreadSafe;
  * @author Vladimir Dzhuvinov
  * @author Dimitar A. Stoikov
  * @author Egor Puzanov
- * @version 2023-09-10
+ * @version 2024-11-11
  */
 @ThreadSafe
 public class AESEncrypter extends AESCryptoProvider implements JWEEncrypter {
@@ -248,7 +248,8 @@ public class AESEncrypter extends AESCryptoProvider implements JWEEncrypter {
 			encryptedKey = Base64URL.encode(AESKW.wrapCEK(cek, getKey(), getJCAContext().getKeyEncryptionProvider()));
 			updatedHeader = header; // simply copy ref
 
-		} else if(AlgFamily.AESGCMKW.equals(algFamily)) {
+		} else {
+			assert AlgFamily.AESGCMKW.equals(algFamily);
 
 			final Container<byte[]> keyIV = new Container<>(AESGCM.generateIV(getJCAContext().getSecureRandom()));
 			final AuthenticatedCipherText authCiphCEK = AESGCMKW.encryptCEK(cek, keyIV, getKey(), getJCAContext().getKeyEncryptionProvider());
@@ -259,9 +260,6 @@ public class AESEncrypter extends AESCryptoProvider implements JWEEncrypter {
 				iv(Base64URL.encode(keyIV.get())).
 				authTag(Base64URL.encode(authCiphCEK.getAuthenticationTag())).
 				build();
-		} else {
-			// This should never happen
-			throw new JOSEException("Unexpected JWE algorithm: " + alg);
 		}
 
 		// for JWEObject we need update the AAD as well
