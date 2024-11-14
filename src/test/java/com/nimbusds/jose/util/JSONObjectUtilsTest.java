@@ -27,12 +27,15 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.*;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
 
 /**
  * Tests the JSON object utilities.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-05-10
+ * @version 2024-11-14
  */
 public class JSONObjectUtilsTest extends TestCase {
 	
@@ -987,5 +990,16 @@ public class JSONObjectUtilsTest extends TestCase {
 		o = JSONObjectUtils.parse(json);
 		
 		assertEquals(base64.toString(), o.get("b64"));
+	}
+
+
+	public void testToJSONString_null() {
+
+		try {
+			JSONObjectUtils.toJSONString(null);
+			fail();
+		} catch (NullPointerException e) {
+			assertNull(e.getMessage());
+		}
 	}
 }

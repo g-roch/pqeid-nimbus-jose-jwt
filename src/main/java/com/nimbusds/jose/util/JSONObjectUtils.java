@@ -35,7 +35,7 @@ import java.util.*;
  * JSON object helper methods.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-05-10
+ * @version 2024-11-14
  */
 public class JSONObjectUtils {
 	
@@ -542,7 +542,7 @@ public class JSONObjectUtils {
 	 * @return The JSON object as string.
 	 */
 	public static String toJSONString(final Map<String, ?> o) {
-		return GSON.toJson(o);
+		return GSON.toJson(Objects.requireNonNull(o));
 	}
 
 
