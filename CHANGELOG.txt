@@ -1734,3 +1734,4 @@ version 9.40 (2024-06-06)
     * Adds static JSONArrayUtils.parse(String).
     * Adds static JSONArrayUtils.toJSONString(List<?>).
     * JSONObjectUtils.toJSONString must throw NPE on null String (iss #577).
+    * Fixes regression: Invalid JSON was accepted in versions 9.24+ (iss #574).

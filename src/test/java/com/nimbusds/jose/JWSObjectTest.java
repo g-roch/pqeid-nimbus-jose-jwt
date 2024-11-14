@@ -33,7 +33,7 @@ import com.nimbusds.jose.util.Base64URL;
  * Tests JWS object methods.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-09-27
+ * @version 2024-11-14
  */
 public class JWSObjectTest extends TestCase {
 
@@ -179,7 +179,7 @@ public class JWSObjectTest extends TestCase {
 			JWSObject.parse(jws);
 			fail();
 		} catch (ParseException e) {
-			assertTrue(e.getMessage().startsWith("Invalid JWS header: Invalid JSON: "));
+			assertEquals("Invalid JWS header: Invalid JSON object", e.getMessage());
 		}
 	}
 	

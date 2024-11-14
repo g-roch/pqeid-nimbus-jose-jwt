@@ -20,6 +20,7 @@ package com.nimbusds.jose.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.Strictness;
 import com.google.gson.ToNumberPolicy;
 import com.google.gson.reflect.TypeToken;
 import com.nimbusds.jwt.util.DateUtils;
@@ -44,6 +45,7 @@ public class JSONObjectUtils {
 	 * The GSon instance for serialisation and parsing.
 	 */
 	private static final Gson GSON = new GsonBuilder()
+		.setStrictness(Strictness.STRICT)
 		.serializeNulls()
 		.setObjectToNumberStrategy(ToNumberPolicy.LONG_OR_DOUBLE)
 		.disableHtmlEscaping()
@@ -128,7 +130,7 @@ public class JSONObjectUtils {
 		try {
 			return GSON.fromJson(s, mapType);
 		} catch (Exception e) {
-			throw new ParseException("Invalid JSON: " + e.getMessage(), 0);
+			throw new ParseException("Invalid JSON object", 0);
 		} catch (StackOverflowError e) {
 			throw new ParseException("Excessive JSON object and / or array nesting", 0);
 		}

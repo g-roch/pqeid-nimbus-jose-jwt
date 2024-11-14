@@ -74,8 +74,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.parse("abc");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid JSON: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING at line 1 column 1 path $\n" +
-				"See https://github.com/google/gson/blob/main/Troubleshooting.md#unexpected-json-structure", e.getMessage());
+			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
 	
@@ -95,7 +94,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.parse("{}a");
 			fail();
 		} catch (ParseException e) {
-			assertTrue(e.getMessage().startsWith("Invalid JSON:"));
+			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
 	
@@ -106,7 +105,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.parse("{\"iat\":1661335547,\"iat\":1661335547}");
 			fail();
 		} catch (ParseException e) {
-			assertEquals("Invalid JSON: duplicate key: iat", e.getMessage());
+			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
 	
@@ -114,14 +113,21 @@ public class JSONObjectUtilsTest extends TestCase {
 	// https://github.com/netplex/json-smart-v1/issues/7
 	// 2021-04-06: JSON Smart 1.3.2 fixes CVE
 	// 2022-08-16: Test rewritten for GSon
+	// 2024-11-14: With strict GSon parsing we get an exception now
 	public void testParse_ignoreNumberFormatException() throws ParseException {
 		
 		String json = "{\"key\":2e+}";
 		
-		Map<String, Object> jsonObject = JSONObjectUtils.parse(json);
-		
-		assertEquals("2e+", jsonObject.get("key"));
-		assertEquals(1, jsonObject.size());
+		try {
+			JSONObjectUtils.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+//		Map<String, Object> jsonObject = JSONObjectUtils.parse(json);
+//
+//		assertEquals("2e+", jsonObject.get("key"));
+//		assertEquals(1, jsonObject.size());
 	}
 	
 	
@@ -137,7 +143,7 @@ public class JSONObjectUtilsTest extends TestCase {
 			JSONObjectUtils.parse(sb.toString());
 			fail();
 		} catch (ParseException e) {
-			assertTrue(e.getMessage().startsWith("Invalid JSON:"));
+			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
 	
@@ -1000,6 +1006,71 @@ public class JSONObjectUtilsTest extends TestCase {
 			fail();
 		} catch (NullPointerException e) {
 			assertNull(e.getMessage());
+		}
+	}
+
+
+	public void testParseNonStrictJSONObject_unescapedKey() {
+
+		String json = "{key1:\"value1\"}";
+
+		try {
+			JSONObjectUtils.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+	}
+
+
+	public void testParseNonStrictJSONObject_unescapedValue() {
+
+		String json = "{\"key1\":value1}";
+
+		try {
+			JSONObjectUtils.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+	}
+
+
+	public void testParseNonStrictJSONObject_unescapedKeyAndValue() {
+
+		String json = "{key1:value1}";
+
+		try {
+			JSONObjectUtils.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+	}
+
+
+	public void testParseNonStrictJSONObject_trailingComma() {
+
+		String json = "{\"key1\":\"value1\",}";
+
+		try {
+			JSONObjectUtils.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+	}
+
+
+	public void testParseNonStrictJSONObject_jwkSet() {
+
+		String json = "{keys: [{kty: RSA, e: AQAB, kid: eee9f17a3b598fd86417a980b591fbe6, alg: RS384, n: wJq2RHIA-7RT6q4go7wjcbHdW7ck7Kz22A8wf-kN7Wi5CWvhFG2_Y7nQp1lDpb2IKMQr }]}";
+
+		try {
+			JSONObjectUtils.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
 }
