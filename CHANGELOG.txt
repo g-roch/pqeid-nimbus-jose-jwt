@@ -1729,3 +1729,7 @@ version 9.40 (2024-06-06)
 9.46 (2024-11-08)
     * Adds JWKParameterNames.PUBLIC constant Set with the standard public JWK
       parameter names.
+
+9.47 (2024-11-14)
+    * Adds static JSONArrayUtils.parse(String).
+    * Adds static JSONArrayUtils.toJSONString(List<?>).
