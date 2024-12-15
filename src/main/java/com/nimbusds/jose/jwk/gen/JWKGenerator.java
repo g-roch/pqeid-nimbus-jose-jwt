@@ -37,7 +37,7 @@ import com.nimbusds.jose.jwk.KeyUse;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Cranford
- * @version 2023-01-29
+ * @version 2024-12-15
  */
 public abstract class JWKGenerator<T extends JWK> {
 	
@@ -70,7 +70,7 @@ public abstract class JWKGenerator<T extends JWK> {
 	 * If {@code true} sets the ID of the JWK to the SHA-256 thumbprint of
 	 * the JWK.
 	 */
-	protected boolean x5tKid;
+	protected boolean tprKid;
 	
 	
 	 /**
@@ -177,13 +177,13 @@ public abstract class JWKGenerator<T extends JWK> {
 	 * may also correspond to a JWS/JWE {@code kid} header
 	 * parameter value.
 	 *
-	 * @param x5tKid If {@code true} sets the ID of the JWK to the SHA-256
+	 * @param tprKid If {@code true} sets the ID of the JWK to the SHA-256
 	 *               JWK thumbprint.
 	 *
 	 * @return This generator.
 	 */
-	public JWKGenerator<T> keyIDFromThumbprint(final boolean x5tKid) {
-		this.x5tKid = x5tKid;
+	public JWKGenerator<T> keyIDFromThumbprint(final boolean tprKid) {
+		this.tprKid = tprKid;
 		return this;
 	}
 	

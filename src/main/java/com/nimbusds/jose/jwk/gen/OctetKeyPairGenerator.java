@@ -44,7 +44,7 @@ import java.util.Set;
  * </ul>
  *
  * @author Tim McLean
- * @version 2024-04-20
+ * @version 2024-12-15
  */
 public class OctetKeyPairGenerator extends JWKGenerator<OctetKeyPair> {
 
@@ -140,7 +140,7 @@ public class OctetKeyPairGenerator extends JWKGenerator<OctetKeyPair> {
 			.notBeforeTime(nbf)
 			.issueTime(iat);
 
-		if (x5tKid) {
+		if (tprKid) {
 			builder.keyIDFromThumbprint();
 		} else {
 			builder.keyID(kid);

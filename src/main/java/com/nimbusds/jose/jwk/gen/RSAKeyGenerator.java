@@ -32,7 +32,7 @@ import com.nimbusds.jose.jwk.RSAKey;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Cranford
- * @version 2023-01-29
+ * @version 2024-12-15
  */
 public class RSAKeyGenerator extends JWKGenerator<RSAKey> {
 	
@@ -114,7 +114,7 @@ public class RSAKeyGenerator extends JWKGenerator<RSAKey> {
 			.issueTime(iat)
 			.keyStore(keyStore);
 		
-		if (x5tKid) {
+		if (tprKid) {
 			builder.keyIDFromThumbprint();
 		} else {
 			builder.keyID(kid);

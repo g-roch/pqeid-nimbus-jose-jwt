@@ -45,7 +45,7 @@ import java.util.Objects;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Cranford
- * @version 2024-04-20
+ * @version 2024-12-15
  */
 public class ECKeyGenerator extends JWKGenerator<ECKey> {
 	
@@ -104,7 +104,7 @@ public class ECKeyGenerator extends JWKGenerator<ECKey> {
 			.issueTime(iat)
 			.keyStore(keyStore);
 		
-		if (x5tKid) {
+		if (tprKid) {
 			builder.keyIDFromThumbprint();
 		} else {
 			builder.keyID(kid);
