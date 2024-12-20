@@ -529,6 +529,49 @@ public final class JWTClaimsSet implements Serializable {
 		}
 	}
 
+	/**
+     * Gets the specified claim (registered or custom) as
+     * {@link java.lang.String}, primitive or Wrapper types will be converted to
+     * {@link java.lang.String}.
+     *
+     *
+     * @param name The name of the claim. Must not be {@code null}.
+     *
+     * @return The value of the claim, {@code null} if not specified.
+     *
+     * @throws ParseException If the claim value is not and cannot be
+     *                        automatically converted to {@link java.lang.String}.
+     */
+    public String getClaimAsString(final String name)
+            throws ParseException {
+
+        Object value = getClaim(name);
+
+        Class<?> clazz;
+        if (value == null || value instanceof String) {
+            return (String) value;
+        } else if ((clazz = value.getClass()).isPrimitive() || isWrapper(clazz)) {
+            return String.valueOf(value);
+        } else {
+            throw new ParseException("The " + name + " claim is not and cannot be converted to a String", 0);
+        }
+    }
+
+
+    /**
+     * Checks if a class is a Java Wrapper class.
+     *
+     * @param clazz The class to check against.
+     *
+     * @return {@code true} if the class is a Wrapper class, otherwise
+     * {@code false}.
+     */
+    private static boolean isWrapper(Class<?> clazz) {
+        return clazz == Integer.class || clazz == Double.class || clazz == Float.class
+                || clazz == Long.class || clazz == Short.class || clazz == Byte.class
+                || clazz == Character.class || clazz == Boolean.class;
+    }
+
 
 	/**
 	 * Gets the specified claims (registered or custom) as a
