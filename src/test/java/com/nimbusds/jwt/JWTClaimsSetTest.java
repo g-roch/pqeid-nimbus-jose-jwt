@@ -307,6 +307,34 @@ public class JWTClaimsSetTest extends TestCase {
 		builder.claim("double", 3.14d);
 		assertEquals(3.14d, builder.build().getDoubleClaim("double"));
 	}
+
+	public void testGetClaimAsString()
+		throws Exception {
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
+
+        builder.claim("string", null);
+        assertNull(builder.build().getClaimAsString("string"));
+
+        builder.claim("number", 2);
+        assertEquals("2", builder.build().getClaimAsString("number"));
+
+        builder.claim("number", new Integer(2));
+        assertEquals("2", builder.build().getClaimAsString("number"));
+
+        builder.claim("boolean", true);
+        assertEquals("true", builder.build().getClaimAsString("boolean"));
+
+        builder.claim("boolean", Boolean.TRUE);
+        assertEquals("true", builder.build().getClaimAsString("boolean"));
+
+        builder.claim("object", new Object());
+        try {
+            builder.build().getClaimAsString("object");
+            fail();
+        } catch (ParseException e) {
+            // ok
+        }
+    }
 	
 	
 	public void testGetClaimTypedNull()

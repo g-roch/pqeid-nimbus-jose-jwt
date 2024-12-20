@@ -18,17 +18,27 @@
 package com.nimbusds.jwt;
 
 
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jose.util.JSONArrayUtils;
-import com.nimbusds.jose.util.JSONObjectUtils;
-import com.nimbusds.jwt.util.DateUtils;
-import net.jcip.annotations.Immutable;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
+import com.nimbusds.jose.Payload;
+import com.nimbusds.jose.util.JSONArrayUtils;
+import com.nimbusds.jose.util.JSONObjectUtils;
+import com.nimbusds.jwt.util.DateUtils;
+
+import net.jcip.annotations.Immutable;
 
 
 /**
@@ -528,6 +538,49 @@ public final class JWTClaimsSet implements Serializable {
 			throw new ParseException("The " + name + " claim is not a String", 0);
 		}
 	}
+
+	/**
+     * Gets the specified claim (registered or custom) as
+     * {@link java.lang.String}, primitive or Wrapper types will be converted to
+     * {@link java.lang.String}.
+     *
+     *
+     * @param name The name of the claim. Must not be {@code null}.
+     *
+     * @return The value of the claim, {@code null} if not specified.
+     *
+     * @throws ParseException If the claim value is not and cannot be
+     *                        automatically converted to {@link java.lang.String}.
+     */
+    public String getClaimAsString(final String name)
+            throws ParseException {
+
+        Object value = getClaim(name);
+
+        Class<?> clazz;
+        if (value == null || value instanceof String) {
+            return (String) value;
+        } else if ((clazz = value.getClass()).isPrimitive() || isWrapper(clazz)) {
+            return String.valueOf(value);
+        } else {
+            throw new ParseException("The " + name + " claim is not and cannot be converted to a String", 0);
+        }
+    }
+
+
+    /**
+     * Checks if a class is a Java Wrapper class.
+     *
+     * @param clazz The class to check against.
+     *
+     * @return {@code true} if the class is a Wrapper class, otherwise
+     * {@code false}.
+     */
+    private static boolean isWrapper(Class<?> clazz) {
+        return clazz == Integer.class || clazz == Double.class || clazz == Float.class
+                || clazz == Long.class || clazz == Short.class || clazz == Byte.class
+                || clazz == Character.class || clazz == Boolean.class;
+    }
 
 
 	/**
