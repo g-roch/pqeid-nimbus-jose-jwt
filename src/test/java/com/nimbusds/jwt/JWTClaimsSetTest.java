@@ -34,7 +34,8 @@ import java.util.*;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
- * @version 2022-02-21
+ * @author Joey Zhao
+ * @version 2024-12-20
  */
 public class JWTClaimsSetTest extends TestCase {
 

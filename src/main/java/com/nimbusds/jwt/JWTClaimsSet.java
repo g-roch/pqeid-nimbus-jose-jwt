@@ -75,7 +75,8 @@ import java.util.*;
  *
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
- * @version 2024-06-06
+ * @author Joey Zhao
+ * @version 2024-12-20
  */
 @Immutable
 public final class JWTClaimsSet implements Serializable {
