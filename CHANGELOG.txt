@@ -1742,8 +1742,9 @@ version 9.40 (2024-06-06)
       types converted to String.
 
 10.0 (2025-01-02)
-    * Removes the "fips" build profile, it was breaking the GSon dependency
+    * Removes the "fips" build profile, it was breaking the Gson dependency
       shading (iss #550).
     * Removes the optional BouncyCastle FIPS JCA provider and PKIX
       dependencies, not required in tests.
     * Updates to optional BouncyCastle 1.79 (JDK 1.8 on).
+    * Updates pom.xml, bumps Maven plugins.
