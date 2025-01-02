@@ -18,17 +18,16 @@
 package com.nimbusds.jose.crypto.factories;
 
 
-import java.security.SecureRandom;
-
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jca.JCAAware;
 import com.nimbusds.jose.proc.JWEDecrypterFactory;
 import com.nimbusds.jose.util.ByteUtils;
 import junit.framework.TestCase;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.security.SecureRandom;
 
 
 /**
@@ -117,9 +116,6 @@ public class DefaultJWEDecrypterFactoryTest extends TestCase {
 
 	public void testSetProvider()
 		throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		DefaultJWEDecrypterFactory factory = new DefaultJWEDecrypterFactory();
 		factory.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());

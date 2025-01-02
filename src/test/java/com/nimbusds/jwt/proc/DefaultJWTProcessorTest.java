@@ -52,7 +52,7 @@ import java.util.*;
 /**
  * Tests the default JWT processor.
  *
- * @version 2023-07-22
+ * @version 2025-01-02
  */
 public class DefaultJWTProcessorTest extends TestCase {
 
@@ -287,9 +287,6 @@ public class DefaultJWTProcessorTest extends TestCase {
 
 	public void testProcessHmacJWTWithTwoKeyCandidates()
 		throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		JWTClaimsSet claims = new JWTClaimsSet.Builder().subject("alice").build();
 		SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.HS256), claims);
@@ -317,9 +314,6 @@ public class DefaultJWTProcessorTest extends TestCase {
 
 	public void testProcessEncryptedJWTWithTwoKeyCandidates()
 		throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		JWTClaimsSet claims = new JWTClaimsSet.Builder().subject("alice").build();
 		EncryptedJWT jwt = new EncryptedJWT(new JWEHeader(JWEAlgorithm.DIR, EncryptionMethod.A128GCM), claims);

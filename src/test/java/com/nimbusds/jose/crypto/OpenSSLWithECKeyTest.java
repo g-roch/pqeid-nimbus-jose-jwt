@@ -81,9 +81,6 @@ public class OpenSSLWithECKeyTest extends TestCase {
 
 	public void testES256()
 		throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		// Extract EC key pair generated with
 		// openssl ecparam -genkey -name prime256v1 -noout -out testprivatekey-ec256.pem
@@ -109,9 +106,6 @@ public class OpenSSLWithECKeyTest extends TestCase {
 
 	public void testES384()
 		throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		// Extract EC key pair generated with
 		// openssl ecparam -genkey -name secp384r1 -noout -out test-ec384-key.pem
@@ -138,9 +132,6 @@ public class OpenSSLWithECKeyTest extends TestCase {
 
 	public void testES512()
 		throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		// Extract EC key pair generated with
 		// openssl ecparam -genkey -name secp521r1 -noout -out test-ec512-key.pem

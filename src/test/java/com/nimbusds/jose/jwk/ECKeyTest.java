@@ -22,7 +22,6 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.*;
 import com.nimbusds.jwt.util.DateUtils;
@@ -55,7 +54,7 @@ import static org.junit.Assert.assertNotEquals;
  * Tests the EC JWK class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-10-31
+ * @version 2025-01-02
  */
 public class ECKeyTest extends TestCase {
 
@@ -1238,10 +1237,7 @@ public class ECKeyTest extends TestCase {
 	// iss #217
 	public void testCurveMismatch()
 		throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
-		
+
 		// EC key on P_256
 		ECParameterSpec ecParameterSpec = Curve.P_256.toECParameterSpec();
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("EC");

@@ -63,10 +63,6 @@ public class ECKeyGeneratorTest extends TestCase {
 	
 	public void testWithBouncyCastleProvider()
 		throws JOSEException  {
-
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 		
 		for (Curve curve: Arrays.asList(Curve.P_256, Curve.P_384, Curve.P_521, Curve.SECP256K1)) {
 			

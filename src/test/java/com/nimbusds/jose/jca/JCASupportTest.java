@@ -100,10 +100,6 @@ public class JCASupportTest {
 	@Test
 	public void jwsSupport_Default_Java_8() {
 
-		if (! System.getProperty("java.version").startsWith("1.8")) {
-			return;
-		}
-
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS256));
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS384));
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS512));
@@ -121,10 +117,6 @@ public class JCASupportTest {
 	
 	@Test
 	public void jwsSupport_SUN_Java_8() {
-
-		if (! System.getProperty("java.version").startsWith("1.8")) {
-			return;
-		}
 
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS256, Security.getProvider("SunJCE")));
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS384, Security.getProvider("SunJCE")));
@@ -147,34 +139,8 @@ public class JCASupportTest {
 	
 	@Test
 	public void jwsSupport_BC() {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		Provider bc = BouncyCastleProviderSingleton.getInstance();
-
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS256, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS384, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS512, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.RS256, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.RS384, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.RS512, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.PS256, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.PS384, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.PS512, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.ES256, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.ES384, bc));
-		assertTrue(JCASupport.isSupported(JWSAlgorithm.ES512, bc));
-	}
-	
-	
-	@Test
-	public void jwsSupport_BC_FIPS() {
-		if (! "fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC-FIPS
-		}
-
-		Provider bc = BouncyCastleFIPSProviderSingleton.getInstance();
 
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS256, bc));
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.HS384, bc));
@@ -260,9 +226,6 @@ public class JCASupportTest {
 	
 	@Test
 	public void jweSupport_BC() {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		Provider bc = BouncyCastleProviderSingleton.getInstance();
 
@@ -321,9 +284,6 @@ public class JCASupportTest {
 	
 	@Test
 	public void encryptionMethodSupport_BC() {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
 
 		Provider bc = BouncyCastleProviderSingleton.getInstance();
 
@@ -346,10 +306,6 @@ public class JCASupportTest {
 	
 	@Test
 	public void joseAlgorithmSupport_Default_Java_8() {
-		
-		if (! System.getProperty("java.version").startsWith("1.8")) {
-			return;
-		}
 		
 		// JWS
 		assertTrue(JCASupport.isSupported((Algorithm) JWSAlgorithm.HS256));
@@ -401,10 +357,6 @@ public class JCASupportTest {
 	
 	@Test
 	public void joseAlgorithmSupport_SUN_Java8() {
-		
-		if (! System.getProperty("java.version").startsWith("1.8")) {
-			return;
-		}
 		
 		// JWS
 		assertTrue(JCASupport.isSupported((Algorithm) JWSAlgorithm.HS256, Security.getProvider("SunJCE")));

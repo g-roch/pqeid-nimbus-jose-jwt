@@ -1740,3 +1740,10 @@ version 9.40 (2024-06-06)
     * Adds static JWTClaimsSet.getClaimAsString(String) to get the specified
       JWT claim (registered or custom) as String, with primitive or Wrapper
       types converted to String.
+
+10.0 (2025-01-02)
+    * Removes the "fips" build profile, it was breaking the GSon dependency
+      shading (iss #550).
+    * Removes the optional BouncyCastle FIPS JCA provider and PKIX
+      dependencies, not required in tests.
+    * Updates to optional BouncyCastle 1.79 (JDK 1.8 on).

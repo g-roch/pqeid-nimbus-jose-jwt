@@ -84,10 +84,6 @@ public class ECDSATest extends TestCase {
 	public void testResolveAlgFromECKey_P256K()
 		throws Exception {
 
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
-
 		KeyPair keyPair = ECDSARoundTripTest.createECKeyPair(ECDSARoundTripTest.EC256KSPEC, BouncyCastleProviderSingleton.getInstance());
 		ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
 		ECPrivateKey privateKey = (ECPrivateKey) keyPair.getPrivate();

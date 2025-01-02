@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2021, Connect2id Ltd.
+ * Copyright 2012-2016, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,14 +18,15 @@
 package com.nimbusds.jose.crypto.bc;
 
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import java.security.Provider;
-import java.security.Security;
 
 
 /**
- * BouncyCastle FIPS JCA provider singleton, intended to prevent memory leaks
- * by ensuring a single instance is loaded at all times. Application code that
- * needs a BouncyCastle FIPS JCA provider should use the {@link #getInstance()}
+ * BouncyCastle JCA provider singleton, intended to prevent memory leaks by
+ * ensuring a single instance is loaded at all times. Application code that
+ * needs a BouncyCastle JCA provider should use the {@link #getInstance()}
  * method to obtain an instance.
  *
  * <p>Requires the following optional dependency:
@@ -33,42 +34,43 @@ import java.security.Security;
  * <pre>
  * &lt;dependency&gt;
  *     &lt;groupId&gt;org.bouncycastle&lt;/groupId&gt;
- *     &lt;artifactId&gt;bc-fips&lt;/artifactId&gt;
- *     &lt;version&gt;[1.0.2,2.0.0)&lt;/version&gt;
+ *     &lt;artifactId&gt;bcprov-jdk15on&lt;/artifactId&gt;
+ *     &lt;version&gt;[1.68,2.0.0)&lt;/version&gt;
  *     &lt;optional&gt;true&lt;/optional&gt;
  * &lt;/dependency&gt;
  * </pre>
  *
- * <p><strong>Important:</strong> The plain BouncyCastle JCA provider
- * dependency must not be present to prevent class conflicts!
+ * <p><strong>Important:</strong> The BouncyCastle FIPS JCA provider dependency
+ * must not be present to prevent class conflicts!
  *
  * @author Vladimir Dzhuvinov
+ * @version 2025-01-02
  */
-public final class BouncyCastleFIPSProviderSingleton {
+public final class BouncyCastleProviderSingleton {
 
 
 	/**
-	 * The BouncyCastle FIPS provider, lazily instantiated.
+	 * The BouncyCastle provider, lazily instantiated.
 	 */
-	private static Provider bouncyCastleFIPSProvider;
+	private static Provider bouncyCastleProvider;
 
 
 	/**
 	 * Prevents external instantiation.
 	 */
-	private BouncyCastleFIPSProviderSingleton() { }
+	private BouncyCastleProviderSingleton() { }
 
 
 	/**
-	 * Returns a BouncyCastle FIPS JCA provider instance.
+	 * Returns a BouncyCastle JCA provider instance.
 	 *
-	 * @return The BouncyCastle FIPS JCA provider instance.
+	 * @return The BouncyCastle JCA provider instance.
 	 */
 	public static Provider getInstance() {
-
-		if (bouncyCastleFIPSProvider == null) {
-			bouncyCastleFIPSProvider = Security.getProvider("BCFIPS");
+		
+		if (bouncyCastleProvider == null) {
+			bouncyCastleProvider = new BouncyCastleProvider();
 		}
-		return bouncyCastleFIPSProvider;
+		return bouncyCastleProvider;
 	}
 }

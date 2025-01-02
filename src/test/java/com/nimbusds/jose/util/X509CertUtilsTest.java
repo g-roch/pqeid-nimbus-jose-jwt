@@ -295,10 +295,7 @@ public class X509CertUtilsTest extends TestCase {
 	
 	
 	public void testStore_noPassword() throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
-		
+
 		JWK jwk = JWK.parseFromPEMEncodedObjects(IOUtils.readFileToString(new File("src/test/resources/sample-pem-encoded-objects/ecprivkey.pem"), StandardCharset.UTF_8));
 		assertTrue(jwk instanceof ECKey);
 		ECKey ecJWK = (ECKey)jwk;
@@ -325,10 +322,7 @@ public class X509CertUtilsTest extends TestCase {
 	
 	
 	public void testStore_withPassword() throws Exception {
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
-		
+
 		JWK jwk = JWK.parseFromPEMEncodedObjects(IOUtils.readFileToString(new File("src/test/resources/sample-pem-encoded-objects/ecprivkey.pem")));
 		assertTrue(jwk instanceof ECKey);
 		ECKey ecJWK = (ECKey)jwk;

@@ -18,16 +18,6 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.Provider;
-import java.security.Signature;
-import java.text.ParseException;
-import java.util.Arrays;
-
-import junit.framework.TestCase;
-import org.junit.Assert;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.crypto.impl.ECDSA;
@@ -38,11 +28,20 @@ import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jose.util.StandardCharset;
+import junit.framework.TestCase;
+import org.junit.Assert;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.Provider;
+import java.security.Signature;
+import java.text.ParseException;
+import java.util.Arrays;
 
 
 /**
  * @author Vladimir Dzhuvinov
- * @version 2024-05-08
+ * @version 2025-01-02
  */
 public class ECDSATranscodingTest extends TestCase {
 	
@@ -50,10 +49,6 @@ public class ECDSATranscodingTest extends TestCase {
 	public void testRejectIllegalSignatureSizesBeforeTranscodeToDER_oneByteOff()
 		throws JOSEException, ParseException {
 
-		if ("fips".equals(System.getProperty("test.profile"))) {
-			return; // test case build for BC, which conflicts with BC-FIPS
-		}
-		
 		for (JWSAlgorithm alg: JWSAlgorithm.Family.EC) {
 			
 			Provider provider = JWSAlgorithm.ES256K.equals(alg) ? BouncyCastleProviderSingleton.getInstance() : null;

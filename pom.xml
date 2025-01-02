@@ -5,7 +5,7 @@
 
     <groupId>com.nimbusds</groupId>
     <artifactId>nimbus-jose-jwt</artifactId>
-    <version>9.49-SNAPSHOT</version>
+    <version>10.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Nimbus JOSE+JWT</name>
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.78</version>
+            <version>1.79</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -126,42 +126,6 @@
                     <fork>true</fork>
                     <compilerArgument>-Xlint</compilerArgument>
                 </configuration>
-                <dependencies>
-                    <!-- Using the eclipse compiler allows for different source and target,
-                            which is a good thing (outweighing that this is a rarely used combination,
-                            and most people use javac) This should also allow us to run maven builds
-                            on a JRE and not a JDK. -->
-                    <dependency>
-                        <groupId>org.codehaus.plexus</groupId>
-                        <artifactId>plexus-compiler-eclipse</artifactId>
-                        <version>2.15.0</version>
-                    </dependency>
-                </dependencies>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <configuration>
-                            <compileSourceRoots>
-                                <compileSourceRoot>${project.build.sourceDirectory}</compileSourceRoot>
-                                <compileSourceRoot>${java7path}</compileSourceRoot>
-                            </compileSourceRoots>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java9</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <configuration>
-                            <release>9</release>
-                            <compileSourceRoots>
-                                <compileSourceRoot>${java9path}</compileSourceRoot>
-                            </compileSourceRoots>
-                            <multiReleaseOutput>true</multiReleaseOutput>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -318,11 +282,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
-                <configuration>
-                    <systemPropertyVariables>
-                        <test.profile>${test.profile}</test.profile>
-                    </systemPropertyVariables>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -399,75 +358,28 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <java9path>${project.basedir}/src/main/java9</java9path>
-                <java7path>${project.basedir}/src/main/java7</java7path>
                 <jar.attachClassifier>false</jar.attachClassifier>
-                <jar.classifier /> <!-- empty -->
-                <test.profile /> <!-- empty -->
             </properties>
             <dependencies>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk18on</artifactId>
-                    <version>1.78</version>
+                    <version>1.79</version>
                     <optional>true</optional>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcutil-jdk18on</artifactId>
-                    <version>1.78</version>
+                    <version>1.79</version>
                     <optional>true</optional>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcpkix-jdk18on</artifactId>
-                    <version>1.78</version>
+                    <version>1.79</version>
                     <optional>true</optional>
                 </dependency>
             </dependencies>
-        </profile>
-
-        <profile>
-            <id>fips</id>
-            <properties>
-                <java9path>${project.basedir}/src/main/java9-fips</java9path>
-                <java7path>${project.basedir}/src/main/java7-fips</java7path>
-                <jar.attachClassifier>true</jar.attachClassifier>
-                <jar.classifier>fips</jar.classifier>
-                <test.profile>fips</test.profile>
-            </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bc-fips</artifactId>
-                    <version>1.0.2.5</version>
-                    <optional>true</optional>
-                </dependency>
-                <dependency>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcpkix-fips</artifactId>
-                    <version>1.0.7</version>
-                    <optional>true</optional>
-                </dependency>
-            </dependencies>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <classpathDependencyExcludes>
-                                <!-- bc required for test compilation, but must not be present with bc-fips at the same time -->
-                                <classpathDependencyExclude>org.bouncycastle:bcprov-jdk18on</classpathDependencyExclude>
-                            </classpathDependencyExcludes>
-                            <excludes>
-                                <!-- test classes that load classes from bcprov-jdk18on -->
-                                <exclude>**/ECParameterTableTest.java</exclude>
-                            </excludes>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
         </profile>
     </profiles>
 
