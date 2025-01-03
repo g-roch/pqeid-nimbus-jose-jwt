@@ -1752,3 +1752,4 @@ version 9.40 (2024-06-06)
 10.0.1 (2025-01-03)
     * Adds "Automatic-Module-Name: com.nimbusds.jose.jwt" to restore
       established module name (iss #550).
+    * Cleans up unused "Multi-Release: true" (iss #550).

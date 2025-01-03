@@ -175,7 +175,6 @@
                     <archive>
                         <manifestEntries>
                             <Automatic-Module-Name>com.nimbusds.jose.jwt</Automatic-Module-Name>
-                            <Multi-Release>true</Multi-Release>
                             <Build-Date>${timestamp}</Build-Date>
                             <Build-Number>${buildNumber}</Build-Number>
                             <Build-Tag>${project.scm.tag}</Build-Tag>
