@@ -18,20 +18,18 @@
 package com.nimbusds.jose.jca;
 
 
+import com.nimbusds.jose.Algorithm;
+import com.nimbusds.jose.EncryptionMethod;
+import com.nimbusds.jose.JWEAlgorithm;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import org.junit.Test;
+
 import java.security.Provider;
 import java.security.Security;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
-
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.crypto.bc.BouncyCastleFIPSProviderSingleton;
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 
 
 /**
