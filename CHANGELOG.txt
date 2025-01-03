@@ -1748,3 +1748,7 @@ version 9.40 (2024-06-06)
       dependencies, not required in tests.
     * Updates to optional BouncyCastle 1.79 (JDK 1.8 on).
     * Updates pom.xml, bumps Maven plugins.
+
+10.0.1 (2025-01-03)
+    * Adds "Automatic-Module-Name: com.nimbusds.jose.jwt" to restore
+      established module name (iss #550).

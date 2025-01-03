@@ -5,7 +5,7 @@
 
     <groupId>com.nimbusds</groupId>
     <artifactId>nimbus-jose-jwt</artifactId>
-    <version>10.1-SNAPSHOT</version>
+    <version>10.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>Nimbus JOSE+JWT</name>
@@ -133,6 +133,12 @@
                 <version>3.6.0</version>
                 <configuration>
                     <shadedArtifactAttached>false</shadedArtifactAttached>
+                    <artifactSet>
+                        <includes>
+                            <include>com.google.code.gson:gson</include>
+                            <include>com.github.stephenc.jcip:jcip-annotations</include>
+                        </includes>
+                    </artifactSet>
                     <relocations>
                         <relocation>
                             <pattern>com.google.gson</pattern>
@@ -143,12 +149,6 @@
                             <shadedPattern>com.nimbusds.jose.shaded.jcip</shadedPattern>
                         </relocation>
                     </relocations>
-                    <artifactSet>
-                        <includes>
-                            <include>com.google.code.gson:gson</include>
-                            <include>com.github.stephenc.jcip:jcip-annotations</include>
-                        </includes>
-                    </artifactSet>
                     <filters>
                         <filter>
                             <artifact>com.google.code.gson:gson</artifact>
@@ -174,6 +174,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
+                            <Automatic-Module-Name>com.nimbusds.jose.jwt</Automatic-Module-Name>
                             <Multi-Release>true</Multi-Release>
                             <Build-Date>${timestamp}</Build-Date>
                             <Build-Number>${buildNumber}</Build-Number>
