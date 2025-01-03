@@ -1753,3 +1753,4 @@ version 9.40 (2024-06-06)
     * Adds "Automatic-Module-Name: com.nimbusds.jose.jwt" to restore
       established module name (iss #550).
     * Cleans up unused "Multi-Release: true" (iss #550).
+    * Updates Tink dependency to 1.16.0 (iss #571).
