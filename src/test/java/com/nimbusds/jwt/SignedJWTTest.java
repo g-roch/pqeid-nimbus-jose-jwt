@@ -26,6 +26,8 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jose.util.JSONObjectUtils;
+import com.nimbusds.jose.util.JSONObjectUtilsTest;
 import junit.framework.TestCase;
 
 import java.net.URI;
@@ -294,6 +296,28 @@ public class SignedJWTTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Invalid JWS header: Missing \"alg\" in header JSON object", e.getMessage());
+		}
+	}
+
+
+	public void testParseWithExcessiveNesting()
+                throws JOSEException, ParseException {
+
+		JWSObject jwsObject = new JWSObject(
+			new JWSHeader(JWSAlgorithm.RS256),
+			new Payload(JSONObjectUtilsTest.createJSONObjectWithNesting(255))
+		);
+
+		jwsObject.sign(new RSASSASigner(RSA_JWK));
+
+		String jwtString = jwsObject.serialize();
+
+		SignedJWT signedJWT = SignedJWT.parse(jwtString);
+		try {
+			signedJWT.getJWTClaimsSet();
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Payload of JWS object is not a valid JSON object", e.getMessage());
 		}
 	}
 }

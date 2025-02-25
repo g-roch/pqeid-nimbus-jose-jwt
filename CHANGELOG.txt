@@ -1754,3 +1754,9 @@ version 9.40 (2024-06-06)
       established module name (iss #550).
     * Cleans up unused "Multi-Release: true" (iss #550).
     * Updates Tink dependency to 1.16.0 (iss #571).
+
+10.0.2 (2025-02-25)
+    * Updates JSONObjectUtils.parse and JSONArrayUtils.parse to reject JSON
+      strings with object and array nesting deeper than 255. This change is the
+      default parse behaviour of GSon 2.12.0+ (iss #583)
+    * Updates GSon to 2.12.1.

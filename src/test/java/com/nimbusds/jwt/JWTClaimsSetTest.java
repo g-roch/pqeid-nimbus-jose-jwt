@@ -18,15 +18,22 @@
 package com.nimbusds.jwt;
 
 
+import com.google.gson.stream.JsonReader;
 import com.nimbusds.jose.HeaderParameterNames;
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jose.util.JSONArrayUtils;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jwt.util.DateUtils;
 import junit.framework.TestCase;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.*;
+
+import static com.nimbusds.jose.util.JSONArrayUtilsTest.createJSONArrayWithNesting;
+import static com.nimbusds.jose.util.JSONObjectUtilsTest.createJSONObjectWithNesting;
 
 
 /**
@@ -35,7 +42,7 @@ import java.util.*;
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
  * @author Joey Zhao
- * @version 2024-12-20
+ * @version 2025-02-25
  */
 public class JWTClaimsSetTest extends TestCase {
 
@@ -1370,5 +1377,82 @@ public class JWTClaimsSetTest extends TestCase {
 		assertEquals("a", JSONObjectUtils.getString(jsonObjectClaim, "member-1"));
                 assertTrue(JSONObjectUtils.getBoolean(jsonObjectClaim, "member-2"));
 		assertEquals(66L, JSONObjectUtils.getLong(jsonObjectClaim, "member-3"));
+	}
+
+
+	public void testSerializationWithDeepJSONObjectNestingCausesStackOverflowError() {
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.claim("o", createJSONObjectWithNesting(10_000))
+			.build();
+
+		try {
+			claimsSet.toString();
+			fail();
+		} catch (StackOverflowError e) {
+			assertNull(e.getMessage());
+		}
+	}
+
+
+	public void testSerializationWithDeepJSONArrayNestingCausesStackOverflowError() {
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.claim("a", createJSONArrayWithNesting(10_000))
+			.build();
+
+		try {
+			claimsSet.toString();
+			fail();
+		} catch (StackOverflowError e) {
+			assertNull(e.getMessage());
+		}
+	}
+
+
+	public void testParseWithExcessiveJSONObjectNesting() {
+
+		JsonReader jsonReader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(new byte[]{})));
+		int nestingLimit = jsonReader.getNestingLimit();
+		assertEquals(255, nestingLimit);
+
+		Map<String, Object> jsonObject = createJSONObjectWithNesting(nestingLimit);
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+		try {
+			JWTClaimsSet.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+	}
+
+
+	public void testParseWithExcessiveJSONArrayNesting() {
+
+		JsonReader jsonReader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(new byte[]{})));
+		int nestingLimit = jsonReader.getNestingLimit();
+		assertEquals(255, nestingLimit);
+
+		List<Object> jsonArray = createJSONArrayWithNesting(nestingLimit);
+		String json = JSONArrayUtils.toJSONString(jsonArray);
+		try {
+			JWTClaimsSet.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+	}
+
+
+	public void testParseWithMaxJSONObjectNesting()
+		throws ParseException {
+
+		JsonReader jsonReader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(new byte[]{})));
+		int nestingLimit = jsonReader.getNestingLimit();
+		assertEquals(255, nestingLimit);
+
+		Map<String, Object> jsonObject = createJSONObjectWithNesting(nestingLimit - 1);
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+		assertEquals(jsonObject, JWTClaimsSet.parse(json).getClaims());
 	}
 }

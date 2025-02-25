@@ -17,15 +17,25 @@
 
 package com.nimbusds.jose.util;
 
+import com.google.gson.stream.JsonReader;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
 
+/**
+ * Tests the JSON array utilities.
+ *
+ * @author Vladimir Dzhuvinov
+ * @version 2025-02-25
+ */
 public class JSONArrayUtilsTest {
 
 
@@ -147,5 +157,49 @@ public class JSONArrayUtilsTest {
         public void toJSONString_twoItem2() {
 
                 assertEquals("[\"abc\",1]", JSONArrayUtils.toJSONString(Arrays.asList("abc", 1)));
+        }
+
+
+        public static List<Object> createJSONArrayWithNesting(int depth) {
+                List<Object> jsonArray = JSONArrayUtils.newJSONArray();
+                List<Object> ref = jsonArray;
+                for (int i=0; i < depth; i++) {
+                        List<Object> nested = JSONArrayUtils.newJSONArray();
+                        ref.add(nested);
+                        ref = nested;
+                }
+                return jsonArray;
+        }
+
+
+        @Test
+        public void testParseWithMaxJSONArrayNesting()
+                throws ParseException {
+
+                JsonReader jsonReader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(new byte[]{})));
+                int nestingLimit = jsonReader.getNestingLimit();
+                assertEquals(255, nestingLimit);
+
+                List<Object> jsonArray = createJSONArrayWithNesting(nestingLimit - 1);
+                String json = JSONArrayUtils.toJSONString(jsonArray);
+                assertEquals(jsonArray, JSONArrayUtils.parse(json));
+        }
+
+
+        @Test
+        public void testParseWithExcessiveJSONArrayNesting() {
+
+                JsonReader jsonReader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(new byte[]{})));
+                int nestingLimit = jsonReader.getNestingLimit();
+                assertEquals(255, nestingLimit);
+
+                List<Object> jsonArray = createJSONArrayWithNesting(nestingLimit);
+                String json = JSONArrayUtils.toJSONString(jsonArray);
+                try {
+                        JSONArrayUtils.parse(json);
+                        fail();
+                } catch (ParseException e) {
+                        assertEquals("Invalid JSON array", e.getMessage());
+                }
         }
 }

@@ -18,35 +18,39 @@
 package com.nimbusds.jose.util;
 
 
+import com.google.gson.stream.JsonReader;
 import com.nimbusds.jose.HeaderParameterNames;
 import com.nimbusds.jwt.util.DateUtils;
-import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.ParseException;
 import java.util.*;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 
 /**
  * Tests the JSON object utilities.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-11-14
+ * @version 2025-02-25
  */
-public class JSONObjectUtilsTest extends TestCase {
-	
-	
-	public void testParseEmpty() throws ParseException {
+public class JSONObjectUtilsTest {
+
+
+        @Test
+        public void testParseEmpty() throws ParseException {
 		
 		assertTrue(JSONObjectUtils.parse("{}").isEmpty());
 	}
 
 
-	public void testParseFromNullString() {
+        @Test
+        public void testParseFromNullString() {
 
 		try {
 			JSONObjectUtils.parse(null);
@@ -55,9 +59,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("The JSON object string must not be null", e.getMessage());
 		}
 	}
-	
-	
-	public void testParseFromEmptyString() {
+
+
+        @Test
+        public void testParseFromEmptyString() {
 		
 		try {
 			JSONObjectUtils.parse("");
@@ -66,9 +71,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
-	
-	
-	public void testParseFromStringEntity() {
+
+
+        @Test
+        public void testParseFromStringEntity() {
 		
 		try {
 			JSONObjectUtils.parse("abc");
@@ -77,18 +83,20 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
-	
-	
-	public void testParseTrailingWhiteSpace()
+
+
+        @Test
+        public void testParseTrailingWhiteSpace()
 		throws Exception {
 
 		assertEquals(0, JSONObjectUtils.parse("{} ").size());
 		assertEquals(0, JSONObjectUtils.parse("{}\n").size());
 		assertEquals(0, JSONObjectUtils.parse("{}\r\n").size());
 	}
-	
-	
-	public void testParseObjectTrailingNonWhiteSpaceChar() {
+
+
+        @Test
+        public void testParseObjectTrailingNonWhiteSpaceChar() {
 		
 		try {
 			JSONObjectUtils.parse("{}a");
@@ -97,9 +105,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
-	
-	
-	public void testParseObjectDuplicateMember() {
+
+
+        @Test
+        public void testParseObjectDuplicateMember() {
 		
 		try {
 			JSONObjectUtils.parse("{\"iat\":1661335547,\"iat\":1661335547}");
@@ -114,7 +123,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	// 2021-04-06: JSON Smart 1.3.2 fixes CVE
 	// 2022-08-16: Test rewritten for GSon
 	// 2024-11-14: With strict GSon parsing we get an exception now
-	public void testParse_ignoreNumberFormatException() throws ParseException {
+        @Test
+        public void testParse_ignoreNumberFormatException() throws ParseException {
 		
 		String json = "{\"key\":2e+}";
 		
@@ -132,7 +142,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	
 	
 	// Originally a JSON Smart test, doesn't apply to GSon
-	public void testParse_catchStackOverflowError() {
+        @Test
+        public void testParse_catchStackOverflowError() {
 	
 		StringBuilder sb = new StringBuilder("{\"a\":");
 		for (int i = 0; i < 6000; i++) {
@@ -146,9 +157,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
-	
-	
-	public void testParse_withSizeLimit() {
+
+
+        @Test
+        public void testParse_withSizeLimit() {
 		
 		int sizeLimit = 100;
 		
@@ -165,9 +177,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("The parsed string is longer than the max accepted size of 100 characters", e.getMessage());
 		}
 	}
-	
-	
-	public void testParse_noSizeLimit() throws ParseException {
+
+
+        @Test
+        public void testParse_noSizeLimit() throws ParseException {
 		
 		Map<String,Object> map = new HashMap<>();
 		
@@ -187,9 +200,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		out = JSONObjectUtils.parse(JSONObjectUtils.toJSONString(map));
 		assertEquals(map, out);
 	}
-	
-	
-	public void testParse_intMember() throws ParseException {
+
+
+        @Test
+        public void testParse_intMember() throws ParseException {
 		
 		String json = "{\"auth_time\":1518022800}";
 		
@@ -197,9 +211,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		assertEquals(1518022800L, jsonObject.get("auth_time"));
 	}
-	
-	
-	public void testParse_floatMember() throws ParseException {
+
+
+        @Test
+        public void testParse_floatMember() throws ParseException {
 		
 		String json = "{\"auth_time\":1.660730988E9}";
 		
@@ -207,33 +222,37 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		assertEquals(1.660730988E9, jsonObject.get("auth_time"));
 	}
-	
-	
-	public void testSerialize_intMember() {
+
+
+        @Test
+        public void testSerialize_intMember() {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("auth_time", 1518022800);
 		assertEquals("{\"auth_time\":1518022800}", JSONObjectUtils.toJSONString(jsonObject));
 	}
-	
-	
-	public void testSerialize_longMember() {
+
+
+        @Test
+        public void testSerialize_longMember() {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("auth_time", 1518022800L);
 		assertEquals("{\"auth_time\":1518022800}", JSONObjectUtils.toJSONString(jsonObject));
 	}
-	
-	
-	public void testSerialize_doubleMember() {
+
+
+        @Test
+        public void testSerialize_doubleMember() {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("auth_time", 1.660730988E9);
 		assertEquals("{\"auth_time\":1.660730988E9}", JSONObjectUtils.toJSONString(jsonObject));
 	}
-	
-	
-	public void testGetBoolean_true()
+
+
+        @Test
+        public void testGetBoolean_true()
 		throws ParseException {
 		
 		// Map
@@ -244,9 +263,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		// Parsed JSON object
 		assertTrue(JSONObjectUtils.getBoolean(JSONObjectUtils.parse("{\"key\":true}"), "key"));
 	}
-	
-	
-	public void testGetBoolean_false()
+
+
+        @Test
+        public void testGetBoolean_false()
 		throws ParseException {
 		
 		// Map
@@ -257,9 +277,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		// Parsed JSON object
 		assertFalse(JSONObjectUtils.getBoolean(JSONObjectUtils.parse("{\"key\":false}"), "key"));
 	}
-	
-	
-	public void testGetBoolean_null() {
+
+
+        @Test
+        public void testGetBoolean_null() {
 		
 		// Map
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
@@ -280,9 +301,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetBoolean_missing() {
+
+
+        @Test
+        public void testGetBoolean_missing() {
 		
 		// Map
 		try {
@@ -300,9 +322,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetInt_null() {
+
+
+        @Test
+        public void testGetInt_null() {
 		
 		// Map
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
@@ -323,9 +346,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetInt_missing() {
+
+
+        @Test
+        public void testGetInt_missing() {
 		
 		// Map
 		try {
@@ -343,9 +367,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetInt_notNumber() {
+
+
+        @Test
+        public void testGetInt_notNumber() {
 		
 		// Map
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
@@ -366,9 +391,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("Unexpected type of JSON object member key", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetLong_null() {
+
+
+        @Test
+        public void testGetLong_null() {
 		
 		// Map
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
@@ -389,9 +415,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetLong_missing() {
+
+
+        @Test
+        public void testGetLong_missing() {
 		
 		// Map
 		try {
@@ -409,9 +436,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetFloat_null() {
+
+
+        @Test
+        public void testGetFloat_null() {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", null);
@@ -423,9 +451,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetFloat_missing() {
+
+
+        @Test
+        public void testGetFloat_missing() {
 		
 		try {
 			JSONObjectUtils.getFloat(JSONObjectUtils.newJSONObject(), "key");
@@ -434,9 +463,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetDouble_null() {
+
+
+        @Test
+        public void testGetDouble_null() {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", null);
@@ -448,9 +478,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetDouble_missing() {
+
+
+        @Test
+        public void testGetDouble_missing() {
 		
 		try {
 			JSONObjectUtils.getDouble(JSONObjectUtils.newJSONObject(), "key");
@@ -459,29 +490,32 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is missing or null", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetIntegerNumberAs_int_long_float_double() throws ParseException {
+
+
+        @Test
+        public void testGetIntegerNumberAs_int_long_float_double() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.parse("{\"key\":10}");
 		assertEquals(10, JSONObjectUtils.getInt(jsonObject, "key"));
 		assertEquals(10L, JSONObjectUtils.getLong(jsonObject, "key"));
-		assertEquals(10.0F, JSONObjectUtils.getFloat(jsonObject, "key"));
-		assertEquals(10.0D, JSONObjectUtils.getDouble(jsonObject, "key"));
+		assertEquals(10.0F, JSONObjectUtils.getFloat(jsonObject, "key"), 0.0);
+		assertEquals(10.0D, JSONObjectUtils.getDouble(jsonObject, "key"), 0.0);
 	}
-	
-	
-	public void testGetDecimalNumberAs_int_long_float_double() throws ParseException {
+
+
+        @Test
+        public void testGetDecimalNumberAs_int_long_float_double() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.parse("{\"key\":3.14}");
 		assertEquals(3, JSONObjectUtils.getInt(jsonObject, "key"));
 		assertEquals(3L, JSONObjectUtils.getLong(jsonObject, "key"));
-		assertEquals(3.14F, JSONObjectUtils.getFloat(jsonObject, "key"));
-		assertEquals(3.14D, JSONObjectUtils.getDouble(jsonObject, "key"));
+		assertEquals(3.14F, JSONObjectUtils.getFloat(jsonObject, "key"), 0.0);
+		assertEquals(3.14D, JSONObjectUtils.getDouble(jsonObject, "key"), 0.0);
 	}
-	
-	
-	public void testGetString() throws ParseException {
+
+
+        @Test
+        public void testGetString() throws ParseException {
 		
 		// Map
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
@@ -492,9 +526,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		jsonObject = JSONObjectUtils.parse("{\"key\":\"value\"}");
 		assertEquals("value", JSONObjectUtils.getString(jsonObject, "key"));
 	}
-	
-	
-	public void testGetString_null() throws ParseException {
+
+
+        @Test
+        public void testGetString_null() throws ParseException {
 		
 		// Map
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
@@ -505,9 +540,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		jsonObject = JSONObjectUtils.parse("{\"key\":null}");
 		assertNull(JSONObjectUtils.getString(jsonObject, "key"));
 	}
-	
-	
-	public void testGetString_missing() throws ParseException {
+
+
+        @Test
+        public void testGetString_missing() throws ParseException {
 		
 		// Map
 		assertNull(JSONObjectUtils.getString(JSONObjectUtils.newJSONObject(), "key"));
@@ -515,9 +551,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		// Parsed JSON object
 		assertNull(JSONObjectUtils.getString(JSONObjectUtils.parse("{}"), "key"));
 	}
-	
-	
-	public void testGetURI() throws ParseException {
+
+
+        @Test
+        public void testGetURI() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", "https://c2id.net");
@@ -525,7 +562,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testGetURI_illegal() {
+        @Test
+        public void testGetURI_illegal() {
 
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", "a%b%c");
@@ -536,23 +574,26 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("Malformed escape pair at index 1: a%b%c", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetURI_null() throws ParseException {
+
+
+        @Test
+        public void testGetURI_null() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", null);
 		assertNull(JSONObjectUtils.getURI(jsonObject, "key"));
 	}
-	
-	
-	public void testGetURI_missing() throws ParseException {
+
+
+        @Test
+        public void testGetURI_missing() throws ParseException {
 		
 		assertNull(JSONObjectUtils.getURI(JSONObjectUtils.newJSONObject(), "key"));
 	}
-	
-	
-	public void testGetJSONArray_null() throws ParseException {
+
+
+        @Test
+        public void testGetJSONArray_null() throws ParseException {
 		
 		// Map
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
@@ -562,9 +603,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		// Parsed JSON object
 		assertNull(JSONObjectUtils.getJSONArray(JSONObjectUtils.parse("{\"key\":null}"), "key"));
 	}
-	
-	
-	public void testGetJSONArray_missing() throws ParseException {
+
+
+        @Test
+        public void testGetJSONArray_missing() throws ParseException {
 		
 		// Map
 		assertNull(JSONObjectUtils.getJSONArray(JSONObjectUtils.newJSONObject(), "key"));
@@ -572,16 +614,18 @@ public class JSONObjectUtilsTest extends TestCase {
 		// Parsed JSON object
 		assertNull(JSONObjectUtils.getJSONArray(JSONObjectUtils.parse("{}"), "key"));
 	}
-	
-	
-	public void testGetStringArray() throws ParseException {
+
+
+        @Test
+        public void testGetStringArray() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.parse("{\"key\":[\"apple\",\"pear\"]}");
 		Assert.assertArrayEquals(new String[]{"apple", "pear"}, JSONObjectUtils.getStringArray(jsonObject, "key"));
 	}
-	
-	
-	public void testGetStringArray_otherTypes() throws ParseException {
+
+
+        @Test
+        public void testGetStringArray_otherTypes() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.parse("{\"key\":[10,true]}");
 		try {
@@ -591,44 +635,50 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is not an array of strings", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetStringArray_null() throws ParseException {
+
+
+        @Test
+        public void testGetStringArray_null() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", null);
 		assertNull(JSONObjectUtils.getStringArray(jsonObject, "key"));
 	}
-	
-	
-	public void testGetStringArray_missing() throws ParseException {
+
+
+        @Test
+        public void testGetStringArray_missing() throws ParseException {
 		
 		assertNull(JSONObjectUtils.getStringArray(JSONObjectUtils.newJSONObject(), "key"));
 	}
-	
-	
-	public void testGetStringList() throws ParseException {
+
+
+        @Test
+        public void testGetStringList() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.parse("{\"key\":[\"apple\",\"pear\"]}");
 		assertEquals(Arrays.asList("apple", "pear"), JSONObjectUtils.getStringList(jsonObject, "key"));
 	}
-	
-	
-	public void testGetStringList_null() throws ParseException {
+
+
+        @Test
+        public void testGetStringList_null() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", null);
 		assertNull(JSONObjectUtils.getStringList(jsonObject, "key"));
 	}
-	
-	
-	public void testGetStringList_missing() throws ParseException {
+
+
+        @Test
+        public void testGetStringList_missing() throws ParseException {
 		
 		assertNull(JSONObjectUtils.getStringList(JSONObjectUtils.newJSONObject(), "key"));
 	}
-	
-	
-	public void testGetJSONObjectArray() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObjectArray() throws ParseException {
 		
 		Map<String, Object> o1 = JSONObjectUtils.newJSONObject();
 		o1.put("o1-key-1", "o1-val-1");
@@ -653,7 +703,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testGetJSONObjectArray_nullItems() throws ParseException {
+        @Test
+        public void testGetJSONObjectArray_nullItems() throws ParseException {
 
 		Map<String, Object> o1 = JSONObjectUtils.newJSONObject();
 		o1.put("o1-key-1", "o1-val-1");
@@ -673,9 +724,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertNull(array[3]);
 		assertEquals(4, array.length);
 	}
-	
-	
-	public void testGetJSONObjectArray_parsedJSONObject() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObjectArray_parsedJSONObject() throws ParseException {
 		
 		Map<String, Object> o1 = JSONObjectUtils.newJSONObject();
 		o1.put("o1-key-1", "o1-val-1");
@@ -702,26 +754,29 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		assertEquals(2, array.length);
 	}
-	
-	
-	public void testGetJSONObjectArray_null() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObjectArray_null() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", null);
 		
 		assertNull(JSONObjectUtils.getJSONObjectArray(jsonObject, "key"));
 	}
-	
-	
-	public void testGetJSONObjectArray_none() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObjectArray_none() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		
 		assertNull(JSONObjectUtils.getJSONObjectArray(jsonObject, "key"));
 	}
-	
-	
-	public void testGetJSONObjectArray_empty() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObjectArray_empty() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", JSONArrayUtils.newJSONArray());
@@ -730,9 +785,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		assertEquals(0, JSONObjectUtils.getJSONObjectArray(JSONObjectUtils.parse("{\"key\":[]}"), "key").length);
 	}
-	
-	
-	public void testGetJSONObjectArray_itemTypeNotJSONObject() {
+
+
+        @Test
+        public void testGetJSONObjectArray_itemTypeNotJSONObject() {
 		
 		Map<String, Object> o1 = JSONObjectUtils.newJSONObject();
 		o1.put("o1-key-1", "o1-val-1");
@@ -757,9 +813,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member key is not an array of JSON objects", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetJSONObjectArray_itemNull() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObjectArray_itemNull() throws ParseException {
 		
 		Map<String, Object> o1 = JSONObjectUtils.newJSONObject();
 		o1.put("o1-key-1", "o1-val-1");
@@ -778,9 +835,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		assertEquals(2, array.length);
 	}
-	
-	
-	public void testGetJSONObjectArray_itemNull_parsedJSONObject() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObjectArray_itemNull_parsedJSONObject() throws ParseException {
 		
 		Map<String, Object> o1 = JSONObjectUtils.newJSONObject();
 		o1.put("o1-key-1", "o1-val-1");
@@ -803,9 +861,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		assertEquals(2, array.length);
 	}
-	
-	
-	public void testGetJSONObject() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObject() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		
@@ -821,9 +880,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertEquals("2", JSONObjectUtils.getJSONObject(jsonObject, "key").get("two"));
 		assertNull(JSONObjectUtils.getJSONObject(jsonObject, "key").get("three"));
 	}
-	
-	
-	public void testGetJSONObject_parsedJSONObject() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObject_parsedJSONObject() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		
@@ -838,7 +898,7 @@ public class JSONObjectUtilsTest extends TestCase {
 		jsonObject = JSONObjectUtils.parse(json);
 		
 		// GSon parses one:1 as one:1.0!
-		assertNotSame(value, JSONObjectUtils.getJSONObject(jsonObject, "key"));
+		Assert.assertNotSame(value, JSONObjectUtils.getJSONObject(jsonObject, "key"));
 		
 		value = JSONObjectUtils.getJSONObject(jsonObject, "key");
 		
@@ -847,9 +907,10 @@ public class JSONObjectUtilsTest extends TestCase {
 		assertTrue(value.containsKey("three"));
 		assertNull(value.get("three"));
 	}
-	
-	
-	public void testGetJSONObject_valueNotMapOfStringObjectPairs() {
+
+
+        @Test
+        public void testGetJSONObject_valueNotMapOfStringObjectPairs() {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		
@@ -865,9 +926,10 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("JSON object member AAA not a JSON object", e.getMessage());
 		}
 	}
-	
-	
-	public void testGetJSONObject_null() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObject_null() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", null);
@@ -875,40 +937,45 @@ public class JSONObjectUtilsTest extends TestCase {
 		
 		assertNull(JSONObjectUtils.getJSONObject(JSONObjectUtils.parse("{\"key\":null}"), "key"));
 	}
-	
-	
-	public void testGetJSONObject_missing() throws ParseException {
+
+
+        @Test
+        public void testGetJSONObject_missing() throws ParseException {
 		
 		assertNull(JSONObjectUtils.getJSONObject(JSONObjectUtils.newJSONObject(), "key"));
 		
 		assertNull(JSONObjectUtils.getJSONObject(JSONObjectUtils.parse("{}"), "key"));
 	}
-	
-	
-	public void testGetBase64URL() throws ParseException {
+
+
+        @Test
+        public void testGetBase64URL() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put(HeaderParameterNames.X_509_CERT_SHA_1_THUMBPRINT, "abc");
 		Base64URL base64URL = JSONObjectUtils.getBase64URL(jsonObject, HeaderParameterNames.X_509_CERT_SHA_1_THUMBPRINT);
 		assertEquals("abc", base64URL.toString());
 	}
-	
-	
-	public void testGetBase64URL_null() throws ParseException {
+
+
+        @Test
+        public void testGetBase64URL_null() throws ParseException {
 		
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put(HeaderParameterNames.X_509_CERT_SHA_1_THUMBPRINT, null);
 		assertNull(JSONObjectUtils.getBase64URL(jsonObject, HeaderParameterNames.X_509_CERT_SHA_1_THUMBPRINT));
 	}
-	
-	
-	public void testGetBase64URL_missing() throws ParseException {
+
+
+        @Test
+        public void testGetBase64URL_missing() throws ParseException {
 		
 		assertNull(JSONObjectUtils.getBase64URL(JSONObjectUtils.newJSONObject(), HeaderParameterNames.X_509_CERT_SHA_1_THUMBPRINT));
 	}
-	
-	
-	public void testToJSONString_unixTimestamp() throws ParseException {
+
+
+        @Test
+        public void testToJSONString_unixTimestamp() throws ParseException {
 		
 		Date now = DateUtils.nowWithSecondsPrecision();
 		
@@ -926,7 +993,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testGetEpochSecondAsDate() throws ParseException {
+        @Test
+        public void testGetEpochSecondAsDate() throws ParseException {
 
 		Date now = DateUtils.nowWithSecondsPrecision();
 
@@ -943,7 +1011,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testGetEpochSecondAsDate_null() throws ParseException {
+        @Test
+        public void testGetEpochSecondAsDate_null() throws ParseException {
 
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("now", null);
@@ -955,13 +1024,15 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testGetEpochSecondAsDate_missing() throws ParseException {
+        @Test
+        public void testGetEpochSecondAsDate_missing() throws ParseException {
 
 		assertNull(JSONObjectUtils.getEpochSecondAsDate(JSONObjectUtils.newJSONObject(), "now"));
 	}
 
 
-	public void testGetEpochSecondAsDate_illegal() throws ParseException {
+        @Test
+        public void testGetEpochSecondAsDate_illegal() throws ParseException {
 
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("now", "xxx");
@@ -976,17 +1047,19 @@ public class JSONObjectUtilsTest extends TestCase {
 			assertEquals("Unexpected type of JSON object member now", e.getMessage());
 		}
 	}
-	
-	
-	public void testSerialize_escape() {
+
+
+        @Test
+        public void testSerialize_escape() {
 	
 		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
 		jsonObject.put("key", "\"\\<>&'=");
 		assertEquals("{\"key\":\"\\\"\\\\<>&'=\"}", JSONObjectUtils.toJSONString(jsonObject));
 	}
-	
-	
-	public void testBase64Value() throws ParseException {
+
+
+        @Test
+        public void testBase64Value() throws ParseException {
 		
 		Base64 base64 = new Base64("xHPBC7VaQxq6AAvrBQN4YQ==");
 		Map<String, Object> o = new HashMap<>();
@@ -999,7 +1072,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testToJSONString_null() {
+        @Test
+        public void testToJSONString_null() {
 
 		try {
 			JSONObjectUtils.toJSONString(null);
@@ -1010,7 +1084,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testParseNonStrictJSONObject_unescapedKey() {
+        @Test
+        public void testParseNonStrictJSONObject_unescapedKey() {
 
 		String json = "{key1:\"value1\"}";
 
@@ -1023,7 +1098,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testParseNonStrictJSONObject_unescapedValue() {
+        @Test
+        public void testParseNonStrictJSONObject_unescapedValue() {
 
 		String json = "{\"key1\":value1}";
 
@@ -1036,7 +1112,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testParseNonStrictJSONObject_unescapedKeyAndValue() {
+        @Test
+        public void testParseNonStrictJSONObject_unescapedKeyAndValue() {
 
 		String json = "{key1:value1}";
 
@@ -1049,7 +1126,8 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testParseNonStrictJSONObject_trailingComma() {
+        @Test
+        public void testParseNonStrictJSONObject_trailingComma() {
 
 		String json = "{\"key1\":\"value1\",}";
 
@@ -1062,9 +1140,55 @@ public class JSONObjectUtilsTest extends TestCase {
 	}
 
 
-	public void testParseNonStrictJSONObject_jwkSet() {
+        @Test
+        public void testParseNonStrictJSONObject_jwkSet() {
 
 		String json = "{keys: [{kty: RSA, e: AQAB, kid: eee9f17a3b598fd86417a980b591fbe6, alg: RS384, n: wJq2RHIA-7RT6q4go7wjcbHdW7ck7Kz22A8wf-kN7Wi5CWvhFG2_Y7nQp1lDpb2IKMQr }]}";
+
+		try {
+			JSONObjectUtils.parse(json);
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+	}
+
+
+	public static Map<String, Object> createJSONObjectWithNesting(int depth) {
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		Map<String, Object> ref = jsonObject;
+		for (int i=0; i < depth; i++) {
+			Map<String, Object> nested = JSONObjectUtils.newJSONObject();
+			ref.put("a", nested);
+			ref = nested;
+		}
+		return jsonObject;
+	}
+
+
+	@Test
+	public void testParseWithMaxJSONObjectNesting()
+		throws ParseException {
+
+		JsonReader jsonReader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(new byte[]{})));
+		int nestingLimit = jsonReader.getNestingLimit();
+		assertEquals(255, nestingLimit);
+
+		Map<String, Object> jsonObject = createJSONObjectWithNesting(nestingLimit - 1);
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+		assertEquals(jsonObject, JSONObjectUtils.parse(json));
+	}
+
+
+	@Test
+	public void testParseWithExcessiveJSONObjectNesting() {
+
+		JsonReader jsonReader = new JsonReader(new InputStreamReader(new ByteArrayInputStream(new byte[]{})));
+		int nestingLimit = jsonReader.getNestingLimit();
+		assertEquals(255, nestingLimit);
+
+		Map<String, Object> jsonObject = createJSONObjectWithNesting(nestingLimit);
+		String json = JSONObjectUtils.toJSONString(jsonObject);
 
 		try {
 			JSONObjectUtils.parse(json);
