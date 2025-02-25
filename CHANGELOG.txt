@@ -1757,6 +1757,10 @@ version 9.40 (2024-06-06)
 
 10.0.2 (2025-02-25)
     * Updates JSONObjectUtils.parse and JSONArrayUtils.parse to reject JSON
-      strings with object and array nesting deeper than 255. This change is the
-      default parse behaviour of GSon 2.12.0+ (iss #583)
+      strings with object and array nesting deeper than 255. This is intended
+      to prevent StackOverflowError's in Gson when a parsed JSON string with
+      excessive nesting is serialised, for example to log the claims of a
+      parsed JWT. Note that in Gson the JSON reader is not susceptible to
+      StackOverflowError's, only the serialisation. The nesting limit of depth
+      255 is introduced in Gson 2.12.0 (iss #583).
     * Updates GSon to 2.12.1.
