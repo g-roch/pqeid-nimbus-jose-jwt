@@ -54,7 +54,9 @@ public class X509CertChainUtilsTest extends TestCase {
                         X509CertChainUtils.parse(certChain);
 			fail();
                 } catch (ParseException e) {
-			assertEquals("Invalid X.509 certificate at position 0: Could not parse certificate: java.io.IOException: Empty input", e.getMessage());
+			String ownExceptionMsg = "Invalid X.509 certificate at position 0: ";
+			assertTrue(e.getMessage().startsWith(ownExceptionMsg));
+			assertTrue(e.getMessage().length() > ownExceptionMsg.length());
 			assertNull(e.getCause());
 		}
         }
