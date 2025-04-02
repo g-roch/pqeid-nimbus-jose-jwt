@@ -1764,3 +1764,6 @@ version 9.40 (2024-06-06)
       StackOverflowError's, only the serialisation. The nesting limit of depth
       255 is introduced in Gson 2.12.0 (iss #583).
     * Updates GSon to 2.12.1.
+
+unreleased
+    * Re-add module-info.java
