@@ -1769,3 +1769,5 @@ unreleased (2025-04-03)
     * Restores module-info.java.
     * Adds ExpiredJWTException extends BadJWTException to enable easy
       programmatic detection whether a JWT has expired (iss #585).
+    * Adds URLBasedJWKSetSource getJWKSetURL and getResourceRetriever methods
+      to ease class extension.

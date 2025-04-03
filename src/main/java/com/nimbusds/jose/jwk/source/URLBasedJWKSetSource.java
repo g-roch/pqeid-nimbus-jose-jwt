@@ -37,7 +37,7 @@ import com.nimbusds.jose.util.ResourceRetriever;
  *
  * @author Thomas Rørvik Skjølberg
  * @author Vladimir Dzhuvinov
- * @version 2022-11-22
+ * @version 2025-04-03
  */
 @ThreadSafe
 public class URLBasedJWKSetSource<C extends SecurityContext> implements JWKSetSource<C> {
@@ -59,14 +59,35 @@ public class URLBasedJWKSetSource<C extends SecurityContext> implements JWKSetSo
 		Objects.requireNonNull(resourceRetriever, "The resource retriever must not be null");
 		this.resourceRetriever = resourceRetriever;
 	}
-	
-	
+
+
+	/**
+	 * Returns the JWK set URL.
+	 *
+	 * @return The JWK set URL.
+	 */
+	public URL getJWKSetURL() {
+		return url;
+	}
+
+
+	/**
+	 * Returns the HTTP resource retriever.
+	 *
+	 * @return The HTTP resource retriever.
+	 */
+	public ResourceRetriever getResourceRetriever() {
+
+		return resourceRetriever;
+	}
+
+
 	@Override
 	public JWKSet getJWKSet(final JWKSetCacheRefreshEvaluator refreshEvaluator, final long currentTime, final C context) throws KeySourceException {
 		
 		Resource resource;
 		try {
-			resource = resourceRetriever.retrieveResource(url);
+			resource = getResourceRetriever().retrieveResource(getJWKSetURL());
 		} catch (IOException e) {
 			throw new JWKSetRetrievalException("Couldn't retrieve JWK set from URL: " + e.getMessage(), e);
 		}
