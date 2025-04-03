@@ -339,7 +339,7 @@ public class DefaultJWTClaimsVerifier <C extends SecurityContext> implements JWT
 			if (exp != null) {
 
 				if (! DateUtils.isAfter(exp, now, maxClockSkew)) {
-					throw new BadJWTException("Expired JWT");
+					throw new ExpiredJWTException("Expired JWT");
 				}
 			}
 

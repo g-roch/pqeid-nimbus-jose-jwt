@@ -781,7 +781,7 @@ public class DefaultJWTProcessorTest extends TestCase {
 
 		try {
 			processor.process(jwt.serialize(), null);
-		} catch (BadJWTException e) {
+		} catch (ExpiredJWTException e) {
 			assertEquals("Expired JWT", e.getMessage());
 		}
 	}

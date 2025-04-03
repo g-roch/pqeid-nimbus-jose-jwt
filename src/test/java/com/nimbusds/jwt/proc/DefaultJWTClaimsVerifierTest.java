@@ -63,7 +63,8 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 	}
 
 
-	public void testExpired() {
+	public void testExpired()
+		throws Exception{
 
 		final Date now = new Date();
 		Date yesterday = new Date(now.getTime() - 24 * 60 * 60 *1000);
@@ -75,7 +76,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 		try {
 			verifier.verify(claimsSet, null);
 			fail();
-		} catch (BadJOSEException e) {
+		} catch (ExpiredJWTException e) {
 			assertEquals("Expired JWT", e.getMessage());
 		}
 	}
@@ -539,7 +540,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 				null
 			);
 			fail();
-		} catch (BadJWTException e) {
+		} catch (ExpiredJWTException e) {
 			assertEquals("Expired JWT", e.getMessage());
 		}
 	}
@@ -566,7 +567,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 		try {
 			new DefaultJWTClaimsVerifier<>().verify(claimsSet, null);
 			fail();
-		} catch (BadJWTException e) {
+		} catch (ExpiredJWTException e) {
 			assertEquals("Expired JWT", e.getMessage());
 		}
 	}
