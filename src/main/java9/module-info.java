@@ -3,7 +3,7 @@ module com.nimbusds.jose.jwt {
 	requires jdk.crypto.ec; // TODO: remove when this project targets JDK > 22, see JDK-8312267
 	requires jdk.crypto.cryptoki;
 
-	requires transitive com.google.gson;
+	requires com.google.gson;
 
 	// shaded:
 	requires static jcip.annotations;
