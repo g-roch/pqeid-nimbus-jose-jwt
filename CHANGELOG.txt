@@ -1774,4 +1774,4 @@ version 9.40 (2024-06-06)
 
 10.2 (2025-04-07)
     * Gson is made a direct instead of a shaded dependency to address module
-      issues (iss #550).
+      issues introduced in 10.1 (iss #550).
