@@ -1771,3 +1771,7 @@ version 9.40 (2024-06-06)
       programmatic detection whether a JWT has expired (iss #585).
     * Adds URLBasedJWKSetSource getJWKSetURL and getResourceRetriever methods
       to ease class extension.
+
+10.2 (2025-04-07)
+    * Gson is made a direct instead of a shaded dependency to address module
+      issues (iss #550).
