@@ -58,6 +58,7 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.12.1</version>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.google.crypto.tink</groupId>
@@ -158,15 +159,28 @@
                     <shadedArtifactAttached>false</shadedArtifactAttached>
                     <artifactSet>
                         <includes>
+                            <include>com.google.code.gson:gson</include>
                             <include>com.github.stephenc.jcip:jcip-annotations</include>
                         </includes>
                     </artifactSet>
                     <relocations>
                         <relocation>
+                            <pattern>com.google.gson</pattern>
+                            <shadedPattern>com.nimbusds.jose.shaded.gson</shadedPattern>
+                        </relocation>
+                        <relocation>
                             <pattern>net.jcip.annotations</pattern>
                             <shadedPattern>com.nimbusds.jose.shaded.jcip</shadedPattern>
                         </relocation>
                     </relocations>
+                    <filters>
+                        <filter>
+                            <artifact>com.google.code.gson:gson</artifact>
+                            <excludes>
+                                <exclude>**/module-info.class</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
                 </configuration>
                 <executions>
                     <execution>
