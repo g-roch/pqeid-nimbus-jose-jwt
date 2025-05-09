@@ -1775,3 +1775,8 @@ version 9.40 (2024-06-06)
 10.2 (2025-04-07)
     * Gson is made a direct instead of a shaded dependency to address module
       issues introduced in 10.1 (iss #550).
+
+10.3 (2025-05-09)
+    * Restores the Gson shading, adding placeholder interfaces to prevent
+      NoClassDefFoundError occurrences at runtime when the JAR is used on a
+      module path (iss #550).
