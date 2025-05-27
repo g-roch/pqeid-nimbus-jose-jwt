@@ -44,7 +44,8 @@ import java.util.Set;
  * </ul>
  *
  * @author Tim McLean
- * @version 2024-12-15
+ * @author Vladimir Dzhuvinov
+ * @version 2025-05-27
  */
 public class OctetKeyPairGenerator extends JWKGenerator<OctetKeyPair> {
 
@@ -114,9 +115,15 @@ public class OctetKeyPairGenerator extends JWKGenerator<OctetKeyPair> {
 			final Ed25519Sign.KeyPair tinkKeyPair;
 
 			try {
-				// TODO Use super.secureRandom if it is set
-
-				tinkKeyPair = Ed25519Sign.KeyPair.newKeyPair();
+				if (secureRandom != null) {
+					// Use the provided JCA SecureRandom
+					byte[] seed = new byte[32];
+					secureRandom.nextBytes(seed);
+					tinkKeyPair = Ed25519Sign.KeyPair.newKeyPairFromSeed(seed);
+				} else {
+					// Use the Tink internal secure random generation
+					tinkKeyPair = Ed25519Sign.KeyPair.newKeyPair();
+				}
 
 			} catch (GeneralSecurityException e) {
 				// internal Tink error, should not happen

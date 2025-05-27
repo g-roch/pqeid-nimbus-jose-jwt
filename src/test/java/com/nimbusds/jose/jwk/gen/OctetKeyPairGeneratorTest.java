@@ -18,11 +18,11 @@
 package com.nimbusds.jose.jwk.gen;
 
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.util.*;
 
+import com.google.crypto.tink.subtle.Ed25519Sign;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -35,7 +35,8 @@ import junit.framework.TestCase;
 
 /**
  * @author Tim McLean
- * @version 2023-01-02
+ * @author Vladimir Dzhuvinov
+ * @version 2025-05-27
  */
 public class OctetKeyPairGeneratorTest extends TestCase {
 	
@@ -181,6 +182,7 @@ public class OctetKeyPairGeneratorTest extends TestCase {
 
 
 	// The x and d values that are generated should all be distinct
+	// (Tink secure random)
 	public void testEd25519Distinctness()
 		throws JOSEException  {
 
@@ -191,6 +193,26 @@ public class OctetKeyPairGeneratorTest extends TestCase {
 		for (int i=0; i<100; i++) {
 
 			OctetKeyPair k = gen.generate();
+			assertTrue(values.add(k.getD()));
+			assertTrue(values.add(k.getX()));
+		}
+	}
+
+
+	// The x and d values that are generated should all be distinct
+	// (JCA Secure Random)
+	public void testEd25519DistinctnessWithJCASecureRandom()
+		throws JOSEException  {
+
+		SecureRandom secureRandom = new SecureRandom();
+
+		Set<Base64URL> values = new HashSet<>();
+
+		for (int i=0; i<100; i++) {
+
+			OctetKeyPair k = new OctetKeyPairGenerator(Curve.Ed25519)
+				.secureRandom(secureRandom)
+				.generate();
 			assertTrue(values.add(k.getD()));
 			assertTrue(values.add(k.getX()));
 		}
@@ -209,5 +231,57 @@ public class OctetKeyPairGeneratorTest extends TestCase {
 		assertEquals(EXP, okp.getExpirationTime());
 		assertEquals(NBF, okp.getNotBeforeTime());
 		assertEquals(IAT, okp.getIssueTime());
+	}
+
+
+	public void testEd25519TinkNewKeyPairFromSeedWithFixedSeed() throws GeneralSecurityException {
+
+		byte[] seed = new byte[32];
+		new SecureRandom().nextBytes(seed);
+
+		Set<Base64URL> values = new HashSet<>();
+
+		Ed25519Sign.KeyPair keyPair = Ed25519Sign.KeyPair.newKeyPairFromSeed(seed);
+		assertTrue(values.add(Base64URL.encode(keyPair.getPrivateKey())));
+
+		for (int i=0; i<100; i++) {
+			keyPair = Ed25519Sign.KeyPair.newKeyPairFromSeed(seed);
+			assertFalse(values.add(Base64URL.encode(keyPair.getPrivateKey())));
+		}
+
+		assertEquals(1, values.size());
+	}
+
+
+	public static class FixedSecureRandom extends SecureRandom {
+		private final byte fixedValue;
+
+		public FixedSecureRandom(final byte fixedValue) {
+			this.fixedValue = fixedValue;
+		}
+
+		@Override
+		public void nextBytes(final byte[] bytes) {
+			Arrays.fill(bytes, fixedValue);
+		}
+	}
+
+
+	public void testGenEd25519WithFixedSeed() throws JOSEException {
+
+		FixedSecureRandom fixedSecureRandom = new FixedSecureRandom((byte) 1);
+
+		Set<Base64URL> values = new HashSet<>();
+
+		for (int i=0; i<100; i++) {
+
+			OctetKeyPair k = new OctetKeyPairGenerator(Curve.Ed25519)
+				.secureRandom(fixedSecureRandom)
+				.generate();
+			values.add(k.getD());
+			values.add(k.getX());
+		}
+
+		assertEquals(2, values.size());
 	}
 }

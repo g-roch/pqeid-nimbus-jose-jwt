@@ -1780,3 +1780,7 @@ version 9.40 (2024-06-06)
     * Restores the Gson shading, adding placeholder interfaces to prevent
       NoClassDefFoundError occurrences at runtime when the JAR is used on a
       module path (iss #550).
+
+10.3.1 (unreleased)
+    * OctetKeyPairGenerator with Curve.Ed25519 should use the provided
+      SecureRandom (iss #590).
