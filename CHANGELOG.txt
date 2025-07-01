@@ -1781,6 +1781,6 @@ version 9.40 (2024-06-06)
       NoClassDefFoundError occurrences at runtime when the JAR is used on a
       module path (iss #550).
 
-10.3.1 (unreleased)
+10.3.1 (2025-07-01)
     * OctetKeyPairGenerator with Curve.Ed25519 should use the provided
       SecureRandom (iss #590).
