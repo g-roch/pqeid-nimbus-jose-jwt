@@ -19,21 +19,29 @@ package com.nimbusds.jose.crypto;
 
 
 import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
+import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jose.crypto.impl.RSA_OAEP;
+import com.nimbusds.jose.crypto.impl.RSA_OAEP_SHA2;
+import com.nimbusds.jose.crypto.opts.CipherMode;
 import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.util.ByteUtils;
 import junit.framework.TestCase;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
+import static org.junit.Assert.assertArrayEquals;
 
 
 /**
@@ -41,7 +49,7 @@ import junit.framework.TestCase;
  * JWE spec.
  *
  * @author Vladimir Dzhuvinov
- * @version 2016-12-04
+ * @version 2025-07-19
  */
 public class RSA_OAEPTest extends TestCase {
 
@@ -154,7 +162,7 @@ public class RSA_OAEPTest extends TestCase {
 	}
 	
 	
-	public void testRoundTripWithAllWithEncs()
+	public void testRoundTripWithAllEncs()
 		throws Exception {
 		
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
@@ -172,37 +180,52 @@ public class RSA_OAEPTest extends TestCase {
 			EncryptionMethod.A256GCM,
 			EncryptionMethod.A128CBC_HS256_DEPRECATED,
 			EncryptionMethod.A256CBC_HS512_DEPRECATED);
-		
-		RSAEncrypter encrypter = new RSAEncrypter(publicKey);
-		
-		RSADecrypter decrypter = new RSADecrypter(privateKey);
-		
-		for (EncryptionMethod enc: encs) {
-			
-			JWEObject jwe = new JWEObject(
-				new JWEHeader(JWEAlgorithm.RSA_OAEP, enc),
-				new Payload("Hello, world!"));
-			
-			assertEquals(JWEObject.State.UNENCRYPTED, jwe.getState());
-			
-			jwe.encrypt(encrypter);
-			
-			assertEquals(JWEObject.State.ENCRYPTED, jwe.getState());
-			
-			String jweString = jwe.serialize();
-			
-			jwe = JWEObject.parse(jweString);
-			
-			jwe.decrypt(decrypter);
-			
-			assertEquals(JWEObject.State.DECRYPTED, jwe.getState());
-			
-			assertEquals("Hello, world!", jwe.getPayload().toString());
+
+		// The OpenJDK provider should accept WRAP / UNWRAP and ENCRYPT / DECRYPT cipher modes.
+		// Other JCA providers (HSMs) may support only one.
+		// WRAP / UNWRAP is considered semantically correct for JWE RSA_OAEP
+		for (CipherMode cipherMode: Arrays.asList(null, CipherMode.WRAP_UNWRAP, CipherMode.ENCRYPT_DECRYPT)) {
+
+			Set<JWEEncrypterOption> encrypterOptions = new HashSet<>();
+			if (cipherMode != null) {
+				encrypterOptions.add(cipherMode);
+			}
+
+			RSAEncrypter encrypter = new RSAEncrypter(publicKey, null, encrypterOptions);
+
+			Set<JWEDecrypterOption> decrypterOptions = new HashSet<>();
+			if (cipherMode != null) {
+				decrypterOptions.add(cipherMode);
+			}
+			RSADecrypter decrypter = new RSADecrypter(privateKey, null, decrypterOptions);
+
+			for (EncryptionMethod enc : encs) {
+
+				JWEObject jwe = new JWEObject(
+					new JWEHeader(JWEAlgorithm.RSA_OAEP, enc),
+					new Payload("Hello, world!"));
+
+				assertEquals(JWEObject.State.UNENCRYPTED, jwe.getState());
+
+				jwe.encrypt(encrypter);
+
+				assertEquals(JWEObject.State.ENCRYPTED, jwe.getState());
+
+				String jweString = jwe.serialize();
+
+				jwe = JWEObject.parse(jweString);
+
+				jwe.decrypt(decrypter);
+
+				assertEquals(JWEObject.State.DECRYPTED, jwe.getState());
+
+				assertEquals("Hello, world!", jwe.getPayload().toString());
+			}
 		}
 	}
 	
 	
-	public void testRoundTripWithAllWithEncs_withBouncyCastleProvider()
+	public void testRoundTripWithAllEncs_withBouncyCastleProvider()
 		throws Exception {
 		
 		KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
@@ -220,34 +243,92 @@ public class RSA_OAEPTest extends TestCase {
 			EncryptionMethod.A256GCM,
 			EncryptionMethod.A128CBC_HS256_DEPRECATED,
 			EncryptionMethod.A256CBC_HS512_DEPRECATED);
-		
-		RSAEncrypter encrypter = new RSAEncrypter(publicKey);
-		encrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
-		
-		RSADecrypter decrypter = new RSADecrypter(privateKey);
-		decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
-		
-		for (EncryptionMethod enc: encs) {
-			
-			JWEObject jwe = new JWEObject(
-				new JWEHeader(JWEAlgorithm.RSA_OAEP_256, enc),
-				new Payload("Hello, world!"));
-			
-			assertEquals(JWEObject.State.UNENCRYPTED, jwe.getState());
-			
-			jwe.encrypt(encrypter);
-			
-			assertEquals(JWEObject.State.ENCRYPTED, jwe.getState());
-			
-			String jweString = jwe.serialize();
-			
-			jwe = JWEObject.parse(jweString);
-			
-			jwe.decrypt(decrypter);
-			
-			assertEquals(JWEObject.State.DECRYPTED, jwe.getState());
-			
-			assertEquals("Hello, world!", jwe.getPayload().toString());
+
+		// The BC provider should accept WRAP / UNWRAP and ENCRYPT / DECRYPT cipher modes.
+		// Other JCA providers (HSMs) may support only one.
+		// WRAP / UNWRAP is considered semantically correct for JWE RSA_OAEP
+		for (CipherMode cipherMode: Arrays.asList(null, CipherMode.WRAP_UNWRAP, CipherMode.ENCRYPT_DECRYPT)) {
+
+			Set<JWEEncrypterOption> encrypterOptions = new HashSet<>();
+			if (cipherMode != null) {
+				encrypterOptions.add(cipherMode);
+			}
+
+			RSAEncrypter encrypter = new RSAEncrypter(publicKey, null, encrypterOptions);
+			encrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+
+			Set<JWEDecrypterOption> decrypterOptions = new HashSet<>();
+			if (cipherMode != null) {
+				decrypterOptions.add(cipherMode);
+			}
+
+			RSADecrypter decrypter = new RSADecrypter(privateKey, null, decrypterOptions);
+			decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+
+			for (EncryptionMethod enc : encs) {
+
+				JWEObject jwe = new JWEObject(
+					new JWEHeader(JWEAlgorithm.RSA_OAEP_256, enc),
+					new Payload("Hello, world!"));
+
+				assertEquals(JWEObject.State.UNENCRYPTED, jwe.getState());
+
+				jwe.encrypt(encrypter);
+
+				assertEquals(JWEObject.State.ENCRYPTED, jwe.getState());
+
+				String jweString = jwe.serialize();
+
+				jwe = JWEObject.parse(jweString);
+
+				jwe.decrypt(decrypter);
+
+				assertEquals(JWEObject.State.DECRYPTED, jwe.getState());
+
+				assertEquals("Hello, world!", jwe.getPayload().toString());
+			}
+		}
+	}
+
+
+	public void testEncryptDecryptCEK()
+		throws Exception {
+
+		KeyPairGenerator rsaGen = KeyPairGenerator.getInstance("RSA");
+		rsaGen.initialize(4096);
+		KeyPair kp = rsaGen.generateKeyPair();
+		RSAPublicKey publicKey = (RSAPublicKey)kp.getPublic();
+		RSAPrivateKey privateKey = (RSAPrivateKey)kp.getPrivate();
+
+		KeyGenerator aesGen = KeyGenerator.getInstance("AES");
+		aesGen.init(128);
+		SecretKey cek = aesGen.generateKey();
+
+		for (Provider provider : Arrays.asList(null, BouncyCastleProviderSingleton.getInstance())) {
+
+			// The OpenJDK and BC providers should accept WRAP / UNWRAP and ENCRYPT / DECRYPT cipher modes.
+			// Other JCA providers (HSMs) may support only one.
+			// WRAP / UNWRAP is considered semantically correct for JWE RSA_OAEP
+			for (CipherMode cipherMode : Arrays.asList(CipherMode.WRAP_UNWRAP, CipherMode.ENCRYPT_DECRYPT)) {
+
+				byte[] encryptedCEK = RSA_OAEP.encryptCEK(
+					publicKey,
+					cek,
+					cipherMode,
+					provider
+				);
+
+				assertEquals(4096, ByteUtils.bitLength(encryptedCEK));
+
+				SecretKey decryptedCEK = RSA_OAEP.decryptCEK(
+					privateKey,
+					encryptedCEK,
+					cipherMode,
+					provider
+				);
+
+				assertArrayEquals(cek.getEncoded(), decryptedCEK.getEncoded());
+			}
 		}
 	}
 	
@@ -429,28 +510,5 @@ public class RSA_OAEPTest extends TestCase {
 			assertEquals("RSA block size exception: The RSA key is too short, try a longer one", e.getMessage());
 			assertNotNull(e.getCause());
 		}
-	}
-
-	public void testKeyWrap() throws Exception{
-		RSAEncrypter encrypter = new RSAEncrypter(PUBLIC_KEY);
-		JWEObject jwe = new JWEObject(
-				new JWEHeader(JWEAlgorithm.RSA_OAEP, EncryptionMethod.A256CBC_HS512),
-				new Payload("Hello, world!"));
-
-		jwe.encrypt(encrypter);
-
-		assertEquals(JWEObject.State.ENCRYPTED, jwe.getState());
-
-		String jweString = jwe.serialize();
-
-		jwe = JWEObject.parse(jweString);
-
-		RSADecrypter decrypter = new RSADecrypter(PRIVATE_KEY);
-
-		jwe.decrypt(decrypter);
-
-		assertEquals(JWEObject.State.DECRYPTED, jwe.getState());
-
-		assertEquals("Hello, world!", jwe.getPayload().toString());
 	}
 }

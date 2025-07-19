@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2025, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,18 +18,19 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.security.PrivateKey;
-import java.util.Set;
-import javax.crypto.SecretKey;
-
-import static com.nimbusds.jose.jwk.gen.RSAKeyGenerator.MIN_KEY_SIZE_BITS;
-
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.impl.*;
+import com.nimbusds.jose.crypto.opts.AllowWeakRSAKey;
+import com.nimbusds.jose.crypto.opts.CipherMode;
+import com.nimbusds.jose.crypto.opts.OptionUtils;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64URL;
+import net.jcip.annotations.ThreadSafe;
+
+import javax.crypto.SecretKey;
+import java.security.PrivateKey;
+import java.util.Collections;
+import java.util.Set;
 
 
 /**
@@ -73,7 +74,7 @@ import com.nimbusds.jose.util.Base64URL;
  * @author Vladimir Dzhuvinov
  * @author Dimitar A. Stoikov
  * @author Egor Puzanov
- * @version 2023-09-10
+ * @version 2025-07-19
  */
 @ThreadSafe
 public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
@@ -89,6 +90,12 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 	 * The private RSA key.
 	 */
 	private final PrivateKey privateKey;
+
+
+	/**
+	 * The configured options, empty set if none.
+	 */
+	private final Set<JWEDecrypterOption> opts;
 	
 	
 	/**
@@ -110,7 +117,7 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 	 */
 	public RSADecrypter(final PrivateKey privateKey) {
 
-		this(privateKey, null, false);
+		this(privateKey, null, Collections.emptySet());
 	}
 
 
@@ -149,7 +156,7 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 	public RSADecrypter(final PrivateKey privateKey,
 			    final Set<String> defCritHeaders) {
 
-		this(privateKey, defCritHeaders, false);
+		this(privateKey, defCritHeaders, Collections.emptySet());
 	}
 
 
@@ -169,24 +176,44 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 	 * @param allowWeakKey   {@code true} to allow an RSA key shorter than
 	 *                       2048 bits.
 	 */
+	@Deprecated
 	public RSADecrypter(final PrivateKey privateKey,
 			    final Set<String> defCritHeaders,
 			    final boolean allowWeakKey) {
+
+		this(privateKey, defCritHeaders, allowWeakKey ? Collections.singleton(AllowWeakRSAKey.getInstance()) : Collections.emptySet());
+	}
+
+
+	/**
+	 * Creates a new RSA decrypter. This constructor can also accept a
+	 * private RSA key located in a PKCS#11 store that doesn't expose the
+	 * private key parameters (such as a smart card or HSM).
+	 *
+	 * @param privateKey     The private RSA key. Its algorithm must be
+	 *                       "RSA" and its length at least 2048 bits. Note
+	 *                       that the length of an RSA key in a PKCS#11
+	 *                       store cannot be checked. Must not be
+	 *                       {@code null}.
+	 * @param defCritHeaders The names of the critical header parameters
+	 *                       that are deferred to the application for
+	 *                       processing, empty set or {@code null} if none.
+	 * @param opts           The decryption options, empty or {@code null}
+	 *                       if none.
+	 */
+	public RSADecrypter(final PrivateKey privateKey,
+			    final Set<String> defCritHeaders,
+			    final Set<JWEDecrypterOption> opts) {
 
 		super(null);
 
 		if (! privateKey.getAlgorithm().equalsIgnoreCase("RSA")) {
 			throw new IllegalArgumentException("The private key algorithm must be RSA");
 		}
-		
-		if (! allowWeakKey) {
-			
-			int keyBitLength = RSAKeyUtils.keyBitLength(privateKey);
-			
-			if (keyBitLength > 0 && keyBitLength < MIN_KEY_SIZE_BITS) {
-				throw new IllegalArgumentException("The RSA key size must be at least " + MIN_KEY_SIZE_BITS + " bits");
-			}
-		}
+
+		this.opts = opts != null ? opts : Collections.emptySet();
+
+		OptionUtils.ensureMinRSAPrivateKeySize(privateKey, this.opts);
 
 		this.privateKey = privateKey;
 
@@ -257,6 +284,18 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 	}
 
 
+	private CipherMode resolveCipherModeForOAEP() {
+
+		if (opts.contains(CipherMode.ENCRYPT_DECRYPT)) {
+			return CipherMode.ENCRYPT_DECRYPT;
+		} else {
+			// The default cipher mode for RSA OAEP
+			return CipherMode.WRAP_UNWRAP;
+		}
+		// The contains ENCRYPT_DECRYPT / WRAP_UNWRAP is not checked
+	}
+
+
 	@Override
 	public byte[] decrypt(final JWEHeader header,
 		              final Base64URL encryptedKey,
@@ -313,13 +352,13 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 			cekDecryptionException = null;
 		
 		} else if (alg.equals(JWEAlgorithm.RSA_OAEP)) {
-			cek = RSA_OAEP.decryptCEK(privateKey, encryptedKey.decode(), getJCAContext().getKeyEncryptionProvider());
+			cek = RSA_OAEP.decryptCEK(privateKey, encryptedKey.decode(), resolveCipherModeForOAEP(), getJCAContext().getKeyEncryptionProvider());
 		} else if (alg.equals(JWEAlgorithm.RSA_OAEP_256)) {
-			cek = RSA_OAEP_SHA2.decryptCEK(privateKey, encryptedKey.decode(), 256, getJCAContext().getKeyEncryptionProvider());
+			cek = RSA_OAEP_SHA2.decryptCEK(privateKey, encryptedKey.decode(), 256, resolveCipherModeForOAEP(), getJCAContext().getKeyEncryptionProvider());
 		} else if (alg.equals(JWEAlgorithm.RSA_OAEP_384)) {
-			cek = RSA_OAEP_SHA2.decryptCEK(privateKey, encryptedKey.decode(), 384, getJCAContext().getKeyEncryptionProvider());
+			cek = RSA_OAEP_SHA2.decryptCEK(privateKey, encryptedKey.decode(), 384, resolveCipherModeForOAEP(), getJCAContext().getKeyEncryptionProvider());
 		} else if (alg.equals(JWEAlgorithm.RSA_OAEP_512)){
-			cek = RSA_OAEP_SHA2.decryptCEK(privateKey, encryptedKey.decode(), 512, getJCAContext().getKeyEncryptionProvider());
+			cek = RSA_OAEP_SHA2.decryptCEK(privateKey, encryptedKey.decode(), 512, resolveCipherModeForOAEP(), getJCAContext().getKeyEncryptionProvider());
 		} else {
 			throw new JOSEException(AlgorithmSupportMessage.unsupportedJWEAlgorithm(alg, SUPPORTED_ALGORITHMS));
 		}

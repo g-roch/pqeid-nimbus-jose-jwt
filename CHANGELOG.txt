@@ -1784,3 +1784,16 @@ version 9.40 (2024-06-06)
 10.3.1 (2025-07-01)
     * OctetKeyPairGenerator with Curve.Ed25519 should use the provided
       SecureRandom (iss #590).
+
+10.4 (2025-07-19)
+    * Creates a hierarchy of Option interfaces, extended by JWSSignerOption,
+      JWEEncrypterOption and JWEDecrypterOption. Intended to provide optional
+      configuration parameters to RSASSASigner, ECDSASigner, RSADecrypter, etc.
+    * Introduces CipherMode implementing JWEEncrypterOption and
+      JWEDecrypterOption, to specify a preferred JCA Cipher mode, such as
+      MODE_ENCRYPT / MODE_DECRYPT when the default MODE_WRAP / MODE_UNWRAP is
+      not supported by the JCA provider (iss #576).
+    * Updates RSAEncrypter and RSADecrypter to support the JWEEncrypterOption
+      CipherMode.ENCRYPT_DECRYPT (iss #576).
+    * Factors out OptionUtils.ensureMinRSAPrivateKeySize.
+    * Deprecates OptionUtils.optionIsPresent.

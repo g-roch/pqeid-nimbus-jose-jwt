@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2025, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,13 +18,21 @@
 package com.nimbusds.jose.crypto.opts;
 
 
+import com.nimbusds.jose.JWSSignerOption;
+import com.nimbusds.jose.Option;
+import com.nimbusds.jose.crypto.impl.RSAKeyUtils;
+
+import java.security.PrivateKey;
 import java.util.Set;
 
-import com.nimbusds.jose.JWSSignerOption;
+import static com.nimbusds.jose.jwk.gen.RSAKeyGenerator.MIN_KEY_SIZE_BITS;
 
 
 /**
  * Utilities for processing JOSE options.
+ *
+ * @author Vladimir Dzhuvinov
+ * @version 2025-07-17
  */
 public class OptionUtils {
 	
@@ -38,19 +46,39 @@ public class OptionUtils {
 	 *
 	 * @return {@code true} if an option is present, else {@code false}.
 	 */
-	public static <T extends JWSSignerOption> boolean optionIsPresent(final Set<JWSSignerOption> opts, final Class<T> tClass) {
+	@Deprecated
+	public static <T extends Option> boolean optionIsPresent(final Set<? extends Option> opts, final Class<T> tClass) {
 		
 		if (opts == null || opts.isEmpty()) {
 			return false;
 		}
 		
-		for (JWSSignerOption o: opts) {
-			
+		for (Option o: opts) {
 			if (o.getClass().isAssignableFrom(tClass)) {
 				return true;
 			}
 		}
 		
 		return false;
+	}
+
+
+	/**
+	 * Throws an {@link IllegalArgumentException} if the size of the
+	 * specified RSA private key shorter than the minimum required.
+	 *
+	 * @param privateKey The RSA private key. Must not be {@code null}.
+	 * @param opts       The options. Must not be {@code null}.
+	 */
+	public static void ensureMinRSAPrivateKeySize(final PrivateKey privateKey, final Set<? extends Option> opts) {
+
+		if (! opts.contains(AllowWeakRSAKey.getInstance())) {
+
+			int keyBitLength = RSAKeyUtils.keyBitLength(privateKey);
+
+			if (keyBitLength > 0 && keyBitLength < MIN_KEY_SIZE_BITS) {
+				throw new IllegalArgumentException("The RSA key size must be at least " + MIN_KEY_SIZE_BITS + " bits");
+			}
+		}
 	}
 }

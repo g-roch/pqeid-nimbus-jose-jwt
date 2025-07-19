@@ -19,9 +19,9 @@ package com.nimbusds.jose;
 
 
 /**
- * Marker interface for a JSON Web Signature (JWS) signer option.
+ * Marker interface for an option.
  *
  * @author Vladimir Dzhuvinov
  * @version 2025-07-17
  */
-public interface JWSSignerOption extends Option { }
+public interface Option { }

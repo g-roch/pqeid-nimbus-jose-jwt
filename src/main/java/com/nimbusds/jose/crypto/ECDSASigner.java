@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2025, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,6 +18,16 @@
 package com.nimbusds.jose.crypto;
 
 
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.impl.AlgorithmSupportMessage;
+import com.nimbusds.jose.crypto.impl.ECDSA;
+import com.nimbusds.jose.crypto.impl.ECDSAProvider;
+import com.nimbusds.jose.crypto.opts.UserAuthenticationRequired;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.util.Base64URL;
+import net.jcip.annotations.ThreadSafe;
+
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.Signature;
@@ -25,18 +35,6 @@ import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
 import java.util.Collections;
 import java.util.Set;
-
-import net.jcip.annotations.ThreadSafe;
-
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.impl.AlgorithmSupportMessage;
-import com.nimbusds.jose.crypto.impl.ECDSA;
-import com.nimbusds.jose.crypto.impl.ECDSAProvider;
-import com.nimbusds.jose.crypto.opts.OptionUtils;
-import com.nimbusds.jose.crypto.opts.UserAuthenticationRequired;
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.util.Base64URL;
 
 
 /**
@@ -71,7 +69,7 @@ import com.nimbusds.jose.util.Base64URL;
  *
  * @author Axel Nennker
  * @author Vladimir Dzhuvinov
- * @version 2023-04-20
+ * @version 2025-07-17
  */
 @ThreadSafe
 public class ECDSASigner extends ECDSAProvider implements JWSSigner {
@@ -125,7 +123,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 		super(ECDSA.resolveAlgorithm(privateKey));
 
 		this.privateKey = privateKey;
-		this.opts = opts != null ? opts : Collections.<JWSSignerOption>emptySet();
+		this.opts = opts != null ? opts : Collections.emptySet();
 	}
 
 
@@ -251,7 +249,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 			final Signature dsa = ECDSA.getSignerAndVerifier(alg, getJCAContext().getProvider());
 			dsa.initSign(privateKey, getJCAContext().getSecureRandom());
 
-			if (OptionUtils.optionIsPresent(opts, UserAuthenticationRequired.class)) {
+			if (opts.contains(UserAuthenticationRequired.getInstance())) {
 
 				throw new ActionRequiredForJWSCompletionException(
 						"Authenticate user to complete signing",
@@ -272,8 +270,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 									final byte[] jwsSignature = ECDSA.transcodeSignatureToConcat(jcaSignature, rsByteArrayLength);
 									return Base64URL.encode(jwsSignature);
 								} catch (SignatureException e) {
-
-								throw new JOSEException(e.getMessage(), e);
+									throw new JOSEException(e.getMessage(), e);
 								}
 							}
 						}

@@ -18,9 +18,9 @@
 package com.nimbusds.jose.crypto.opts;
 
 
-import junit.framework.TestCase;
-
+import com.nimbusds.jose.JWEDecrypterOption;
 import com.nimbusds.jose.JWSSignerOption;
+import junit.framework.TestCase;
 
 
 public class AllowWeakRSAKeyTest extends TestCase {
@@ -29,7 +29,8 @@ public class AllowWeakRSAKeyTest extends TestCase {
 	public void testInstance() {
 		
 		assertTrue(AllowWeakRSAKey.getInstance() instanceof JWSSignerOption);
-		
+		assertTrue(AllowWeakRSAKey.getInstance() instanceof JWEDecrypterOption);
+
 		assertEquals(AllowWeakRSAKey.getInstance(), AllowWeakRSAKey.getInstance());
 		
 		assertEquals("AllowWeakRSAKey", AllowWeakRSAKey.getInstance().toString());

@@ -46,8 +46,7 @@ public final class UserAuthenticationRequired implements JWSSignerOption {
 	}
 	
 	
-	private UserAuthenticationRequired() {
-	}
+	private UserAuthenticationRequired() {}
 	
 	
 	@Override

@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2025, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -20,13 +20,16 @@ package com.nimbusds.jose.crypto;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.impl.*;
+import com.nimbusds.jose.crypto.opts.CipherMode;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.crypto.SecretKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -71,7 +74,7 @@ import java.util.Objects;
  * @author Vladimir Dzhuvinov
  * @author Jun Yu
  * @author Egor Puzanov
- * @version 2024-04-20
+ * @version 2025-07-17
  */
 @ThreadSafe
 public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
@@ -82,6 +85,11 @@ public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
 	 */
 	private final RSAPublicKey publicKey;
 
+
+	/**
+	 * The configured options, empty set if none.
+	 */
+	private final Set<JWEEncrypterOption> opts;
 
 	
 	/**
@@ -124,8 +132,32 @@ public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
 	 */
 	public RSAEncrypter(final RSAPublicKey publicKey, final SecretKey contentEncryptionKey) {
 
+		this(publicKey, contentEncryptionKey, Collections.emptySet());
+	}
+
+
+	/**
+	 * Creates a new RSA encrypter with an optionally specified content
+	 * encryption key (CEK).
+	 *
+	 * @param publicKey            The public RSA key. Must not be
+	 *                             {@code null}.
+	 * @param contentEncryptionKey The content encryption key (CEK) to use.
+	 *                             If specified its algorithm must be "AES"
+	 *                             or "ChaCha20" and its length must match
+	 *                             the expected for the JWE encryption
+	 *                             method ("enc"). If {@code null} a CEK
+	 *                             will be generated for each JWE.
+	 * @param opts                 The encryption options, empty or
+	 *                             {@code null} if none.
+	 */
+	public RSAEncrypter(final RSAPublicKey publicKey,
+			    final SecretKey contentEncryptionKey,
+			    final Set<JWEEncrypterOption> opts) {
+
 		super(contentEncryptionKey);
 		this.publicKey = Objects.requireNonNull(publicKey);
+		this.opts = opts != null ? opts : Collections.emptySet();
 	}
 	
 	
@@ -162,6 +194,18 @@ public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
 	}
 
 
+	private CipherMode resolveCipherModeForOAEP() {
+
+		if (opts.contains(CipherMode.ENCRYPT_DECRYPT)) {
+			return CipherMode.ENCRYPT_DECRYPT;
+		} else {
+			// The default cipher mode for RSA OAEP
+			return CipherMode.WRAP_UNWRAP;
+		}
+		// The contains ENCRYPT_DECRYPT / WRAP_UNWRAP is not checked
+	}
+
+
 	@Override
 	public JWECryptoParts encrypt(final JWEHeader header, final byte[] clearText, final byte[] aad)
 		throws JOSEException {
@@ -175,13 +219,13 @@ public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
 		if (alg.equals(JWEAlgorithm.RSA1_5)) {
 			encryptedKey = Base64URL.encode(RSA1_5.encryptCEK(publicKey, cek, getJCAContext().getKeyEncryptionProvider()));
 		} else if (alg.equals(JWEAlgorithm.RSA_OAEP)) {
-			encryptedKey = Base64URL.encode(RSA_OAEP.encryptCEK(publicKey, cek, getJCAContext().getKeyEncryptionProvider()));
+			encryptedKey = Base64URL.encode(RSA_OAEP.encryptCEK(publicKey, cek, resolveCipherModeForOAEP(), getJCAContext().getKeyEncryptionProvider()));
 		} else if (alg.equals(JWEAlgorithm.RSA_OAEP_256)) {
-			encryptedKey = Base64URL.encode(RSA_OAEP_SHA2.encryptCEK(publicKey, cek, 256, getJCAContext().getKeyEncryptionProvider()));
+			encryptedKey = Base64URL.encode(RSA_OAEP_SHA2.encryptCEK(publicKey, cek, 256, resolveCipherModeForOAEP(), getJCAContext().getKeyEncryptionProvider()));
 		} else if (alg.equals(JWEAlgorithm.RSA_OAEP_384)) {
-			encryptedKey = Base64URL.encode(RSA_OAEP_SHA2.encryptCEK(publicKey, cek, 384, getJCAContext().getKeyEncryptionProvider()));
+			encryptedKey = Base64URL.encode(RSA_OAEP_SHA2.encryptCEK(publicKey, cek, 384, resolveCipherModeForOAEP(), getJCAContext().getKeyEncryptionProvider()));
 		} else if (alg.equals(JWEAlgorithm.RSA_OAEP_512)) {
-			encryptedKey = Base64URL.encode(RSA_OAEP_SHA2.encryptCEK(publicKey, cek, 512, getJCAContext().getKeyEncryptionProvider()));
+			encryptedKey = Base64URL.encode(RSA_OAEP_SHA2.encryptCEK(publicKey, cek, 512, resolveCipherModeForOAEP(), getJCAContext().getKeyEncryptionProvider()));
 		} else {
 			throw new JOSEException(AlgorithmSupportMessage.unsupportedJWEAlgorithm(alg, SUPPORTED_ALGORITHMS));
 		}

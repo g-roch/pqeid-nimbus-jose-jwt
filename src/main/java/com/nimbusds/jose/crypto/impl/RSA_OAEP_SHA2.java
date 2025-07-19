@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd and contributors.
+ * Copyright 2012-2025, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -19,12 +19,14 @@ package com.nimbusds.jose.crypto.impl;
 
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.crypto.opts.CipherMode;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.AlgorithmParameters;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
@@ -42,7 +44,7 @@ import java.security.spec.MGF1ParameterSpec;
  * @author Justin Richer
  * @author Peter Laurina
  * @author Pankaj Yadav
- * @version 2024-09-10
+ * @version 2025-07-19
  */
 @ThreadSafe
 public class RSA_OAEP_SHA2 {
@@ -90,6 +92,7 @@ public class RSA_OAEP_SHA2 {
 	 * @param cek        The Content Encryption Key (CEK) to encrypt. Must
 	 *                   not be {@code null}.
 	 * @param shaBitSize The SHA-2 bit size. Must be 256, 384 or 512.
+	 * @param mode       The cipher mode to use. Must not be {@code null}.
 	 * @param provider   The JCA provider, {@code null} to use the
 	 *                   default.
 	 *
@@ -100,9 +103,12 @@ public class RSA_OAEP_SHA2 {
 	public static byte[] encryptCEK(final RSAPublicKey pub,
 					final SecretKey cek,
 					final int shaBitSize,
+					final CipherMode mode,
 					final Provider provider)
 		throws JOSEException {
-		
+
+		assert mode == CipherMode.WRAP_UNWRAP || mode == CipherMode.ENCRYPT_DECRYPT;
+
 		final String jcaAlgName;
 		final String jcaShaAlgName;
 		final MGF1ParameterSpec mgf1ParameterSpec;
@@ -127,8 +133,13 @@ public class RSA_OAEP_SHA2 {
 			AlgorithmParameterSpec paramSpec = new OAEPParameterSpec(jcaShaAlgName, "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
 			algp.init(paramSpec);
 			Cipher cipher = CipherHelper.getInstance(jcaAlgName, provider);
-			cipher.init(Cipher.WRAP_MODE, pub, algp);
-			return cipher.wrap(cek);
+			cipher.init(mode.getForJWEEncrypter(), pub, algp);
+			if (mode == CipherMode.WRAP_UNWRAP) {
+				return cipher.wrap(cek);
+			} else {
+				// CipherMode.ENCRYPT_DECRYPT
+				return cipher.doFinal(cek.getEncoded());
+			}
 
 		} catch (InvalidKeyException e) {
 			throw new JOSEException("Encryption failed due to invalid RSA key for SHA-" + shaBitSize + ": "
@@ -150,6 +161,8 @@ public class RSA_OAEP_SHA2 {
 	 * @param encryptedCEK The encrypted Content Encryption Key (CEK) to
 	 *                     decrypt. Must not be {@code null}.
 	 * @param shaBitSize   The SHA-2 bit size. Must be 256 or 512.
+	 * @param mode         The cipher mode to use. Must not be
+	 *                     {@code null}.
 	 * @param provider     The JCA provider, {@code null} to use the
 	 *                     default.
 	 *
@@ -160,9 +173,12 @@ public class RSA_OAEP_SHA2 {
 	public static SecretKey decryptCEK(final PrivateKey priv,
 					   final byte[] encryptedCEK,
 					   final int shaBitSize,
+					   final CipherMode mode,
 					   final Provider provider)
 		throws JOSEException {
-		
+
+		assert mode == CipherMode.WRAP_UNWRAP || mode == CipherMode.ENCRYPT_DECRYPT;
+
 		final String jcaAlgName;
 		final String jcaShaAlgName;
 		final MGF1ParameterSpec mgf1ParameterSpec;
@@ -187,8 +203,14 @@ public class RSA_OAEP_SHA2 {
 			AlgorithmParameterSpec paramSpec = new OAEPParameterSpec(jcaShaAlgName, "MGF1", mgf1ParameterSpec, PSource.PSpecified.DEFAULT);
 			algp.init(paramSpec);
 			Cipher cipher = CipherHelper.getInstance(jcaAlgName, provider);
-			cipher.init(Cipher.UNWRAP_MODE, priv, algp);
-			return (SecretKey) cipher.unwrap(encryptedCEK, "AES", Cipher.SECRET_KEY);
+			cipher.init(mode.getForJWEDecrypter(), priv, algp);
+
+			if (mode == CipherMode.WRAP_UNWRAP) {
+				return (SecretKey) cipher.unwrap(encryptedCEK, "AES", Cipher.SECRET_KEY);
+			} else {
+				// CipherMode.ENCRYPT_DECRYPT
+				return new SecretKeySpec(cipher.doFinal(encryptedCEK), "AES");
+			}
 			
 		} catch (Exception e) {
 			// java.security.NoSuchAlgorithmException

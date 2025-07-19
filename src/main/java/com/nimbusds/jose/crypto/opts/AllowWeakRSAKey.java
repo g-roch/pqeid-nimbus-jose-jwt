@@ -18,18 +18,22 @@
 package com.nimbusds.jose.crypto.opts;
 
 
-import net.jcip.annotations.Immutable;
-
+import com.nimbusds.jose.JWEDecrypterOption;
 import com.nimbusds.jose.JWSSignerOption;
+import net.jcip.annotations.Immutable;
 
 
 /**
- * JSON Web Signature (JWS) option to allow weak RSA keys that are shorter than
+ * JSON Web Signature (JWS) and JSON Web Encryption (JWE) option to allow weak
+ * RSA keys shorter than
  * {@link com.nimbusds.jose.jwk.gen.RSAKeyGenerator#MIN_KEY_SIZE_BITS 2048
  * bits}.
+ *
+ * @author Vladimir Dzhuvinov
+ * @version 2025-07-17
  */
 @Immutable
-public final class AllowWeakRSAKey implements JWSSignerOption {
+public final class AllowWeakRSAKey implements JWSSignerOption, JWEDecrypterOption {
 	
 	
 	private static final AllowWeakRSAKey SINGLETON = new AllowWeakRSAKey();
@@ -45,8 +49,7 @@ public final class AllowWeakRSAKey implements JWSSignerOption {
 	}
 	
 	
-	private AllowWeakRSAKey() {
-	}
+	private AllowWeakRSAKey() {}
 	
 	
 	@Override

@@ -18,18 +18,18 @@
 package com.nimbusds.jose.crypto.impl;
 
 
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.crypto.opts.CipherMode;
+import net.jcip.annotations.ThreadSafe;
+
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.SecureRandom;
 import java.security.interfaces.RSAPublicKey;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import com.nimbusds.jose.JOSEException;
-import net.jcip.annotations.ThreadSafe;
 
 
 /**
@@ -37,7 +37,7 @@ import net.jcip.annotations.ThreadSafe;
  * decryption. Uses the BouncyCastle.org provider. This class is thread-safe
  *
  * @author Vladimir Dzhuvinov
- * @version 2017-11-27
+ * @version 2025-07-19
  */
 @ThreadSafe
 public class RSA_OAEP {
@@ -55,19 +55,27 @@ public class RSA_OAEP {
 	 * @param pub      The public RSA key. Must not be {@code null}.
 	 * @param cek      The Content Encryption Key (CEK) to encrypt. Must
 	 *                 not be {@code null}.
+	 * @param mode     The cipher mode to use. Must not be {@code null}.
 	 * @param provider The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The encrypted Content Encryption Key (CEK).
 	 *
 	 * @throws JOSEException If encryption failed.
 	 */
-	public static byte[] encryptCEK(final RSAPublicKey pub, final SecretKey cek, final Provider provider)
+	public static byte[] encryptCEK(final RSAPublicKey pub, final SecretKey cek, final CipherMode mode, final Provider provider)
 		throws JOSEException {
+
+		assert mode == CipherMode.WRAP_UNWRAP || mode == CipherMode.ENCRYPT_DECRYPT;
 
 		try {
 			Cipher cipher = CipherHelper.getInstance(RSA_OEAP_JCA_ALG, provider);
-			cipher.init(Cipher.WRAP_MODE, pub, new SecureRandom());
-			return cipher.wrap(cek);
+			cipher.init(mode.getForJWEEncrypter(), pub, new SecureRandom());
+			if (mode == CipherMode.WRAP_UNWRAP) {
+				return cipher.wrap(cek);
+			} else {
+				// CipherMode.ENCRYPT_DECRYPT
+				return cipher.doFinal(cek.getEncoded());
+			}
 			
 		} catch (InvalidKeyException e) {
 			throw new JOSEException("RSA block size exception: The RSA key is too short, try a longer one", e);
@@ -87,6 +95,8 @@ public class RSA_OAEP {
 	 * @param priv         The private RSA key. Must not be {@code null}.
 	 * @param encryptedCEK The encrypted Content Encryption Key (CEK) to
 	 *                     decrypt. Must not be {@code null}.
+	 * @param mode         The cipher mode to use. Must not be
+	 *                     {@code null}.
 	 * @param provider     The JCA provider, {@code null} to use the
 	 *                     default.
 	 *
@@ -94,14 +104,21 @@ public class RSA_OAEP {
 	 *
 	 * @throws JOSEException If decryption failed.
 	 */
-	public static SecretKey decryptCEK(final PrivateKey priv,
-		                           final byte[] encryptedCEK, final Provider provider)
+	public static SecretKey decryptCEK(final PrivateKey priv, final byte[] encryptedCEK, final CipherMode mode, final Provider provider)
 		throws JOSEException {
+
+		assert mode == CipherMode.WRAP_UNWRAP || mode == CipherMode.ENCRYPT_DECRYPT;
 
 		try {
 			Cipher cipher = CipherHelper.getInstance(RSA_OEAP_JCA_ALG, provider);
-			cipher.init(Cipher.UNWRAP_MODE, priv);
-			return (SecretKey) cipher.unwrap(encryptedCEK, "AES", Cipher.SECRET_KEY);
+			cipher.init(mode.getForJWEDecrypter(), priv);
+
+			if (mode == CipherMode.WRAP_UNWRAP) {
+				return (SecretKey) cipher.unwrap(encryptedCEK, "AES", Cipher.SECRET_KEY);
+			} else {
+				// CipherMode.ENCRYPT_DECRYPT
+				return new SecretKeySpec(cipher.doFinal(encryptedCEK), "AES");
+			}
 
 		} catch (Exception e) {
 			// java.security.NoSuchAlgorithmException
