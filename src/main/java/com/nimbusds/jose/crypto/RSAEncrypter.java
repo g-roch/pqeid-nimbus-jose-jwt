@@ -74,7 +74,7 @@ import java.util.Set;
  * @author Vladimir Dzhuvinov
  * @author Jun Yu
  * @author Egor Puzanov
- * @version 2025-07-17
+ * @version 2025-07-19
  */
 @ThreadSafe
 public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
@@ -132,7 +132,7 @@ public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
 	 */
 	public RSAEncrypter(final RSAPublicKey publicKey, final SecretKey contentEncryptionKey) {
 
-		this(publicKey, contentEncryptionKey, Collections.emptySet());
+		this(publicKey, contentEncryptionKey, Collections.<JWEEncrypterOption>emptySet());
 	}
 
 
@@ -157,7 +157,7 @@ public class RSAEncrypter extends RSACryptoProvider implements JWEEncrypter {
 
 		super(contentEncryptionKey);
 		this.publicKey = Objects.requireNonNull(publicKey);
-		this.opts = opts != null ? opts : Collections.emptySet();
+		this.opts = opts != null ? opts : Collections.<JWEEncrypterOption>emptySet();
 	}
 	
 	

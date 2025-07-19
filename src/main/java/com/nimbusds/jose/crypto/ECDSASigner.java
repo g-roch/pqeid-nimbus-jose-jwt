@@ -69,7 +69,7 @@ import java.util.Set;
  *
  * @author Axel Nennker
  * @author Vladimir Dzhuvinov
- * @version 2025-07-17
+ * @version 2025-07-19
  */
 @ThreadSafe
 public class ECDSASigner extends ECDSAProvider implements JWSSigner {
@@ -103,7 +103,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 	public ECDSASigner(final ECPrivateKey privateKey)
 		throws JOSEException {
 
-		this(privateKey, (Set<JWSSignerOption>) null);
+		this(privateKey, Collections.<JWSSignerOption>emptySet());
 	}
 
 
@@ -123,7 +123,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 		super(ECDSA.resolveAlgorithm(privateKey));
 
 		this.privateKey = privateKey;
-		this.opts = opts != null ? opts : Collections.emptySet();
+		this.opts = opts != null ? opts : Collections.<JWSSignerOption>emptySet();
 	}
 
 
@@ -142,7 +142,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 	 */
 	public ECDSASigner(final PrivateKey privateKey, final Curve curve)
 		throws JOSEException {
-		this(privateKey, curve, null);
+		this(privateKey, curve, Collections.<JWSSignerOption>emptySet());
 	}
 
 

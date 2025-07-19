@@ -134,7 +134,10 @@ public class RSASSASigner extends RSASSAProvider implements JWSSigner {
 	@Deprecated
 	public RSASSASigner(final PrivateKey privateKey, final boolean allowWeakKey) {
 
-		this(privateKey, allowWeakKey ? Collections.singleton(AllowWeakRSAKey.getInstance()) : Collections.emptySet());
+		this(
+			privateKey,
+			allowWeakKey ? Collections.<JWSSignerOption>singleton(AllowWeakRSAKey.getInstance()) : Collections.<JWSSignerOption>emptySet()
+		);
 	}
 
 
@@ -160,7 +163,7 @@ public class RSASSASigner extends RSASSAProvider implements JWSSigner {
 			throw new IllegalArgumentException("The private key algorithm must be RSA");
 		}
 		
-		this.opts = opts != null ? opts : Collections.emptySet();
+		this.opts = opts != null ? opts : Collections.<JWSSignerOption>emptySet();
 		OptionUtils.ensureMinRSAPrivateKeySize(privateKey, this.opts);
 	}
 
@@ -179,7 +182,7 @@ public class RSASSASigner extends RSASSAProvider implements JWSSigner {
 	public RSASSASigner(final RSAKey rsaJWK)
 		throws JOSEException {
 
-		this(rsaJWK, null);
+		this(rsaJWK, Collections.<JWSSignerOption>emptySet());
 	}
 
 

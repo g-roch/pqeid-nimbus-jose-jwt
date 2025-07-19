@@ -117,7 +117,7 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 	 */
 	public RSADecrypter(final PrivateKey privateKey) {
 
-		this(privateKey, null, Collections.emptySet());
+		this(privateKey, null, Collections.<JWEDecrypterOption>emptySet());
 	}
 
 
@@ -156,7 +156,7 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 	public RSADecrypter(final PrivateKey privateKey,
 			    final Set<String> defCritHeaders) {
 
-		this(privateKey, defCritHeaders, Collections.emptySet());
+		this(privateKey, defCritHeaders, Collections.<JWEDecrypterOption>emptySet());
 	}
 
 
@@ -181,7 +181,11 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 			    final Set<String> defCritHeaders,
 			    final boolean allowWeakKey) {
 
-		this(privateKey, defCritHeaders, allowWeakKey ? Collections.singleton(AllowWeakRSAKey.getInstance()) : Collections.emptySet());
+		this(
+			privateKey,
+			defCritHeaders,
+			allowWeakKey ? Collections.<JWEDecrypterOption>singleton(AllowWeakRSAKey.getInstance()) : Collections.<JWEDecrypterOption>emptySet()
+		);
 	}
 
 
@@ -211,7 +215,7 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 			throw new IllegalArgumentException("The private key algorithm must be RSA");
 		}
 
-		this.opts = opts != null ? opts : Collections.emptySet();
+		this.opts = opts != null ? opts : Collections.<JWEDecrypterOption>emptySet();
 
 		OptionUtils.ensureMinRSAPrivateKeySize(privateKey, this.opts);
 
