@@ -31,6 +31,8 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.proc.SimpleSecurityContext;
 
+import java.util.concurrent.TimeUnit;
+
 
 public abstract class AbstractWrappedJWKSetSourceTest {
 
@@ -69,6 +71,10 @@ public abstract class AbstractWrappedJWKSetSourceTest {
 
 	protected static JWKSetCacheRefreshEvaluator anyJWKSetCacheEvaluator() {
 		return any(JWKSetCacheRefreshEvaluator.class);
+	}
+
+	protected static TimeUnit anyTimeUnit() {
+		return any(TimeUnit.class);
 	}
 	
 

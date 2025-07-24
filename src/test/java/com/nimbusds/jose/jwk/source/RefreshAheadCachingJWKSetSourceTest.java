@@ -22,8 +22,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
@@ -40,6 +39,8 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.util.cache.CachedObject;
 import com.nimbusds.jose.util.events.Event;
 import com.nimbusds.jose.util.events.EventListener;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 
 public class RefreshAheadCachingJWKSetSourceTest extends AbstractWrappedJWKSetSourceTest {
@@ -426,6 +427,51 @@ public class RefreshAheadCachingJWKSetSourceTest extends AbstractWrappedJWKSetSo
 		assertEquals( second.getKeys(), wrapper.get(bSelector, context)); // should already be in cache
 		source.getExecutorService().awaitTermination(1, TimeUnit.SECONDS); // just to make sure
 		verify(wrappedJWKSetSource, times(2)).getJWKSet(anyJWKSetCacheEvaluator(), anyLong(), anySecurityContext());
+	}
+
+	@Test
+	public void refreshAheadUsesSuppliedExecutorServices() throws Exception {
+		ExecutorService executorService = mock(ExecutorService.class);
+		ScheduledExecutorService scheduledExecutorService = mock(ScheduledExecutorService.class);
+
+		when(scheduledExecutorService.schedule(any(Runnable.class), anyLong(), anyTimeUnit()))
+				.thenAnswer(new Answer<ScheduledFuture<?>>() {
+					@Override
+					public ScheduledFuture<?> answer(InvocationOnMock invocation) throws Throwable {
+						Runnable command = (Runnable) invocation.getArgument(0);
+						command.run();
+						return null;
+					}
+				});
+
+		source = new RefreshAheadCachingJWKSetSource<>(
+				wrappedJWKSetSource,
+				TIME_TO_LIVE,
+				REFRESH_TIMEOUT,
+				REFRESH_AHEAD_TIME,
+				executorService,
+				true,
+				null,
+				scheduledExecutorService,
+				true);
+
+		wrapper = new JWKSetBasedJWKSource<>(source);
+
+		when(wrappedJWKSetSource.getJWKSet(anyJWKSetCacheEvaluator(), anyLong(), anySecurityContext())).thenReturn(jwkSet);
+		wrapper.get(aSelector, context);
+
+
+		verify(scheduledExecutorService, atLeastOnce()).schedule(any(Runnable.class), anyLong(), anyTimeUnit());
+		verifyNoMoreInteractions(scheduledExecutorService);
+
+		verify(executorService, only()).execute(any(Runnable.class));
+
+		source.close();
+		verify(executorService).shutdownNow();
+		verify(executorService).awaitTermination(anyLong(), anyTimeUnit());
+		verify(scheduledExecutorService).shutdownNow();
+		verify(scheduledExecutorService).awaitTermination(anyLong(), anyTimeUnit());
+		verifyNoMoreInteractions(executorService, scheduledExecutorService);
 	}
 
 	@Test

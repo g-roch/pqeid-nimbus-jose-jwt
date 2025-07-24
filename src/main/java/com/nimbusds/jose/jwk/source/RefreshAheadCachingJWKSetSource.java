@@ -474,6 +474,16 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 		return executorService;
 	}
 
+
+	/**
+	 * Returns the scheduled executor service scheduling the updates.
+	 *
+	 * @return The scheduled executor service.
+	 */
+	public ScheduledExecutorService getScheduledExecutorService() {
+		return scheduledExecutorService;
+	}
+
 	
 	ReentrantLock getLazyLock() {
 		return lazyLock;
