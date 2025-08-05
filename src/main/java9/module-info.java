@@ -2,6 +2,7 @@ module com.nimbusds.jose.jwt {
 
 	requires jdk.crypto.ec; // TODO: remove when this project targets JDK > 22, see JDK-8312267
 	requires jdk.crypto.cryptoki;
+	requires java.sql;
 
 	// shaded:
 	requires static com.google.gson;

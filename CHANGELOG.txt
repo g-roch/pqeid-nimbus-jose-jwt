@@ -1797,3 +1797,6 @@ version 9.40 (2024-06-06)
       CipherMode.ENCRYPT_DECRYPT (iss #576).
     * Factors out OptionUtils.ensureMinRSAPrivateKeySize.
     * Deprecates OptionUtils.optionIsPresent.
+
+10.4.1 (2025-08-05)
+    * Adds "requires java.sql" to module com.nimbusds.jose.jwt (iss #595).
