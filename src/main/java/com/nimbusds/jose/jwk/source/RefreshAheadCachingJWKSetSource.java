@@ -252,7 +252,7 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 	 * {@link ScheduledExecutorService} to schedule the updates in the
 	 * background.
 	 * <p>
-	 * <i>Note about the {@link ScheduledExecutorService}: It is assumed
+	 * Note about the {@link ScheduledExecutorService}: It is assumed
 	 * that a thread will be available to schedule the update of the cache
 	 * when needed. If this is not the case then the updates will not be
 	 * scheduled on-time. This could, in the worst-case scenario, lead to
