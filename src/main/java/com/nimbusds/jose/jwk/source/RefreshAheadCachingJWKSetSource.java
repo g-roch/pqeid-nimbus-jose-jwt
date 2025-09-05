@@ -44,7 +44,7 @@ import com.nimbusds.jose.util.events.EventListener;
  *
  * @author Thomas Rørvik Skjølberg
  * @author Vladimir Dzhuvinov
- * @version 2022-11-22
+ * @version 2025-06-24
  */
 @ThreadSafe
 public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends CachingJWKSetSource<C> {
@@ -142,7 +142,22 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 			super(source, context);
 		}
 	}
-	
+
+	/**
+	 * Creates a new instance of the default {@code ExecutorService}-implementation to be used
+	 * for refreshing the cache.
+	 */
+	public static ExecutorService createDefaultExecutorService() {
+		return Executors.newSingleThreadExecutor();
+	}
+
+	/**
+	 * Creates a new instance of the default {@code ScheduledExecutorService}-implementation to be used
+	 * for scheduling the cache refreshes in the background.
+	 */
+	public static ScheduledExecutorService createDefaultScheduledExecutorService() {
+		return Executors.newSingleThreadScheduledExecutor();
+	}
 	
 	
 	// refresh ahead of expiration should execute when
@@ -154,7 +169,8 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 	private final ExecutorService executorService;
 	private final boolean shutdownExecutorOnClose;
 	private final ScheduledExecutorService scheduledExecutorService;
-	
+	private final boolean shutdownScheduledExecutorOnClose;
+
 	// cache expiration time (in milliseconds) used as fingerprint
 	private volatile long cacheExpiration;
 	
@@ -186,8 +202,8 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 					       final EventListener<CachingJWKSetSource<C>, C> eventListener) {
 		
 		this(source, timeToLive, cacheRefreshTimeout, refreshAheadTime,
-			scheduled, Executors.newSingleThreadExecutor(), true,
-			eventListener);
+			createDefaultExecutorService(), true,
+			eventListener, scheduled ? createDefaultScheduledExecutorService() : null, scheduled);
 	}
 	
 
@@ -222,7 +238,55 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 					       final ExecutorService executorService,
 					       final boolean shutdownExecutorOnClose,
 					       final EventListener<CachingJWKSetSource<C>, C> eventListener) {
-		
+		this(source, timeToLive, cacheRefreshTimeout, refreshAheadTime, executorService, shutdownExecutorOnClose, eventListener, scheduled ? createDefaultScheduledExecutorService() : null, scheduled);
+	}
+
+	/**
+	 * Creates a new refresh-ahead caching JWK set source with the
+	 * specified {@code ExecutorService} to run the updates in the background.
+	 * The parameters include an optional {@code ScheduledExecutorService} for
+	 * optionally scheduling the updates in the background.
+	 * <p>
+	 * <i>A note about the {@code ScheduledExecutorService}: It is assumed that a
+	 * thread will be available to schedule the update of the cache when needed.
+	 * If this is not the case then the updates will not be scheduled on-time
+	 * This could, in the worst-case scenario, lead to the cache being expired when
+	 * {@link #getJWKSet(JWKSetCacheRefreshEvaluator, long, SecurityContext)}
+	 * is called.
+	 * </i>
+	 *
+	 * @param source                       The JWK set source to decorate. Must
+	 *                                         not be {@code null}.
+	 * @param timeToLive                       The time to live of the cached JWK
+	 *                                         set, in milliseconds.
+	 * @param cacheRefreshTimeout              The cache refresh timeout, in
+	 *                                         milliseconds.
+	 * @param refreshAheadTime                 The refresh ahead time, in
+	 *                                         milliseconds.
+	 * @param executorService                  The executor service to run the
+	 *                                         updates in the background.
+	 * @param shutdownExecutorOnClose          If {@code true} the executor service
+	 *                                         will be shut down upon closing the
+	 *                                         source.
+	 * @param eventListener                    The event listener, {@code null} if
+	 *                                         not specified.
+	 * @param scheduledExecutorService         The {@code ScheduledExecutorService} that
+	 *                                         will be used to schedule the updates
+	 *                                         in the background. If {@code null},
+	 *                                         then no updates will be scheduled
+	 * @param shutdownScheduledExecutorOnClose If {@code true} then the {@code ScheduledExecutorService}
+	 *                                         will be shut down upon closing the source.
+	 */
+	public RefreshAheadCachingJWKSetSource(final JWKSetSource<C> source,
+				       final long timeToLive,
+				       final long cacheRefreshTimeout,
+				       final long refreshAheadTime,
+				       final ExecutorService executorService,
+				       final boolean shutdownExecutorOnClose,
+				       final EventListener<CachingJWKSetSource<C>, C> eventListener,
+				       final ScheduledExecutorService scheduledExecutorService,
+				       final boolean shutdownScheduledExecutorOnClose) {
+
 		super(source, timeToLive, cacheRefreshTimeout, eventListener);
 
 		if (refreshAheadTime + cacheRefreshTimeout > timeToLive) {
@@ -235,15 +299,12 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 		
 		Objects.requireNonNull(executorService, "The executor service must not be null");
 		this.executorService = executorService;
-		
-		this.shutdownExecutorOnClose = shutdownExecutorOnClose;
 
-		if (scheduled) {
-			scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-		} else {
-			scheduledExecutorService = null;
-		}
-		
+		this.shutdownExecutorOnClose = shutdownExecutorOnClose;
+		this.shutdownScheduledExecutorOnClose = shutdownScheduledExecutorOnClose;
+
+		this.scheduledExecutorService = scheduledExecutorService;
+
 		this.eventListener = eventListener;
 	}
 
@@ -413,6 +474,16 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 		return executorService;
 	}
 
+
+	/**
+	 * Returns the scheduled executor service scheduling the updates.
+	 *
+	 * @return The scheduled executor service.
+	 */
+	public ScheduledExecutorService getScheduledExecutorService() {
+		return scheduledExecutorService;
+	}
+
 	
 	ReentrantLock getLazyLock() {
 		return lazyLock;
@@ -448,7 +519,7 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 				Thread.currentThread().interrupt();
 			}
 		}
-		if (scheduledExecutorService != null) {
+		if (scheduledExecutorService != null && shutdownScheduledExecutorOnClose) {
 			scheduledExecutorService.shutdownNow();
 			try {
 				scheduledExecutorService.awaitTermination(getCacheRefreshTimeout(), TimeUnit.MILLISECONDS);
@@ -456,6 +527,6 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 				// ignore
 				Thread.currentThread().interrupt();
 			}
-		}		
+		}
 	}
 }

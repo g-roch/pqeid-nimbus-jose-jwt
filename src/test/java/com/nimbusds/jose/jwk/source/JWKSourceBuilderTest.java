@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -300,14 +302,42 @@ public class JWKSourceBuilderTest extends AbstractWrappedJWKSetSourceTest {
 	}
 	
 	@Test
-	public void refreshAheadCaching() {
+	public void refreshAheadCachingWithMinimalSetup() {
 		JWKSource<SecurityContext> source = builder().rateLimited(false).refreshAheadCache(10 * 1000, true).build();
 
 		List<JWKSetSource<SecurityContext>> jwksProviders = jwksSources(source);
 		assertEquals(2, jwksProviders.size());
 
 		assertTrue(jwksProviders.get(0) instanceof RefreshAheadCachingJWKSetSource);
+		RefreshAheadCachingJWKSetSource<SecurityContext> refreshAheadSource = (RefreshAheadCachingJWKSetSource<SecurityContext>) jwksProviders.get(0);
+		assertEquals(refreshAheadSource.getExecutorService().getClass(),
+				RefreshAheadCachingJWKSetSource.createDefaultExecutorService().getClass());
+		assertEquals(refreshAheadSource.getScheduledExecutorService().getClass(),
+				RefreshAheadCachingJWKSetSource.createDefaultScheduledExecutorService().getClass());
+
 		assertTrue(jwksProviders.get(1) instanceof JWKSetSource);
+	}
+
+	@Test
+	public void refreshAheadCachingWithMaximalSetup() {
+		ExecutorService executorService = mock(ExecutorService.class);
+		ScheduledExecutorService scheduledExecutorService = mock(ScheduledExecutorService.class);
+
+		JWKSource<SecurityContext> source = builder()
+				.rateLimited(false)
+				.refreshAheadCache(10 * 1000, event -> {
+					// No-op
+				}, executorService, false, scheduledExecutorService, false)
+				.build();
+
+
+		List<JWKSetSource<SecurityContext>> jwksProviders = jwksSources(source);
+		assertEquals(2, jwksProviders.size());
+
+		assertTrue(jwksProviders.get(0) instanceof RefreshAheadCachingJWKSetSource);
+		RefreshAheadCachingJWKSetSource<SecurityContext> refreshAheadSource = (RefreshAheadCachingJWKSetSource<SecurityContext>) jwksProviders.get(0);
+		assertSame(refreshAheadSource.getExecutorService(), executorService);
+		assertSame(refreshAheadSource.getScheduledExecutorService(), scheduledExecutorService);
 	}
 	
 	@Test

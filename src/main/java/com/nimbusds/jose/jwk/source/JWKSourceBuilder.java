@@ -20,6 +20,9 @@ package com.nimbusds.jose.jwk.source;
 
 import java.net.URL;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.util.DefaultResourceRetriever;
@@ -152,6 +155,10 @@ public class JWKSourceBuilder<C extends SecurityContext> {
 	private boolean refreshAhead = true;
 	private long refreshAheadTime = DEFAULT_REFRESH_AHEAD_TIME;
 	private boolean refreshAheadScheduled = false;
+	private ExecutorService executorService;
+	private boolean shutdownExecutorOnClose = true;
+	private ScheduledExecutorService scheduledExecutorService;
+	private boolean shutdownScheduledExecutorOnClose = true;
 
 	// rate limiting (retry on network error will not count against this)
 	private boolean rateLimited = true;
@@ -307,6 +314,44 @@ public class JWKSourceBuilder<C extends SecurityContext> {
 		this.refreshAheadTime = refreshAheadTime;
 		this.refreshAheadScheduled = scheduled;
 		this.cachingEventListener = eventListener;
+		return this;
+	}
+
+	/**
+	 * Enables refresh-ahead caching of the JWK set.
+	 *
+	 * @param refreshAheadTime                 The refresh ahead time, in milliseconds.
+	 * @param eventListener                    The event listener, {@code null} if not
+	 *                                         specified.
+	 * @param executorService                  The executor service to use for the
+	 *                                         cache refresh.
+	 * @param shutdownExecutorOnClose          If {@code true} the executor service
+	 *                                         will be shut down upon closing the
+	 *                                         source.
+	 * @param scheduledExecutorService         The {@code ScheduledExecutorService} that
+	 *                                         will be used to schedule the updates
+	 *                                         in the background. If {@code null},
+	 *                                         then no updates will be scheduled
+	 * @param shutdownScheduledExecutorOnClose If {@code true} then the {@code ScheduledExecutorService}
+	 *                                         will be shut down upon closing the source.
+	 *
+	 * @return This builder.
+	 */
+	public JWKSourceBuilder<C> refreshAheadCache(final long refreshAheadTime,
+												 final EventListener<CachingJWKSetSource<C>, C> eventListener,
+												 final ExecutorService executorService,
+												 final boolean shutdownExecutorOnClose,
+												 final ScheduledExecutorService scheduledExecutorService,
+												 final boolean shutdownScheduledExecutorOnClose){
+		this.caching = true;
+		this.refreshAhead = true;
+		this.refreshAheadTime = refreshAheadTime;
+		this.refreshAheadScheduled = scheduledExecutorService != null;
+		this.cachingEventListener = eventListener;
+		this.executorService = executorService;
+		this.shutdownExecutorOnClose = shutdownExecutorOnClose;
+		this.scheduledExecutorService = scheduledExecutorService;
+		this.shutdownScheduledExecutorOnClose = shutdownScheduledExecutorOnClose;
 		return this;
 	}
 
@@ -531,7 +576,15 @@ public class JWKSourceBuilder<C extends SecurityContext> {
 		}
 		
 		if (refreshAhead) {
-			source = new RefreshAheadCachingJWKSetSource<>(source, cacheTimeToLive, cacheRefreshTimeout, refreshAheadTime, refreshAheadScheduled, cachingEventListener);
+			if (refreshAheadScheduled){
+				if (scheduledExecutorService == null){
+					scheduledExecutorService = RefreshAheadCachingJWKSetSource.createDefaultScheduledExecutorService();
+				}
+			}
+			if (executorService == null){
+				executorService = RefreshAheadCachingJWKSetSource.createDefaultExecutorService();
+			}
+			source = new RefreshAheadCachingJWKSetSource<>(source, cacheTimeToLive, cacheRefreshTimeout, refreshAheadTime, executorService, shutdownExecutorOnClose, cachingEventListener, scheduledExecutorService, shutdownScheduledExecutorOnClose);
 		} else if (caching) {
 			source = new CachingJWKSetSource<>(source, cacheTimeToLive, cacheRefreshTimeout, cachingEventListener);
 		}
