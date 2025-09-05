@@ -143,17 +143,20 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 		}
 	}
 
+
 	/**
-	 * Creates a new instance of the default {@code ExecutorService}-implementation to be used
-	 * for refreshing the cache.
+	 * Creates a new instance of the default {@link ExecutorService}
+	 * implementation to refresh the cache.
 	 */
 	public static ExecutorService createDefaultExecutorService() {
 		return Executors.newSingleThreadExecutor();
 	}
 
+
 	/**
-	 * Creates a new instance of the default {@code ScheduledExecutorService}-implementation to be used
-	 * for scheduling the cache refreshes in the background.
+	 * Creates a new instance of the default
+	 * {@link ScheduledExecutorService} implementation to perform scheduled
+	 * cache refreshes in the background.
 	 */
 	public static ScheduledExecutorService createDefaultScheduledExecutorService() {
 		return Executors.newSingleThreadScheduledExecutor();
@@ -241,51 +244,58 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 		this(source, timeToLive, cacheRefreshTimeout, refreshAheadTime, executorService, shutdownExecutorOnClose, eventListener, scheduled ? createDefaultScheduledExecutorService() : null, scheduled);
 	}
 
+
 	/**
 	 * Creates a new refresh-ahead caching JWK set source with the
-	 * specified {@code ExecutorService} to run the updates in the background.
-	 * The parameters include an optional {@code ScheduledExecutorService} for
-	 * optionally scheduling the updates in the background.
+	 * specified {@link ExecutorService} to run the updates in the
+	 * background. The parameters include an optional
+	 * {@link ScheduledExecutorService} to schedule the updates in the
+	 * background.
 	 * <p>
-	 * <i>A note about the {@code ScheduledExecutorService}: It is assumed that a
-	 * thread will be available to schedule the update of the cache when needed.
-	 * If this is not the case then the updates will not be scheduled on-time
-	 * This could, in the worst-case scenario, lead to the cache being expired when
+	 * <i>Note about the {@link ScheduledExecutorService}: It is assumed
+	 * that a thread will be available to schedule the update of the cache
+	 * when needed. If this is not the case then the updates will not be
+	 * scheduled on-time. This could, in the worst-case scenario, lead to
+	 * the cache being expired when
 	 * {@link #getJWKSet(JWKSetCacheRefreshEvaluator, long, SecurityContext)}
 	 * is called.
-	 * </i>
 	 *
-	 * @param source                       The JWK set source to decorate. Must
-	 *                                         not be {@code null}.
-	 * @param timeToLive                       The time to live of the cached JWK
-	 *                                         set, in milliseconds.
-	 * @param cacheRefreshTimeout              The cache refresh timeout, in
+	 * @param source                           The JWK set source to
+	 *                                         decorate. Must not be
+	 *                                         {@code null}.
+	 * @param timeToLive                       The time to live of the
+	 *                                         cached JWK set, in
 	 *                                         milliseconds.
+	 * @param cacheRefreshTimeout              The cache refresh timeout,
+	 *                                         in milliseconds.
 	 * @param refreshAheadTime                 The refresh ahead time, in
 	 *                                         milliseconds.
-	 * @param executorService                  The executor service to run the
-	 *                                         updates in the background.
-	 * @param shutdownExecutorOnClose          If {@code true} the executor service
-	 *                                         will be shut down upon closing the
-	 *                                         source.
-	 * @param eventListener                    The event listener, {@code null} if
-	 *                                         not specified.
-	 * @param scheduledExecutorService         The {@code ScheduledExecutorService} that
-	 *                                         will be used to schedule the updates
-	 *                                         in the background. If {@code null},
-	 *                                         then no updates will be scheduled
-	 * @param shutdownScheduledExecutorOnClose If {@code true} then the {@code ScheduledExecutorService}
-	 *                                         will be shut down upon closing the source.
+	 * @param executorService                  The executor service to run
+	 *                                         the updates in the
+	 *                                         background.
+	 * @param shutdownExecutorOnClose          If {@code true} the executor
+	 *                                         service will be shut down
+	 *                                         upon closing the source.
+	 * @param eventListener                    The event listener,
+	 *                                         {@code null} if not specified.
+	 * @param scheduledExecutorService         The {@link ScheduledExecutorService}
+	 *                                         to schedule the updates in
+	 *                                         the background. If {@code null}
+	 *                                         no updates will be scheduled.
+	 * @param shutdownScheduledExecutorOnClose If {@code true} then the
+	 *                                         {@link ScheduledExecutorService}
+	 *                                         will be shut down upon
+	 *                                         closing the source.
 	 */
 	public RefreshAheadCachingJWKSetSource(final JWKSetSource<C> source,
-				       final long timeToLive,
-				       final long cacheRefreshTimeout,
-				       final long refreshAheadTime,
-				       final ExecutorService executorService,
-				       final boolean shutdownExecutorOnClose,
-				       final EventListener<CachingJWKSetSource<C>, C> eventListener,
-				       final ScheduledExecutorService scheduledExecutorService,
-				       final boolean shutdownScheduledExecutorOnClose) {
+				               final long timeToLive,
+				               final long cacheRefreshTimeout,
+				               final long refreshAheadTime,
+				               final ExecutorService executorService,
+				               final boolean shutdownExecutorOnClose,
+				               final EventListener<CachingJWKSetSource<C>, C> eventListener,
+				               final ScheduledExecutorService scheduledExecutorService,
+				               final boolean shutdownScheduledExecutorOnClose) {
 
 		super(source, timeToLive, cacheRefreshTimeout, eventListener);
 

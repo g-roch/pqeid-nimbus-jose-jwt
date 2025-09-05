@@ -49,7 +49,7 @@ import com.nimbusds.jose.util.health.HealthReportListener;
  *
  * @author Thomas Rørvik Skjølberg
  * @author Vladimir Dzhuvinov
- * @version 2023-12-10
+ * @version 2025-09-05
  */
 public class JWKSourceBuilder<C extends SecurityContext> {
 	
@@ -317,32 +317,36 @@ public class JWKSourceBuilder<C extends SecurityContext> {
 		return this;
 	}
 
+
 	/**
 	 * Enables refresh-ahead caching of the JWK set.
 	 *
-	 * @param refreshAheadTime                 The refresh ahead time, in milliseconds.
-	 * @param eventListener                    The event listener, {@code null} if not
+	 * @param refreshAheadTime                 The refresh ahead time, in
+	 *                                         milliseconds.
+	 * @param eventListener                    The event listener,
+	 *                                         {@code null} if not
 	 *                                         specified.
-	 * @param executorService                  The executor service to use for the
-	 *                                         cache refresh.
-	 * @param shutdownExecutorOnClose          If {@code true} the executor service
-	 *                                         will be shut down upon closing the
-	 *                                         source.
-	 * @param scheduledExecutorService         The {@code ScheduledExecutorService} that
-	 *                                         will be used to schedule the updates
-	 *                                         in the background. If {@code null},
-	 *                                         then no updates will be scheduled
+	 * @param executorService                  The executor service to use
+	 *                                         for the cache refresh.
+	 * @param shutdownExecutorOnClose          If {@code true} the executor
+	 *                                         service will be shut down
+	 *                                         upon closing the source.
+	 * @param scheduledExecutorService         The {@link ScheduledExecutorService}
+	 *                                         to schedule the updates in
+	 *                                         the background. If
+	 *                                         {@code null} no updates will
+	 *                                         be scheduled
 	 * @param shutdownScheduledExecutorOnClose If {@code true} then the {@code ScheduledExecutorService}
 	 *                                         will be shut down upon closing the source.
 	 *
 	 * @return This builder.
 	 */
 	public JWKSourceBuilder<C> refreshAheadCache(final long refreshAheadTime,
-												 final EventListener<CachingJWKSetSource<C>, C> eventListener,
-												 final ExecutorService executorService,
-												 final boolean shutdownExecutorOnClose,
-												 final ScheduledExecutorService scheduledExecutorService,
-												 final boolean shutdownScheduledExecutorOnClose){
+						     final EventListener<CachingJWKSetSource<C>, C> eventListener,
+						     final ExecutorService executorService,
+						     final boolean shutdownExecutorOnClose,
+						     final ScheduledExecutorService scheduledExecutorService,
+						     final boolean shutdownScheduledExecutorOnClose){
 		this.caching = true;
 		this.refreshAhead = true;
 		this.refreshAheadTime = refreshAheadTime;
