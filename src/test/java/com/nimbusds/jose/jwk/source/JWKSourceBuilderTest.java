@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
+import com.nimbusds.jose.util.events.Event;
+import com.nimbusds.jose.util.events.EventListener;
 import org.junit.Test;
 
 import com.nimbusds.jose.proc.SecurityContext;
@@ -324,11 +326,19 @@ public class JWKSourceBuilderTest extends AbstractWrappedJWKSetSourceTest {
 		ScheduledExecutorService scheduledExecutorService = mock(ScheduledExecutorService.class);
 
 		JWKSource<SecurityContext> source = builder()
-				.rateLimited(false)
-				.refreshAheadCache(10 * 1000, event -> {
-					// No-op
-				}, executorService, false, scheduledExecutorService, false)
-				.build();
+			.rateLimited(false)
+			.refreshAheadCache(10 * 1000,
+				new EventListener<CachingJWKSetSource<SecurityContext>, SecurityContext>() {
+					@Override
+					public void notify(Event<CachingJWKSetSource<SecurityContext>, SecurityContext> event) {
+						// No-op
+					}
+				},
+				executorService,
+				false,
+				scheduledExecutorService,
+				false)
+			.build();
 
 
 		List<JWKSetSource<SecurityContext>> jwksProviders = jwksSources(source);
