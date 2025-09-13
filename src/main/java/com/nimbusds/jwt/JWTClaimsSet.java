@@ -715,7 +715,8 @@ public final class JWTClaimsSet implements Serializable {
 
 	/**
 	 * Gets the specified claim (registered or custom) as
-	 * {@link java.lang.Integer}.
+	 * {@link java.lang.Integer}. May involve truncation if
+	 * {@link Integer#MAX_VALUE} or {@link Integer#MIN_VALUE} is exceeded.
 	 *
 	 * @param name The name of the claim. Must not be {@code null}.
 	 *
@@ -741,7 +742,8 @@ public final class JWTClaimsSet implements Serializable {
 
 	/**
 	 * Gets the specified claim (registered or custom) as
-	 * {@link java.lang.Long}.
+	 * {@link java.lang.Long}. May involve truncation if
+	 * {@link Long#MAX_VALUE} or {@link Long#MIN_VALUE} is exceeded.
 	 *
 	 * @param name The name of the claim. Must not be {@code null}.
 	 *
@@ -796,7 +798,9 @@ public final class JWTClaimsSet implements Serializable {
 
 	/**
 	 * Gets the specified claim (registered or custom) as
-	 * {@link java.lang.Float}.
+	 * {@link java.lang.Float}. May involve truncation if {@link
+	 * Float#MAX_VALUE} or {@link Float#MIN_VALUE} is exceeded, or
+	 * rounding if floating-point precision is exceeded.
 	 *
 	 * @param name The name of the claim. Must not be {@code null}.
 	 *
@@ -822,7 +826,9 @@ public final class JWTClaimsSet implements Serializable {
 
 	/**
 	 * Gets the specified claim (registered or custom) as
-	 * {@link java.lang.Double}.
+	 * {@link java.lang.Double}. May involve truncation if {@link
+	 * Double#MAX_VALUE} or {@link Double#MIN_VALUE} is exceeded, or
+	 * rounding if floating-point precision is exceeded.
 	 *
 	 * @param name The name of the claim. Must not be {@code null}.
 	 *
