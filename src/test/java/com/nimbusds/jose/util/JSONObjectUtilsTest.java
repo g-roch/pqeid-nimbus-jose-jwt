@@ -37,7 +37,7 @@ import static org.junit.Assert.*;
  * Tests the JSON object utilities.
  *
  * @author Vladimir Dzhuvinov
- * @version 2025-02-25
+ * @version 2025-11-06
  */
 public class JSONObjectUtilsTest {
 
@@ -108,10 +108,22 @@ public class JSONObjectUtilsTest {
 
 
         @Test
-        public void testParseObjectDuplicateMember() {
+        public void testParseObjectDuplicateMember_number() {
 		
 		try {
 			JSONObjectUtils.parse("{\"iat\":1661335547,\"iat\":1661335547}");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
+	}
+
+
+        @Test
+        public void testParseObjectDuplicateMember_object() {
+
+		try {
+			JSONObjectUtils.parse("{\"resource_access\":{},\"resource_access\":{}}");
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Invalid JSON object", e.getMessage());
