@@ -18,14 +18,14 @@
 package com.nimbusds.jwt.proc;
 
 
-import java.util.*;
-
-import com.nimbusds.jwt.JWTClaimNames;
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.proc.SecurityContext;
+import com.nimbusds.jose.util.CollectionUtils;
+import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.util.DateUtils;
+import net.jcip.annotations.ThreadSafe;
+
+import java.util.*;
 
 
 /**
@@ -211,7 +211,7 @@ public class DefaultJWTClaimsVerifier <C extends SecurityContext> implements JWT
 		this.exactMatchClaims = exactMatchClaims != null ? exactMatchClaims : new JWTClaimsSet.Builder().build();
 		
 		Set<String> requiredClaimsCopy = new HashSet<>(this.exactMatchClaims.getClaims().keySet());
-		if (acceptedAudienceValues != null && ! acceptedAudienceValues.contains(null)) {
+		if (acceptedAudienceValues != null && ! CollectionUtils.containsNull(acceptedAudienceValues)) {
 			// check if an explicit aud is required
 			requiredClaimsCopy.add(JWTClaimNames.AUDIENCE);
 		}
@@ -279,9 +279,9 @@ public class DefaultJWTClaimsVerifier <C extends SecurityContext> implements JWT
 	public void setMaxClockSkew(final int maxClockSkewSeconds) {
 		maxClockSkew = maxClockSkewSeconds;
 	}
-	
-	
-	@Override
+
+
+        @Override
 	public void verify(final JWTClaimsSet claimsSet, final C context)
 		throws BadJWTException {
 		
@@ -299,7 +299,7 @@ public class DefaultJWTClaimsVerifier <C extends SecurityContext> implements JWT
 				if (! audMatch) {
 					throw new BadJWTException("JWT aud claim rejected");
 				}
-			} else if (! acceptedAudienceValues.contains(null)) {
+			} else if (! CollectionUtils.containsNull(acceptedAudienceValues)) {
 				throw new BadJWTException("JWT missing required aud claim");
 			}
 		}

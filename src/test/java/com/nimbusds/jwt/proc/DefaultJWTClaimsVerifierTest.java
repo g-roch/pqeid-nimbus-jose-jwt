@@ -18,13 +18,12 @@
 package com.nimbusds.jwt.proc;
 
 
-import java.util.*;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.proc.BadJOSEException;
 import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
+import junit.framework.TestCase;
+
+import java.util.*;
 
 
 public class DefaultJWTClaimsVerifierTest extends TestCase {
@@ -244,6 +243,39 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 		} catch (BadJWTException e) {
 			assertEquals("JWT aud claim rejected", e.getMessage());
 		}
+	}
+
+
+	public void testAudienceAcceptJava9SetOf() throws BadJWTException {
+
+                String aud = "123";
+
+                HashSet<String> setToBeDefensivelyCopied = new HashSet<String>() {
+                        @Override
+                        public boolean contains(Object o) {
+                                if (o == null) {
+                                        throw new NullPointerException("Simulate Java 9 Set.of() behaviour");
+                                } else {
+                                        return super.contains(o);
+                                }
+                        }
+                };
+                setToBeDefensivelyCopied.add("123");
+                setToBeDefensivelyCopied.add(null);
+
+		DefaultJWTClaimsVerifier verifier = new DefaultJWTClaimsVerifier(setToBeDefensivelyCopied, null, null, null);
+                assertEquals(2, verifier.getAcceptedAudienceValues().size());
+
+                verifier.verify(new JWTClaimsSet.Builder().build(), null);
+                verifier.verify(new JWTClaimsSet.Builder().audience(aud).build(), null);
+                verifier.verify(new JWTClaimsSet.Builder().audience(Arrays.asList(aud, "456")).build(), null);
+
+                try {
+                        verifier.verify(new JWTClaimsSet.Builder().audience("456").build(), null);
+                        fail();
+                } catch (BadJWTException e) {
+                        assertEquals("JWT aud claim rejected", e.getMessage());
+                }
 	}
 
 

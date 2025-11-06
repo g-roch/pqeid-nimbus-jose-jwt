@@ -1809,6 +1809,9 @@ version 9.40 (2024-06-06)
     * Support for specifying a ScheduledExecutorService instance in
       RefreshAheadCachingJWKSetSource and JWKSourceBuilder (iss #592).
 
-10.5.1 (2025-11-06)
+10.6 (2025-11-06)
+    * Adds static CollectionUtils.containsNull(Set) method.
+    * DefaultJWTClaimsVerifier accepted "aud" (audience) argument must be
+      compatible with Set.of (iss #499).
     * The DefaultJWTClaimsVerifier must not include JWT claim values in
       BadJWTException messages (iss #605).
