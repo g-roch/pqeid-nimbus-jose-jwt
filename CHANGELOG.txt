@@ -1808,3 +1808,7 @@ version 9.40 (2024-06-06)
 10.5 (2025-09-05)
     * Support for specifying a ScheduledExecutorService instance in
       RefreshAheadCachingJWKSetSource and JWKSourceBuilder (iss #592).
+
+10.5.1 (2025-11-06)
+    * The DefaultJWTClaimsVerifier must not include JWT claim values in
+      BadJWTException messages (iss #605).

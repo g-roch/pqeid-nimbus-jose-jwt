@@ -221,7 +221,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 			verifier.verify(new JWTClaimsSet.Builder().issuer("https://example.com").build(), null);
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT iss claim has value https://example.com, must be https://c2id.com", e.getMessage());
+			assertEquals("JWT iss claim value rejected", e.getMessage());
 		}
 	}
 
@@ -242,7 +242,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 			verifier.verify(new JWTClaimsSet.Builder().audience("456").build(), null);
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT audience rejected: [456]", e.getMessage());
+			assertEquals("JWT aud claim rejected", e.getMessage());
 		}
 	}
 
@@ -266,7 +266,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 			verifier.verify(new JWTClaimsSet.Builder().audience("456").build(), null);
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT aud claim has value [456], must be [123]", e.getMessage());
+			assertEquals("JWT aud claim value rejected", e.getMessage());
 		}
 	}
 
@@ -281,7 +281,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 			verifier.verify(new JWTClaimsSet.Builder().build(), null);
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT missing required audience", e.getMessage());
+			assertEquals("JWT missing required aud claim", e.getMessage());
 		}
 	}
 
@@ -296,7 +296,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 			verifier.verify(new JWTClaimsSet.Builder().audience("456").build(), null);
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT audience rejected: [456]", e.getMessage());
+			assertEquals("JWT aud claim rejected", e.getMessage());
 		}
 	}
 
@@ -311,7 +311,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 			verifier.verify(new JWTClaimsSet.Builder().audience(Arrays.asList("456", "789")).build(), null);
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT audience rejected: [456, 789]", e.getMessage());
+			assertEquals("JWT aud claim rejected", e.getMessage());
 		}
 	}
 
@@ -619,7 +619,7 @@ public class DefaultJWTClaimsVerifierTest extends TestCase {
 			verifier.verify(jwtClaimsSet, null);
 			fail();
 		} catch (BadJWTException e) {
-			assertEquals("JWT iss claim has value null, must be bob", e.getMessage());
+			assertEquals("JWT iss claim value rejected", e.getMessage());
 		}
 	}
 }

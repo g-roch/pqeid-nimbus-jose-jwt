@@ -82,7 +82,7 @@ import com.nimbusds.jwt.util.DateUtils;
  *
  * @author Vladimir Dzhuvinov
  * @author Eugene Kuleshov
- * @version 2021-09-28
+ * @version 2025-11-06
  */
 @ThreadSafe
 public class DefaultJWTClaimsVerifier <C extends SecurityContext> implements JWTClaimsSetVerifier<C>, ClockSkewAware {
@@ -297,10 +297,10 @@ public class DefaultJWTClaimsVerifier <C extends SecurityContext> implements JWT
 					}
 				}
 				if (! audMatch) {
-					throw new BadJWTException("JWT audience rejected: " + audList);
+					throw new BadJWTException("JWT aud claim rejected");
 				}
 			} else if (! acceptedAudienceValues.contains(null)) {
-				throw new BadJWTException("JWT missing required audience");
+				throw new BadJWTException("JWT missing required aud claim");
 			}
 		}
 		
@@ -327,7 +327,7 @@ public class DefaultJWTClaimsVerifier <C extends SecurityContext> implements JWT
 			Object actualClaim = claimsSet.getClaim(exactMatch);
 			Object expectedClaim = exactMatchClaims.getClaim(exactMatch);
 			if (! Objects.equals(expectedClaim, actualClaim)) {
-				throw new BadJWTException("JWT " + exactMatch + " claim has value " + actualClaim + ", must be " + expectedClaim);
+				throw new BadJWTException("JWT " + exactMatch + " claim value rejected");
 			}
 		}
 		
