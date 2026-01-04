@@ -19,11 +19,13 @@ package com.nimbusds.jose;
 
 
 import com.nimbusds.jose.crypto.impl.AAD;
+import com.nimbusds.jose.crypto.opts.MaxCompressedCipherTextLength;
 import com.nimbusds.jose.util.Base64URL;
 import net.jcip.annotations.ThreadSafe;
 
 import java.text.ParseException;
 import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -35,7 +37,7 @@ import java.util.Objects;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2025-05-08
+ * @version 2025-01-04
  */
 @ThreadSafe
 public class JWEObject extends JOSEObject {
@@ -396,16 +398,41 @@ public class JWEObject extends JOSEObject {
 	public synchronized void decrypt(final JWEDecrypter decrypter)
 		throws JOSEException {
 
+		decrypt(decrypter, null);
+	}
+
+
+	/**
+	 * Decrypts this JWE object with the specified decrypter and options.
+	 * The JWE object must be in a {@link State#ENCRYPTED encrypted} state.
+	 *
+	 * @param decrypter The JWE decrypter. Must not be {@code null}.
+	 * @param opts      The JWE decrypter options, {@code null} if none.
+	 *
+	 * @throws IllegalStateException If the JWE object is not in an 
+	 *                               {@link State#ENCRYPTED encrypted
+	 *                               state}.
+	 * @throws JOSEException         If the JWE object couldn't be 
+	 *                               decrypted.
+	 */
+	public synchronized void decrypt(final JWEDecrypter decrypter,
+					 final Set<JWEDecrypterOption> opts)
+		throws JOSEException {
+
 		ensureEncryptedState();
 
-		if (getHeader().getCompressionAlgorithm() != null &&
-		    getCipherText().toString().length() > MAX_COMPRESSED_CIPHER_TEXT_LENGTH) {
+		if (getHeader().getCompressionAlgorithm() != null) {
 
-			throw new JOSEException(
-				"The JWE compressed cipher text exceeds the " +
-				"maximum allowed length of " +
-				MAX_COMPRESSED_CIPHER_TEXT_LENGTH +
-				" characters");
+			int maxLength = resolveMaxCompressedCipherTextLength(opts);
+
+			if (getCipherText().toString().length() > maxLength) {
+
+				throw new JOSEException(
+					"The JWE compressed cipher text exceeds the " +
+					"maximum allowed length of " +
+					maxLength +
+					" characters");
+			}
 		}
 
 		try {
@@ -428,6 +455,27 @@ public class JWEObject extends JOSEObject {
 		}
 
 		state = State.DECRYPTED;
+	}
+
+
+	/**
+	 * Resolves the maximum compressed cipher text length from the
+	 * specified options.
+	 *
+	 * @param opts The options, {@code null} if none.
+	 *
+	 * @return The maximum compressed cipher text length.
+	 */
+	private static int resolveMaxCompressedCipherTextLength(final Set<JWEDecrypterOption> opts) {
+
+		if (opts != null) {
+			for (JWEDecrypterOption opt : opts) {
+				if (opt instanceof MaxCompressedCipherTextLength) {
+					return ((MaxCompressedCipherTextLength) opt).getMaxLength();
+				}
+			}
+		}
+		return MAX_COMPRESSED_CIPHER_TEXT_LENGTH;
 	}
 
 
