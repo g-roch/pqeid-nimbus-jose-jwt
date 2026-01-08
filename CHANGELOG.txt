@@ -1815,3 +1815,9 @@ version 9.40 (2024-06-06)
       compatible with Set.of (iss #499).
     * The DefaultJWTClaimsVerifier must not include JWT claim values in
       BadJWTException messages (iss #605).
+
+10.7 (2026-01-08)
+    * Adds MaxCompressedCipherTextLength that implements JWEDecrypterOption, to
+      to configure the maximum allowed length of compressed cipher text.
+    * Adds JWEObject.decrypt(JWEDecrypter, Set<JWEDecrypterOption>) method to
+      support the MaxCompressedCipherTextLength option.

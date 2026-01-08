@@ -37,7 +37,7 @@ import java.util.Set;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2025-01-04
+ * @version 2026-01-04
  */
 @ThreadSafe
 public class JWEObject extends JOSEObject {

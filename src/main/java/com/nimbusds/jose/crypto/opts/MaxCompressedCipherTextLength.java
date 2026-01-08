@@ -26,7 +26,7 @@ import net.jcip.annotations.Immutable;
  * JSON Web Encryption (JWE) decrypter option to configure the maximum allowed
  * length of compressed cipher text. The
  * {@link com.nimbusds.jose.JWEObject#MAX_COMPRESSED_CIPHER_TEXT_LENGTH default}
- * is 100,000 characters.
+ * is 100 thousand characters.
  *
  * @author Vladimir Dzhuvinov
  * @version 2025-01-04
