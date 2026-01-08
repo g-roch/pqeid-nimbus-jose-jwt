@@ -291,7 +291,7 @@ public class JWEObjectTest extends TestCase {
 		// Parse again and decrypt with increased limit
 		parse = JWEObject.parse(jweString);
 		Set<JWEDecrypterOption> opts = Collections.singleton(
-			new MaxCompressedCipherTextLength(500_000)
+                        (JWEDecrypterOption) new MaxCompressedCipherTextLength(500_000)
 		);
 		parse.decrypt(new DirectDecrypter(aesKey), opts);
 
@@ -327,7 +327,7 @@ public class JWEObjectTest extends TestCase {
 
 		// Decrypt with a limit smaller than cipher text length
 		Set<JWEDecrypterOption> opts = Collections.singleton(
-			new MaxCompressedCipherTextLength(cipherTextLength - 1)
+                        (JWEDecrypterOption) new MaxCompressedCipherTextLength(cipherTextLength - 1)
 		);
 
 		try {
@@ -376,7 +376,7 @@ public class JWEObjectTest extends TestCase {
 		String jweString = jweObject.serialize();
 
 		JWEObject parse = JWEObject.parse(jweString);
-		parse.decrypt(new DirectDecrypter(aesKey), Collections.emptySet());
+		parse.decrypt(new DirectDecrypter(aesKey), Collections.<JWEDecrypterOption>emptySet());
 
 		assertEquals(JWEObject.State.DECRYPTED, parse.getState());
 		assertEquals("Hello, World!", parse.getPayload().toString());
