@@ -20,6 +20,7 @@ package com.nimbusds.jose;
 
 import com.nimbusds.jose.crypto.DirectDecrypter;
 import com.nimbusds.jose.crypto.DirectEncrypter;
+import com.nimbusds.jose.crypto.opts.MaxCompressedCipherTextLength;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
@@ -253,5 +254,131 @@ public class JWEObjectTest extends TestCase {
 		} catch (JOSEException e) {
 			assertEquals("The JWE compressed cipher text exceeds the maximum allowed length of 100000 characters", e.getMessage());
 		}
+	}
+
+
+	public void testDecryptWithCustomMaxCompressedCipherTextLength()
+		throws Exception {
+
+		OctetSequenceKey aesKey = new OctetSequenceKeyGenerator(128).generate();
+
+		JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128GCM)
+			.compressionAlgorithm(CompressionAlgorithm.DEF)
+			.build();
+
+		// Create a payload that compresses to more than 100K but less than 500K
+		StringBuilder veryLongString = new StringBuilder();
+		for (int i = 0; i < 100_000_000; i++) {
+			veryLongString.append('a');
+		}
+
+		Payload payload = new Payload(veryLongString.toString());
+
+		JWEObject jweObject = new JWEObject(header, payload);
+		jweObject.encrypt(new DirectEncrypter(aesKey));
+		String jweString = jweObject.serialize();
+
+		JWEObject parse = JWEObject.parse(jweString);
+
+		// Verify it fails with default limit
+		try {
+			parse.decrypt(new DirectDecrypter(aesKey));
+			fail();
+		} catch (JOSEException e) {
+			assertEquals("The JWE compressed cipher text exceeds the maximum allowed length of 100000 characters", e.getMessage());
+		}
+
+		// Parse again and decrypt with increased limit
+		parse = JWEObject.parse(jweString);
+		Set<JWEDecrypterOption> opts = Collections.singleton(
+			new MaxCompressedCipherTextLength(500_000)
+		);
+		parse.decrypt(new DirectDecrypter(aesKey), opts);
+
+		assertEquals(JWEObject.State.DECRYPTED, parse.getState());
+		assertEquals(veryLongString.toString(), parse.getPayload().toString());
+	}
+
+
+	public void testDecryptWithReducedMaxCompressedCipherTextLength()
+		throws Exception {
+
+		OctetSequenceKey aesKey = new OctetSequenceKeyGenerator(128).generate();
+
+		JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128GCM)
+			.compressionAlgorithm(CompressionAlgorithm.DEF)
+			.build();
+
+		// Create a payload that compresses to a small size
+		StringBuilder payload = new StringBuilder();
+		for (int i = 0; i < 10_000; i++) {
+			payload.append('a');
+		}
+
+		JWEObject jweObject = new JWEObject(header, new Payload(payload.toString()));
+		jweObject.encrypt(new DirectEncrypter(aesKey));
+		String jweString = jweObject.serialize();
+
+		JWEObject parse = JWEObject.parse(jweString);
+
+		// Get cipher text length
+		int cipherTextLength = parse.getCipherText().toString().length();
+		assertTrue(cipherTextLength < 1000); // Compressed should be small
+
+		// Decrypt with a limit smaller than cipher text length
+		Set<JWEDecrypterOption> opts = Collections.singleton(
+			new MaxCompressedCipherTextLength(cipherTextLength - 1)
+		);
+
+		try {
+			parse.decrypt(new DirectDecrypter(aesKey), opts);
+			fail();
+		} catch (JOSEException e) {
+			assertEquals(
+				"The JWE compressed cipher text exceeds the maximum allowed length of " +
+					(cipherTextLength - 1) + " characters",
+				e.getMessage()
+			);
+		}
+	}
+
+
+	public void testDecryptWithNullOptions()
+		throws Exception {
+
+		OctetSequenceKey aesKey = new OctetSequenceKeyGenerator(128).generate();
+
+		JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128GCM)
+			.build();
+
+		JWEObject jweObject = new JWEObject(header, new Payload("Hello, World!"));
+		jweObject.encrypt(new DirectEncrypter(aesKey));
+		String jweString = jweObject.serialize();
+
+		JWEObject parse = JWEObject.parse(jweString);
+		parse.decrypt(new DirectDecrypter(aesKey), null);
+
+		assertEquals(JWEObject.State.DECRYPTED, parse.getState());
+		assertEquals("Hello, World!", parse.getPayload().toString());
+	}
+
+
+	public void testDecryptWithEmptyOptions()
+		throws Exception {
+
+		OctetSequenceKey aesKey = new OctetSequenceKeyGenerator(128).generate();
+
+		JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.DIR, EncryptionMethod.A128GCM)
+			.build();
+
+		JWEObject jweObject = new JWEObject(header, new Payload("Hello, World!"));
+		jweObject.encrypt(new DirectEncrypter(aesKey));
+		String jweString = jweObject.serialize();
+
+		JWEObject parse = JWEObject.parse(jweString);
+		parse.decrypt(new DirectDecrypter(aesKey), Collections.emptySet());
+
+		assertEquals(JWEObject.State.DECRYPTED, parse.getState());
+		assertEquals("Hello, World!", parse.getPayload().toString());
 	}
 }
