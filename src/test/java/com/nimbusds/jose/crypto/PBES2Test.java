@@ -24,11 +24,14 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.JSONObjectUtils;
 import com.nimbusds.jose.util.StandardCharset;
 import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -326,6 +329,95 @@ public class PBES2Test extends TestCase {
 			fail();
 		} catch (JOSEException e) {
 			assertEquals("The JWE p2c header exceeds the maximum allowed 1000000 count", e.getMessage());
+		}
+	}
+
+
+	@Test
+	public void testCritHeaderParamsDefer()
+		throws Exception {
+
+		byte[] password = "secret".getBytes(StandardCharset.UTF_8);
+		String plaintext = "Hello world!";
+
+		JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.PBES2_HS256_A128KW, EncryptionMethod.A128GCM)
+			.customParam("exp", "2014-04-24")
+			.criticalParams(new HashSet<>(Collections.singletonList("exp")))
+			.build();
+		JWEObject jweObject = new JWEObject(header, new Payload(plaintext));
+
+		jweObject.encrypt(new PasswordBasedEncrypter(password, 8, 1000));
+
+		String jwe = jweObject.serialize();
+		jweObject = JWEObject.parse(jwe);
+
+		Set<String> deferredCrit = new HashSet<>(Collections.singletonList("exp"));
+
+		PasswordBasedDecrypter decrypter = new PasswordBasedDecrypter(password, deferredCrit);
+		assertEquals(deferredCrit, decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
+		jweObject.decrypt(decrypter);
+		assertEquals(plaintext, jweObject.getPayload().toString());
+	}
+
+
+	@Test
+	public void testCritHeaderParamsDeferTwo()
+		throws Exception {
+
+		byte[] password = "secret".getBytes(StandardCharset.UTF_8);
+		String plaintext = "Hello world!";
+
+		JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.PBES2_HS256_A128KW, EncryptionMethod.A128GCM)
+			.customParam("exp", "2014-04-24")
+			.criticalParams(new HashSet<>(Collections.singletonList("exp")))
+			.build();
+		JWEObject jweObject = new JWEObject(header, new Payload(plaintext));
+
+		jweObject.encrypt(new PasswordBasedEncrypter(password, 8, 1000));
+
+		String jwe = jweObject.serialize();
+		jweObject = JWEObject.parse(jwe);
+
+		Set<String> deferredCrit = new HashSet<>(Arrays.asList("exp", "iat"));
+
+		PasswordBasedDecrypter decrypter = new PasswordBasedDecrypter(password, deferredCrit);
+		assertEquals(deferredCrit, decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
+		jweObject.decrypt(decrypter);
+		assertEquals(plaintext, jweObject.getPayload().toString());
+	}
+
+
+	@Test
+	public void testCritHeaderParamsNoDefer()
+		throws Exception {
+
+		byte[] password = "secret".getBytes(StandardCharset.UTF_8);
+		String plaintext = "Hello world!";
+
+		JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.PBES2_HS256_A128KW, EncryptionMethod.A128GCM)
+			.customParam("exp", "2014-04-24")
+			.criticalParams(new HashSet<>(Collections.singletonList("exp")))
+			.build();
+		JWEObject jweObject = new JWEObject(header, new Payload(plaintext));
+
+		jweObject.encrypt(new PasswordBasedEncrypter(password, 8, 1000));
+
+		String jwe = jweObject.serialize();
+		jweObject = JWEObject.parse(jwe);
+
+		PasswordBasedDecrypter decrypter = new PasswordBasedDecrypter(password, Collections.<String>emptySet());
+		Assert.assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
+		try {
+			jweObject.decrypt(decrypter);
+			fail();
+		} catch (JOSEException e) {
+			assertEquals("Unsupported critical header parameter(s)", e.getMessage());
 		}
 	}
 }

@@ -62,7 +62,7 @@ import java.util.Set;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2024-09-10
+ * @version 2026-02-19
  */
 @ThreadSafe
 public class PasswordBasedDecrypter extends PasswordBasedCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
@@ -88,7 +88,7 @@ public class PasswordBasedDecrypter extends PasswordBasedCryptoProvider implemen
 	 */
 	public PasswordBasedDecrypter(final byte[] password) {
 
-		super(password);
+		this(password, null);
 	}
 
 
@@ -100,7 +100,24 @@ public class PasswordBasedDecrypter extends PasswordBasedCryptoProvider implemen
 	 */
 	public PasswordBasedDecrypter(final String password) {
 
-		super(password.getBytes(StandardCharset.UTF_8));
+		this(password.getBytes(StandardCharset.UTF_8), null);
+	}
+
+
+	/**
+	 * Creates a new password-based decrypter.
+	 *
+	 * @param password       The password bytes. Must not be empty or
+	 *                       {@code null}.
+	 * @param defCritHeaders The names of the critical header parameters
+	 *                       that are deferred to the application for
+	 *                       processing, empty set or {@code null} if none.
+	 */
+	public PasswordBasedDecrypter(final byte[] password,
+				      final Set<String> defCritHeaders) {
+
+		super(password);
+		critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
 	}
 
 
@@ -114,7 +131,7 @@ public class PasswordBasedDecrypter extends PasswordBasedCryptoProvider implemen
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 

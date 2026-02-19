@@ -1821,3 +1821,9 @@ version 9.40 (2024-06-06)
       to configure the maximum allowed length of compressed cipher text.
     * Adds JWEObject.decrypt(JWEDecrypter, Set<JWEDecrypterOption>) method to
       support the MaxCompressedCipherTextLength option.
+
+10.8 (2026-02-19)
+    * Adds a PasswordBasedDecrypter(byte[], Set<String>) constructor to specify
+      names of the critical header parameters that are deferred to the
+      application for processing. Aligns with other JWEDecrypter and
+      CriticalHeaderParamsAware implementations (iss #610).
