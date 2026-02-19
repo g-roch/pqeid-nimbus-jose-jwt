@@ -75,7 +75,8 @@ import com.nimbusds.jose.util.Base64URL;
  *
  * @author Tim McLean
  * @author Egor Puzanov
- * @version 2023-03-26
+ * @author Vladimir Dzhuvinov
+ * @version 2026-02-19
  */
 public class X25519Decrypter extends ECDHCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
 
@@ -163,7 +164,7 @@ public class X25519Decrypter extends ECDHCryptoProvider implements JWEDecrypter,
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 

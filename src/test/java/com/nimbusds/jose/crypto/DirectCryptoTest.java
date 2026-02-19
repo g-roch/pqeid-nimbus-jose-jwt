@@ -18,27 +18,26 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.text.ParseException;
-import java.util.Collections;
-import java.util.HashSet;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import junit.framework.TestCase;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jwt.JWTClaimNames;
+import junit.framework.TestCase;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.text.ParseException;
+import java.util.Collections;
+import java.util.HashSet;
 
 
 /**
  * Tests direct JWE encryption and decryption.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-09-20
+ * @version 2026-02-19
  */
 public class DirectCryptoTest extends TestCase {
 
@@ -556,7 +555,10 @@ public class DirectCryptoTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweString);
 
-		JWEDecrypter decrypter = new DirectDecrypter(new SecretKeySpec(key256, "AES"), new HashSet<>(Collections.singletonList(JWTClaimNames.EXPIRATION_TIME)));
+		DirectDecrypter decrypter = new DirectDecrypter(new SecretKeySpec(key256, "AES"), new HashSet<>(Collections.singletonList(JWTClaimNames.EXPIRATION_TIME)));
+
+		assertEquals(Collections.singleton(JWTClaimNames.EXPIRATION_TIME), decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
 
 		jweObject.decrypt(decrypter);
 
@@ -588,7 +590,10 @@ public class DirectCryptoTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweString);
 
-		JWEDecrypter decrypter = new DirectDecrypter(key256);
+		DirectDecrypter decrypter = new DirectDecrypter(key256);
+
+		assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
 
 		try {
 			jweObject.decrypt(decrypter);

@@ -18,23 +18,6 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECParameterSpec;
-import java.util.Collections;
-import java.util.HashSet;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import junit.framework.TestCase;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
-import org.bouncycastle.jce.spec.ECNamedCurveSpec;
-import org.jose4j.jwe.JsonWebEncryption;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.crypto.impl.*;
@@ -44,13 +27,29 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jose.util.ByteUtils;
 import com.nimbusds.jose.util.Container;
 import com.nimbusds.jose.util.StandardCharset;
+import junit.framework.TestCase;
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.jce.spec.ECNamedCurveSpec;
+import org.jose4j.jwe.JsonWebEncryption;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECParameterSpec;
+import java.util.Collections;
+import java.util.HashSet;
 
 
 /**
  * Tests ECDH encryption and decryption.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-04-27
+ * @version 2026-02-19
  */
 public class ECDHCryptoTest extends TestCase {
 
@@ -827,7 +826,12 @@ public class ECDHCryptoTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweObject.serialize());
 
-		jweObject.decrypt(new ECDHDecrypter(ecJWK.toECPrivateKey(), new HashSet<>(Collections.singletonList("exp"))));
+		ECDHDecrypter decrypter = new ECDHDecrypter(ecJWK.toECPrivateKey(), new HashSet<>(Collections.singletonList("exp")));
+
+		assertEquals(Collections.singleton("exp"), decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
+		jweObject.decrypt(decrypter);
 
 		assertEquals("Hello world!", jweObject.getPayload().toString());
 	}
@@ -848,8 +852,13 @@ public class ECDHCryptoTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweObject.serialize());
 
+		ECDHDecrypter decrypter = new ECDHDecrypter(ecJWK);
+
+		assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
 		try {
-			jweObject.decrypt(new ECDHDecrypter(ecJWK));
+			jweObject.decrypt(decrypter);
 			fail();
 		} catch (JOSEException e) {
 			// ok

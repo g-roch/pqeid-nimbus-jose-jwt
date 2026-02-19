@@ -66,7 +66,7 @@ import net.jcip.annotations.ThreadSafe;
  * 
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2023-09-10
+ * @version 2026-02-19
  */
 @ThreadSafe
 public class DirectDecrypter extends DirectCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
@@ -231,7 +231,7 @@ public class DirectDecrypter extends DirectCryptoProvider implements JWEDecrypte
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 

@@ -18,22 +18,23 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.util.Collections;
-import java.util.HashSet;
-import javax.crypto.spec.SecretKeySpec;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jwt.JWTClaimNames;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Collections;
+import java.util.HashSet;
+
 
 /**
  * Tests A256KW JWE encryption and decryption.
  *
  * @author Melisa Halsband
- * @version 2015-09-19
+ * @author Vladimir Dzhuvinov
+ * @version 2026-02-19
  */
 public class A256KWTest extends TestCase {
 
@@ -395,7 +396,10 @@ public class A256KWTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweString);
 
-		JWEDecrypter decrypter = new AESDecrypter(new SecretKeySpec(key256, "AES"), new HashSet<>(Collections.singletonList("exp")));
+		AESDecrypter decrypter = new AESDecrypter(new SecretKeySpec(key256, "AES"), new HashSet<>(Collections.singletonList("exp")));
+
+		assertEquals(Collections.singleton(JWTClaimNames.EXPIRATION_TIME), decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
 
 		jweObject.decrypt(decrypter);
 
@@ -427,7 +431,10 @@ public class A256KWTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweString);
 
-		JWEDecrypter decrypter = new AESDecrypter(key256);
+		AESDecrypter decrypter = new AESDecrypter(key256);
+
+		assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
 
 		try {
 			jweObject.decrypt(decrypter);

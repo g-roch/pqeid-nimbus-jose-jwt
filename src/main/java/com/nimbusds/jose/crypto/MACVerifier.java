@@ -57,7 +57,7 @@ import java.util.Set;
  <p>Tested with the AWS CloudHSM JCE provider.
  * 
  * @author Vladimir Dzhuvinov
- * @version 2024-10-28
+ * @version 2026-02-19
  */
 @ThreadSafe
 public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHeaderParamsAware {
@@ -206,7 +206,7 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 

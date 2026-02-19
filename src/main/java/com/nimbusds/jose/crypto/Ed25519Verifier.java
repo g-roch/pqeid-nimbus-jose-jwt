@@ -50,7 +50,7 @@ import java.util.Set;
  * </ul>
  *
  * @author Tim McLean
- * @version 2024-05-07
+ * @version 2026-02-19
  */
 @ThreadSafe
 public class Ed25519Verifier extends EdDSAProvider implements JWSVerifier, CriticalHeaderParamsAware {
@@ -130,7 +130,7 @@ public class Ed25519Verifier extends EdDSAProvider implements JWSVerifier, Criti
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 

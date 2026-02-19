@@ -85,7 +85,7 @@ import net.jcip.annotations.ThreadSafe;
  * </ul>
  *
  * @author Egor Puzanov
- * @version 2023-09-10
+ * @version 2026-02-19
  */
 @ThreadSafe
 public class MultiDecrypter extends MultiCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
@@ -199,7 +199,7 @@ public class MultiDecrypter extends MultiCryptoProvider implements JWEDecrypter,
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 

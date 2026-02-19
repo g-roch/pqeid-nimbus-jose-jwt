@@ -39,7 +39,7 @@ import static org.junit.Assert.assertNotEquals;
  * Tests HMAC JWS signing and verification. Uses test vectors from JWS spec.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-10-28
+ * @version 2026-02-19
  */
 public class MACTest extends TestCase {
 
@@ -535,6 +535,9 @@ public class MACTest extends TestCase {
 			new MACVerifier(new SecretKeySpec(secret, "HMACSHA512"), defCritHeaders),
 			new MACVerifier(new OctetSequenceKey.Builder(secret).build(), defCritHeaders))) {
 
+			assertEquals(defCritHeaders, verifier.getDeferredCriticalHeaderParams());
+			assertEquals(Collections.singleton("b64"), verifier.getProcessedCriticalHeaderParams());
+
 			boolean verified = jwsObject.verify(verifier);
 
 			assertTrue("Verified signature", verified);
@@ -567,6 +570,9 @@ public class MACTest extends TestCase {
 			new MACVerifier(secret),
 			new MACVerifier(new SecretKeySpec(secret, "HMACSHA512")),
 			new MACVerifier(new OctetSequenceKey.Builder(secret).build()))) {
+
+			assertTrue(verifier.getDeferredCriticalHeaderParams().isEmpty());
+			assertEquals(Collections.singleton("b64"), verifier.getProcessedCriticalHeaderParams());
 
 			boolean verified = jwsObject.verify(verifier);
 

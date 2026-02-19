@@ -50,7 +50,7 @@ import com.nimbusds.jwt.util.DateUtils;
  * from the JWS spec.
  *
  * @author Vladimir Dzhuvinov
- * @version 2023-04-20
+ * @version 2026-02-19
  */
 public class RSASSATest {
 
@@ -768,7 +768,7 @@ public class RSASSATest {
 
 		RSASSAVerifier verifier = new RSASSAVerifier(PUBLIC_KEY, deferredCrit);
 
-		assertTrue(deferredCrit.containsAll(verifier.getDeferredCriticalHeaderParams()));
+		assertEquals(deferredCrit, verifier.getDeferredCriticalHeaderParams());
 		assertEquals(Collections.singleton(HeaderParameterNames.BASE64_URL_ENCODE_PAYLOAD), verifier.getProcessedCriticalHeaderParams());
 
 		boolean verified = jwsObject.verify(verifier);
@@ -795,6 +795,9 @@ public class RSASSATest {
 		jwsObject.sign(signer);
 
 		RSASSAVerifier verifier = new RSASSAVerifier(PUBLIC_KEY);
+
+		assertTrue(verifier.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton(HeaderParameterNames.BASE64_URL_ENCODE_PAYLOAD), verifier.getProcessedCriticalHeaderParams());
 
 		boolean verified = jwsObject.verify(verifier);
 

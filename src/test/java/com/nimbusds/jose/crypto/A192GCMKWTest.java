@@ -18,22 +18,23 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.util.Collections;
-import java.util.HashSet;
-import javax.crypto.spec.SecretKeySpec;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jwt.JWTClaimNames;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Collections;
+import java.util.HashSet;
+
 
 /**
  * Tests A192GCMKW JWE encryption and decryption. 
  *
- * @author Melisa Halsband 
- * @version 2015-09-18
+ * @author Melisa Halsband
+ * @author Vladimir Dzhuvinov
+ * @version 2026-02-19
  */
 public class A192GCMKWTest extends TestCase {
 
@@ -398,6 +399,10 @@ public class A192GCMKWTest extends TestCase {
 		jweObject = JWEObject.parse(jweString);
 
 		AESDecrypter decrypter = new AESDecrypter(new SecretKeySpec(key192, "AES"), new HashSet<>(Collections.singletonList(JWTClaimNames.EXPIRATION_TIME)));
+
+		assertEquals(Collections.singleton(JWTClaimNames.EXPIRATION_TIME), decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
 		decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
 
 		jweObject.decrypt(decrypter);
@@ -431,7 +436,10 @@ public class A192GCMKWTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweString);
 
-		JWEDecrypter decrypter = new AESDecrypter(key192);
+		AESDecrypter decrypter = new AESDecrypter(key192);
+
+		assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
 
 		try {
 			jweObject.decrypt(decrypter);

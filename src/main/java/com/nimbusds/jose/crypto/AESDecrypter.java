@@ -72,7 +72,7 @@ import com.nimbusds.jose.util.Base64URL;
  * @author Melisa Halsband
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2023-09-10
+ * @version 2026-02-19
  */
 @ThreadSafe
 public class AESDecrypter extends AESCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
@@ -164,7 +164,7 @@ public class AESDecrypter extends AESCryptoProvider implements JWEDecrypter, Cri
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 

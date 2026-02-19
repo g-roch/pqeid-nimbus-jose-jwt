@@ -19,7 +19,10 @@ package com.nimbusds.jose.crypto;
 
 
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.impl.*;
+import com.nimbusds.jose.crypto.impl.AAD;
+import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
+import com.nimbusds.jose.crypto.impl.ECDH1PU;
+import com.nimbusds.jose.crypto.impl.ECDH1PUCryptoProvider;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.OctetKeyPair;
 import com.nimbusds.jose.util.Base64URL;
@@ -87,7 +90,8 @@ import java.util.Set;
  *
  * @author Alexander Martynov
  * @author Egor Puzanov
- * @version 2023-05-17
+ * @author Vladimir Dzhuvinov
+ * @version 2026-02-19
  */
 @ThreadSafe
 public class ECDH1PUX25519Decrypter extends ECDH1PUCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
@@ -186,7 +190,7 @@ public class ECDH1PUX25519Decrypter extends ECDH1PUCryptoProvider implements JWE
     @Override
     public Set<String> getDeferredCriticalHeaderParams() {
 
-        return critPolicy.getProcessedCriticalHeaderParams();
+        return critPolicy.getDeferredCriticalHeaderParams();
     }
 
 

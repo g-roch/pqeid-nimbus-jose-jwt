@@ -33,7 +33,8 @@ import junit.framework.TestCase;
  * Tests X25519 ECDH encryption and decryption.
  *
  * @author Tim McLean
- * @version 2018-07-16
+ * @author Vladimir Dzhuvinov
+ * @version 2026-02-19
  */
 public class X25519CryptoTest extends TestCase {
 
@@ -131,7 +132,12 @@ public class X25519CryptoTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweObject.serialize());
 
-		jweObject.decrypt(new X25519Decrypter(okp, Collections.singleton(JWTClaimNames.EXPIRATION_TIME)));
+		X25519Decrypter decrypter = new X25519Decrypter(okp, Collections.singleton(JWTClaimNames.EXPIRATION_TIME));
+
+		assertEquals(Collections.singleton(JWTClaimNames.EXPIRATION_TIME), decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
+		jweObject.decrypt(decrypter);
 
 		assertEquals("Hello world!", jweObject.getPayload().toString());
 	}
@@ -152,8 +158,13 @@ public class X25519CryptoTest extends TestCase {
 
 		jweObject = JWEObject.parse(jweObject.serialize());
 
+		X25519Decrypter decrypter = new X25519Decrypter(okp);
+
+		assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
 		try {
-			jweObject.decrypt(new X25519Decrypter(okp));
+			jweObject.decrypt(decrypter);
 			fail();
 		} catch (JOSEException e) {
 			// ok

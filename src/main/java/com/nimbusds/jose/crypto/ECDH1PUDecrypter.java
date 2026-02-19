@@ -90,213 +90,208 @@ import java.util.Set;
  *
  * @author Alexander Martynov
  * @author Egor Puzanov
- * @version 2023-05-17
+ * @version 2026-02-19
  */
 @ThreadSafe
 public class ECDH1PUDecrypter extends ECDH1PUCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
 
 
-    /**
-     * The supported EC JWK curves by the ECDH crypto provider class.
-     */
-    public static final Set<Curve> SUPPORTED_ELLIPTIC_CURVES;
+        /**
+         * The supported EC JWK curves by the ECDH crypto provider class.
+         */
+        public static final Set<Curve> SUPPORTED_ELLIPTIC_CURVES;
 
 
-    static {
-        Set<Curve> curves = new LinkedHashSet<>();
-        curves.add(Curve.P_256);
-        curves.add(Curve.P_384);
-        curves.add(Curve.P_521);
-        SUPPORTED_ELLIPTIC_CURVES = Collections.unmodifiableSet(curves);
-    }
-
-
-    /**
-     * The private EC key.
-     */
-    private final ECPrivateKey privateKey;
-
-    /**
-     * The public EC key.
-     */
-    private final ECPublicKey publicKey;
-
-    /**
-     * The critical header policy.
-     */
-    private final CriticalHeaderParamsDeferral critPolicy = new CriticalHeaderParamsDeferral();
-
-
-    /**
-     * Creates a new Elliptic Curve Diffie-Hellman decrypter.
-     *
-     * @param privateKey 	The private EC key. Must not be {@code null}.
-     * @param publicKey 	The public EC key. Must not be {@code null}.
-     *
-     * @throws JOSEException If the elliptic curve is not supported.
-     */
-    public ECDH1PUDecrypter(final ECPrivateKey privateKey, final ECPublicKey publicKey)
-        throws JOSEException {
-
-        this(privateKey, publicKey, null);
-    }
-
-    /**
-     * Creates a new Elliptic Curve Diffie-Hellman decrypter.
-     *
-     * @param privateKey     The private EC key. Must not be {@code null}.
-     * @param publicKey      The public EC key. Must not be {@code null}.
-     * @param defCritHeaders The names of the critical header parameters
-     *                       that are deferred to the application for
-     *                       processing, empty set or {@code null} if none.
-     *
-     * @throws JOSEException If the elliptic curve is not supported.
-     */
-    public ECDH1PUDecrypter(final ECPrivateKey privateKey,
-                            final ECPublicKey publicKey,
-                            final Set<String> defCritHeaders)
-        throws JOSEException {
-
-        this(privateKey, publicKey, defCritHeaders, Curve.forECParameterSpec(privateKey.getParams()));
-    }
-
-
-    /**
-     * Creates a new Elliptic Curve Diffie-Hellman decrypter. This
-     * constructor can also accept a private EC key located in a PKCS#11
-     * store that doesn't expose the private key parameters (such as a
-     * smart card or HSM).
-     *
-     * @param privateKey     The private EC key. Must not be {@code null}.
-     * @param publicKey      The public EC key. Must not be {@code null}.
-     * @param defCritHeaders The names of the critical header parameters
-     *                       that are deferred to the application for
-     *                       processing, empty set or {@code null} if none.
-     * @param curve          The key curve. Must not be {@code null}.
-     *
-     * @throws JOSEException If the elliptic curve is not supported.
-     */
-    public ECDH1PUDecrypter(final ECPrivateKey privateKey,
-                            final ECPublicKey publicKey,
-                            final Set<String> defCritHeaders,
-                            final Curve curve)
-        throws JOSEException {
-
-        super(curve, null);
-
-        critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
-
-        this.privateKey = privateKey;
-        this.publicKey = publicKey;
-    }
-
-    /**
-     * Returns the public EC key.
-     *
-     * @return The public EC key.
-     */
-    public ECPublicKey getPublicKey() {
-
-        return publicKey;
-    }
-
-    /**
-     * Returns the private EC key.
-     *
-     * @return The private EC key. Casting to
-     *         {@link ECPrivateKey} may not be
-     *         possible if the key is located in a PKCS#11 store that
-     *         doesn't expose the private key parameters.
-     */
-    public PrivateKey getPrivateKey() {
-
-        return privateKey;
-    }
-
-
-    @Override
-    public Set<Curve> supportedEllipticCurves() {
-
-        return SUPPORTED_ELLIPTIC_CURVES;
-    }
-
-
-    @Override
-    public Set<String> getProcessedCriticalHeaderParams() {
-
-        return critPolicy.getProcessedCriticalHeaderParams();
-    }
-
-
-    @Override
-    public Set<String> getDeferredCriticalHeaderParams() {
-
-        return critPolicy.getProcessedCriticalHeaderParams();
-    }
-
-
-    /**
-     * Decrypts the specified cipher text of a {@link JWEObject JWE Object}.
-     *
-     * @param header       The JSON Web Encryption (JWE) header. Must
-     *                     specify a supported JWE algorithm and method.
-     *                     Must not be {@code null}.
-     * @param encryptedKey The encrypted key, {@code null} if not required
-     *                     by the JWE algorithm.
-     * @param iv           The initialisation vector, {@code null} if not
-     *                     required by the JWE algorithm.
-     * @param cipherText   The cipher text to decrypt. Must not be
-     *                     {@code null}.
-     * @param authTag      The authentication tag, {@code null} if not
-     *                     required.
-     *
-     * @return The clear text.
-     *
-     * @throws JOSEException If the JWE algorithm or method is not
-     *                       supported, if a critical header parameter is
-     *                       not supported or marked for deferral to the
-     *                       application, or if decryption failed for some
-     *                       other reason.
-     */
-    @Deprecated
-    public byte[] decrypt(final JWEHeader header,
-               final Base64URL encryptedKey,
-               final Base64URL iv,
-               final Base64URL cipherText,
-               final Base64URL authTag)
-        throws JOSEException {
-
-        return decrypt(header, encryptedKey, iv, cipherText, authTag, AAD.compute(header));
-    }
-
-
-    @Override
-    public byte[] decrypt(final JWEHeader header,
-                          final Base64URL encryptedKey,
-                          final Base64URL iv,
-                          final Base64URL cipherText,
-                          final Base64URL authTag,
-                          final byte[] aad)
-        throws JOSEException {
-
-        critPolicy.ensureHeaderPasses(header);
-
-        // Get ephemeral EC key
-        ECKey ephemeralKey = (ECKey) header.getEphemeralPublicKey();
-
-        if (ephemeralKey == null) {
-            throw new JOSEException("Missing ephemeral public EC key \"epk\" JWE header parameter");
+        static {
+                Set<Curve> curves = new LinkedHashSet<>();
+                curves.add(Curve.P_256);
+                curves.add(Curve.P_384);
+                curves.add(Curve.P_521);
+                SUPPORTED_ELLIPTIC_CURVES = Collections.unmodifiableSet(curves);
         }
 
-        ECPublicKey ephemeralPublicKey = ephemeralKey.toECPublicKey();
 
-        SecretKey Z = ECDH1PU.deriveRecipientZ(
-                privateKey,
-                publicKey,
-                ephemeralPublicKey,
-                getJCAContext().getKeyEncryptionProvider()
-        );
+        /**
+         * The private EC key.
+         */
+        private final ECPrivateKey privateKey;
 
-        return decryptWithZ(header, aad, Z, encryptedKey, iv, cipherText, authTag);
-    }
+        /**
+         * The public EC key.
+         */
+        private final ECPublicKey publicKey;
+
+        /**
+         * The critical header policy.
+         */
+        private final CriticalHeaderParamsDeferral critPolicy = new CriticalHeaderParamsDeferral();
+
+
+        /**
+         * Creates a new Elliptic Curve Diffie-Hellman decrypter.
+         *
+         * @param privateKey The private EC key. Must not be {@code null}.
+         * @param publicKey  The public EC key. Must not be {@code null}.
+         * @throws JOSEException If the elliptic curve is not supported.
+         */
+        public ECDH1PUDecrypter(final ECPrivateKey privateKey, final ECPublicKey publicKey)
+                throws JOSEException {
+
+                this(privateKey, publicKey, null);
+        }
+
+        /**
+         * Creates a new Elliptic Curve Diffie-Hellman decrypter.
+         *
+         * @param privateKey     The private EC key. Must not be {@code null}.
+         * @param publicKey      The public EC key. Must not be {@code null}.
+         * @param defCritHeaders The names of the critical header parameters
+         *                       that are deferred to the application for
+         *                       processing, empty set or {@code null} if none.
+         * @throws JOSEException If the elliptic curve is not supported.
+         */
+        public ECDH1PUDecrypter(final ECPrivateKey privateKey,
+                                final ECPublicKey publicKey,
+                                final Set<String> defCritHeaders)
+                throws JOSEException {
+
+                this(privateKey, publicKey, defCritHeaders, Curve.forECParameterSpec(privateKey.getParams()));
+        }
+
+
+        /**
+         * Creates a new Elliptic Curve Diffie-Hellman decrypter. This
+         * constructor can also accept a private EC key located in a PKCS#11
+         * store that doesn't expose the private key parameters (such as a
+         * smart card or HSM).
+         *
+         * @param privateKey     The private EC key. Must not be {@code null}.
+         * @param publicKey      The public EC key. Must not be {@code null}.
+         * @param defCritHeaders The names of the critical header parameters
+         *                       that are deferred to the application for
+         *                       processing, empty set or {@code null} if none.
+         * @param curve          The key curve. Must not be {@code null}.
+         * @throws JOSEException If the elliptic curve is not supported.
+         */
+        public ECDH1PUDecrypter(final ECPrivateKey privateKey,
+                                final ECPublicKey publicKey,
+                                final Set<String> defCritHeaders,
+                                final Curve curve)
+                throws JOSEException {
+
+                super(curve, null);
+
+                critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
+
+                this.privateKey = privateKey;
+                this.publicKey = publicKey;
+        }
+
+        /**
+         * Returns the public EC key.
+         *
+         * @return The public EC key.
+         */
+        public ECPublicKey getPublicKey() {
+
+                return publicKey;
+        }
+
+        /**
+         * Returns the private EC key.
+         *
+         * @return The private EC key. Casting to
+         * {@link ECPrivateKey} may not be
+         * possible if the key is located in a PKCS#11 store that
+         * doesn't expose the private key parameters.
+         */
+        public PrivateKey getPrivateKey() {
+
+                return privateKey;
+        }
+
+
+        @Override
+        public Set<Curve> supportedEllipticCurves() {
+
+                return SUPPORTED_ELLIPTIC_CURVES;
+        }
+
+
+        @Override
+        public Set<String> getProcessedCriticalHeaderParams() {
+
+                return critPolicy.getProcessedCriticalHeaderParams();
+        }
+
+
+        @Override
+        public Set<String> getDeferredCriticalHeaderParams() {
+
+                return critPolicy.getDeferredCriticalHeaderParams();
+        }
+
+
+        /**
+         * Decrypts the specified cipher text of a {@link JWEObject JWE Object}.
+         *
+         * @param header       The JSON Web Encryption (JWE) header. Must
+         *                     specify a supported JWE algorithm and method.
+         *                     Must not be {@code null}.
+         * @param encryptedKey The encrypted key, {@code null} if not required
+         *                     by the JWE algorithm.
+         * @param iv           The initialisation vector, {@code null} if not
+         *                     required by the JWE algorithm.
+         * @param cipherText   The cipher text to decrypt. Must not be
+         *                     {@code null}.
+         * @param authTag      The authentication tag, {@code null} if not
+         *                     required.
+         * @return The clear text.
+         * @throws JOSEException If the JWE algorithm or method is not
+         *                       supported, if a critical header parameter is
+         *                       not supported or marked for deferral to the
+         *                       application, or if decryption failed for some
+         *                       other reason.
+         */
+        @Deprecated
+        public byte[] decrypt(final JWEHeader header,
+                              final Base64URL encryptedKey,
+                              final Base64URL iv,
+                              final Base64URL cipherText,
+                              final Base64URL authTag)
+                throws JOSEException {
+
+                return decrypt(header, encryptedKey, iv, cipherText, authTag, AAD.compute(header));
+        }
+
+
+        @Override
+        public byte[] decrypt(final JWEHeader header,
+                              final Base64URL encryptedKey,
+                              final Base64URL iv,
+                              final Base64URL cipherText,
+                              final Base64URL authTag,
+                              final byte[] aad)
+                throws JOSEException {
+
+                critPolicy.ensureHeaderPasses(header);
+
+                // Get ephemeral EC key
+                ECKey ephemeralKey = (ECKey) header.getEphemeralPublicKey();
+
+                if (ephemeralKey == null) {
+                        throw new JOSEException("Missing ephemeral public EC key \"epk\" JWE header parameter");
+                }
+
+                ECPublicKey ephemeralPublicKey = ephemeralKey.toECPublicKey();
+
+                SecretKey Z = ECDH1PU.deriveRecipientZ(
+                        privateKey,
+                        publicKey,
+                        ephemeralPublicKey,
+                        getJCAContext().getKeyEncryptionProvider()
+                );
+
+                return decryptWithZ(header, aad, Z, encryptedKey, iv, cipherText, authTag);
+        }
 }

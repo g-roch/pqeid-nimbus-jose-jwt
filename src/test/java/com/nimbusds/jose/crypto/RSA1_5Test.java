@@ -18,6 +18,17 @@
 package com.nimbusds.jose.crypto;
 
 
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
+import com.nimbusds.jose.util.ByteUtils;
+import com.nimbusds.jwt.JWTClaimNames;
+import junit.framework.TestCase;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
@@ -29,18 +40,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import junit.framework.TestCase;
-
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
-import com.nimbusds.jose.util.ByteUtils;
-import com.nimbusds.jwt.JWTClaimNames;
 
 
 /**
@@ -48,7 +47,7 @@ import com.nimbusds.jwt.JWTClaimNames;
  * spec.
  *
  * @author Vladimir Dzhuvinov
- * @version 2021-09-26
+ * @version 2026-02-19
  */
 public class RSA1_5Test extends TestCase {
 	
@@ -632,7 +631,10 @@ public class RSA1_5Test extends TestCase {
 
 		jweObject = JWEObject.parse(jweString);
 
-		JWEDecrypter decrypter = new RSADecrypter(PRIVATE_KEY, new HashSet<>(Collections.singletonList(JWTClaimNames.EXPIRATION_TIME)));
+		RSADecrypter decrypter = new RSADecrypter(PRIVATE_KEY, new HashSet<>(Collections.singletonList(JWTClaimNames.EXPIRATION_TIME)));
+
+		assertEquals(Collections.singleton(JWTClaimNames.EXPIRATION_TIME), decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
 
 		jweObject.decrypt(decrypter);
 
@@ -664,7 +666,10 @@ public class RSA1_5Test extends TestCase {
 
 		jweObject = JWEObject.parse(jweString);
 
-		JWEDecrypter decrypter = new RSADecrypter(PRIVATE_KEY);
+		RSADecrypter decrypter = new RSADecrypter(PRIVATE_KEY);
+
+		assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
 
 		try {
 			jweObject.decrypt(decrypter);

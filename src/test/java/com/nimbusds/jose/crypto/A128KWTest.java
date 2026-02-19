@@ -18,10 +18,6 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.util.Collections;
-import java.util.HashSet;
-import javax.crypto.spec.SecretKeySpec;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
@@ -31,12 +27,17 @@ import com.nimbusds.jwt.SignedJWT;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Collections;
+import java.util.HashSet;
+
 
 /**
  * Tests A128KW JWE encryption and decryption.
  *
  * @author Melisa Halsband
- * @version 2015-09-18
+ * @author Vladimir Dzhuvinov
+ * @version 2026-02-10
  */
 public class A128KWTest extends TestCase {
 
@@ -429,6 +430,9 @@ public class A128KWTest extends TestCase {
 
 		AESDecrypter decrypter = new AESDecrypter(new SecretKeySpec(key128, "AES"), new HashSet<>(Collections.singletonList(JWTClaimNames.EXPIRATION_TIME)));
 
+		assertEquals(Collections.singleton(JWTClaimNames.EXPIRATION_TIME), decrypter.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
 		jweObject.decrypt(decrypter);
 
 		assertEquals("State check", JWEObject.State.DECRYPTED, jweObject.getState());
@@ -460,6 +464,9 @@ public class A128KWTest extends TestCase {
 		jweObject = JWEObject.parse(jweString);
 
 		AESDecrypter decrypter = new AESDecrypter(key128);
+
+		assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
 
 		try {
 			jweObject.decrypt(decrypter);

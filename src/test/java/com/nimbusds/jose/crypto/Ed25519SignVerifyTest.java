@@ -37,7 +37,7 @@ import java.util.Set;
 /**
  * @author Tim McLean
  * @version Vladimir Dzhuvinov
- * @version 2024-05-07
+ * @version 2026-02-19
  */
 public class Ed25519SignVerifyTest extends TestCase {
 
@@ -527,7 +527,12 @@ public class Ed25519SignVerifyTest extends TestCase {
 
 		jwsObject = JWSObject.parse(jwsObject.serialize());
 
-		assertTrue(jwsObject.verify(new Ed25519Verifier(okp.toPublicJWK(), Collections.singleton(JWTClaimNames.EXPIRATION_TIME))));
+		Ed25519Verifier verifier = new Ed25519Verifier(okp.toPublicJWK(), Collections.singleton(JWTClaimNames.EXPIRATION_TIME));
+
+		assertEquals(Collections.singleton(JWTClaimNames.EXPIRATION_TIME), verifier.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), verifier.getProcessedCriticalHeaderParams());
+
+		assertTrue(jwsObject.verify(verifier));
 
 		assertEquals("Hello world!", jwsObject.getPayload().toString());
 	}
@@ -548,6 +553,11 @@ public class Ed25519SignVerifyTest extends TestCase {
 
 		jwsObject = JWSObject.parse(jwsObject.serialize());
 
-		assertFalse(jwsObject.verify(new Ed25519Verifier(okp.toPublicJWK())));
+		Ed25519Verifier verifier = new Ed25519Verifier(okp.toPublicJWK());
+
+		assertTrue(verifier.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), verifier.getProcessedCriticalHeaderParams());
+
+		assertFalse(jwsObject.verify(verifier));
 	}
 }

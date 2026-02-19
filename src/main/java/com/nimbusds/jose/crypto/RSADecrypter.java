@@ -249,7 +249,7 @@ public class RSADecrypter extends RSACryptoProvider implements JWEDecrypter, Cri
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 

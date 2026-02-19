@@ -47,7 +47,7 @@ import com.nimbusds.jwt.SignedJWT;
  * verification.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-05-08
+ * @version 2026-02-19
  */
 public class ECDSARoundTripTest extends TestCase {
 
@@ -411,7 +411,10 @@ public class ECDSARoundTripTest extends TestCase {
 
 		assertEquals(JWSObject.State.SIGNED, jwsObject.getState());
 
-		JWSVerifier verifier = new ECDSAVerifier(publicKey, new HashSet<>(Collections.singletonList(JWTClaimNames.EXPIRATION_TIME)));
+		ECDSAVerifier verifier = new ECDSAVerifier(publicKey, new HashSet<>(Collections.singletonList(JWTClaimNames.EXPIRATION_TIME)));
+
+		assertEquals(Collections.singleton("exp"), verifier.getDeferredCriticalHeaderParams());
+		assertEquals(Collections.singleton("b64"), verifier.getProcessedCriticalHeaderParams());
 
 		boolean verified = jwsObject.verify(verifier);
 
@@ -441,7 +444,10 @@ public class ECDSARoundTripTest extends TestCase {
 
 		assertEquals(JWSObject.State.SIGNED, jwsObject.getState());
 
-		JWSVerifier verifier = new ECDSAVerifier(publicKey);
+		ECDSAVerifier verifier = new ECDSAVerifier(publicKey);
+
+		assertTrue(verifier.getDeferredCriticalHeaderParams().isEmpty());
+		assertEquals(Collections.singleton("b64"), verifier.getProcessedCriticalHeaderParams());
 
 		boolean verified = jwsObject.verify(verifier);
 

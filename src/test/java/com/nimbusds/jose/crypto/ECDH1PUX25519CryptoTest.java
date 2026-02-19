@@ -40,7 +40,8 @@ import com.nimbusds.jwt.JWTClaimNames;
  * Tests X25519 ECDH-1PU encryption and decryption.
  *
  * @author Alexander Martynov
- * @version 2022-01-24
+ * @author Vladimir Dzhuvinov
+ * @version 2026-02-19
  */
 public class ECDH1PUX25519CryptoTest extends TestCase {
 
@@ -269,7 +270,12 @@ public class ECDH1PUX25519CryptoTest extends TestCase {
         jweObject.encrypt(encrypter);
 
         jweObject = JWEObject.parse(jweObject.serialize());
+
         ECDH1PUX25519Decrypter decrypter = new ECDH1PUX25519Decrypter(bobKey, aliceKey.toPublicJWK(), Collections.singleton(JWTClaimNames.EXPIRATION_TIME));
+
+        assertEquals(Collections.singleton(JWTClaimNames.EXPIRATION_TIME), decrypter.getDeferredCriticalHeaderParams());
+        assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
         jweObject.decrypt(decrypter);
 
         assertEquals("Hello world!", jweObject.getPayload().toString());
@@ -293,8 +299,12 @@ public class ECDH1PUX25519CryptoTest extends TestCase {
 
         jweObject = JWEObject.parse(jweObject.serialize());
 
+        ECDH1PUX25519Decrypter decrypter = new ECDH1PUX25519Decrypter(bobKey, aliceKey.toPublicJWK());
+
+        assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+        assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
         try {
-            ECDH1PUX25519Decrypter decrypter = new ECDH1PUX25519Decrypter(bobKey, aliceKey.toPublicJWK());
             jweObject.decrypt(decrypter);
             fail();
         } catch (JOSEException e) {

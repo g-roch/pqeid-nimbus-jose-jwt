@@ -43,7 +43,8 @@ import java.util.HashSet;
  * Tests ECDH-1PU encryption and decryption.
  *
  * @author Alexander Martynov
- * @version 2022-01-24
+ * @author Vladimir Dzhuvinov
+ * @version 2026-02-19
  */
 public class ECDH1PUCryptoTest extends TestCase {
 
@@ -311,10 +312,12 @@ public class ECDH1PUCryptoTest extends TestCase {
 
         jweObject = JWEObject.parse(jweObject.serialize());
 
-        jweObject.decrypt(new ECDH1PUDecrypter(
-                bobKey.toECPrivateKey(),
-                aliceKey.toECPublicKey(),
-                new HashSet<>(Collections.singletonList("exp"))));
+        ECDH1PUDecrypter decrypter = new ECDH1PUDecrypter(bobKey.toECPrivateKey(), aliceKey.toECPublicKey(), new HashSet<>(Collections.singletonList("exp")));
+
+        assertEquals(Collections.singleton("exp"), decrypter.getDeferredCriticalHeaderParams());
+        assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
+        jweObject.decrypt(decrypter);
 
         assertEquals("Hello world!", jweObject.getPayload().toString());
     }
@@ -336,8 +339,12 @@ public class ECDH1PUCryptoTest extends TestCase {
 
         jweObject = JWEObject.parse(jweObject.serialize());
 
+        ECDH1PUDecrypter decrypter = new ECDH1PUDecrypter(bobKey.toECPrivateKey(), aliceKey.toECPublicKey());
+        assertTrue(decrypter.getDeferredCriticalHeaderParams().isEmpty());
+        assertEquals(Collections.singleton("b64"), decrypter.getProcessedCriticalHeaderParams());
+
         try {
-            jweObject.decrypt(new ECDH1PUDecrypter(bobKey.toECPrivateKey(), aliceKey.toECPublicKey()));
+            jweObject.decrypt(decrypter);
             fail();
         } catch (JOSEException e) {
             // ok

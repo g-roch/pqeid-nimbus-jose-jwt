@@ -18,14 +18,6 @@
 package com.nimbusds.jose.crypto;
 
 
-import java.security.PrivateKey;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import javax.crypto.SecretKey;
-
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
@@ -35,6 +27,14 @@ import com.nimbusds.jose.crypto.utils.ECChecks;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.util.Base64URL;
+
+import javax.crypto.SecretKey;
+import java.security.PrivateKey;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 
 /**
@@ -83,7 +83,7 @@ import com.nimbusds.jose.util.Base64URL;
  *
  * @author Vladimir Dzhuvinov
  * @author Egor Puzanov
- * @version 2023-05-17
+ * @version 2026-02-19
  */
 public class ECDHDecrypter extends ECDHCryptoProvider implements JWEDecrypter, CriticalHeaderParamsAware {
 
@@ -225,7 +225,7 @@ public class ECDHDecrypter extends ECDHCryptoProvider implements JWEDecrypter, C
 	@Override
 	public Set<String> getDeferredCriticalHeaderParams() {
 
-		return critPolicy.getProcessedCriticalHeaderParams();
+		return critPolicy.getDeferredCriticalHeaderParams();
 	}
 
 
