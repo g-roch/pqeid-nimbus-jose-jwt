@@ -134,7 +134,7 @@ public class JOSEMatcher {
 			if (clazz == null) {
 				this.classes = null;
 			} else {
-				this.classes = new HashSet<Class<? extends JOSEObject>>(Collections.singletonList(clazz));
+				this.classes = new HashSet<>(Collections.singletonList(clazz));
 			}
 			return this;
 		}

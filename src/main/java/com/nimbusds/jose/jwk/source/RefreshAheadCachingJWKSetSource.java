@@ -18,18 +18,17 @@
 package com.nimbusds.jose.jwk.source;
 
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantLock;
-
-import net.jcip.annotations.ThreadSafe;
-
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jose.util.cache.CachedObject;
 import com.nimbusds.jose.util.events.EventListener;
+import net.jcip.annotations.ThreadSafe;
+
+import java.io.IOException;
+import java.util.Objects;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -368,30 +367,26 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 		long delay = cache.getExpirationTime() - currentTime - refreshAheadTime - getCacheRefreshTimeout();
 		if (delay > 0) {
 			final RefreshAheadCachingJWKSetSource<C> that = this;
-			Runnable command = new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						// so will only refresh if this specific cache entry still is the current one
-						refreshAheadOfExpiration(cache, true, System.currentTimeMillis(), context);
-					} catch (Exception e) {
-						if (eventListener != null) {
-							eventListener.notify(new ScheduledRefreshFailed<C>(that, e, context));
-						}
-						// ignore
-					}
-				}
-			};
+			Runnable command = () -> {
+                                try {
+                                        // so will only refresh if this specific cache entry still is the current one
+                                        refreshAheadOfExpiration(cache, true, System.currentTimeMillis(), context);
+                                } catch (Exception e) {
+                                        if (eventListener != null) {
+                                                eventListener.notify(new ScheduledRefreshFailed<>(that, e, context));
+                                        }
+                                        // ignore
+                                }
+                        };
 			this.scheduledRefreshFuture = scheduledExecutorService.schedule(command, delay, TimeUnit.MILLISECONDS);
 			
 			if (eventListener != null) {
-				eventListener.notify(new RefreshScheduledEvent<C>(this, context));
+				eventListener.notify(new RefreshScheduledEvent<>(this, context));
 			}
 		} else {
 			// cache refresh not scheduled
 			if (eventListener != null) {
-				eventListener.notify(new RefreshNotScheduledEvent<C>(this, context));
+				eventListener.notify(new RefreshNotScheduledEvent<>(this, context));
 			}
 		}
 	}
@@ -442,33 +437,29 @@ public class RefreshAheadCachingJWKSetSource<C extends SecurityContext> extends 
 			
 			final RefreshAheadCachingJWKSetSource<C> that = this;
 
-			Runnable runnable = new Runnable() {
+			Runnable runnable = () -> {
+                                try {
+                                        if (eventListener != null) {
+                                                eventListener.notify(new ScheduledRefreshInitiatedEvent<>(that, context));
+                                        }
 
-				@Override
-				public void run() {
-					try {
-						if (eventListener != null) {
-							eventListener.notify(new ScheduledRefreshInitiatedEvent<>(that, context));
-						}
-						
-						JWKSet jwkSet = RefreshAheadCachingJWKSetSource.this.loadJWKSetBlocking(JWKSetCacheRefreshEvaluator.forceRefresh(), currentTime, context);
-						
-						if (eventListener != null) {
-							eventListener.notify(new ScheduledRefreshCompletedEvent<>(that, jwkSet, context));
-						}
+                                        JWKSet jwkSet = RefreshAheadCachingJWKSetSource.this.loadJWKSetBlocking(JWKSetCacheRefreshEvaluator.forceRefresh(), currentTime, context);
 
-						// so next time this method is invoked, it'll be with the updated cache item expiry time
-					} catch (Throwable e) {
-						// update failed, but another thread can retry
-						cacheExpiration = -1L;
-						// ignore, unable to update
-						// another thread will attempt the same
-						if (eventListener != null) {
-							eventListener.notify(new UnableToRefreshAheadOfExpirationEvent<C>(that, context));
-						}
-					}
-				}
-			};
+                                        if (eventListener != null) {
+                                                eventListener.notify(new ScheduledRefreshCompletedEvent<>(that, jwkSet, context));
+                                        }
+
+                                        // so next time this method is invoked, it'll be with the updated cache item expiry time
+                                } catch (Throwable e) {
+                                        // update failed, but another thread can retry
+                                        cacheExpiration = -1L;
+                                        // ignore, unable to update
+                                        // another thread will attempt the same
+                                        if (eventListener != null) {
+                                                eventListener.notify(new UnableToRefreshAheadOfExpirationEvent<>(that, context));
+                                        }
+                                }
+                        };
 			// run update in the background
 			executorService.execute(runnable);
 		}

@@ -85,7 +85,7 @@ public abstract class Header implements Serializable {
 	 * Empty custom parameters constant.
 	 */
 	private static final Map<String,Object> EMPTY_CUSTOM_PARAMS =
-		Collections.unmodifiableMap(new HashMap<String,Object>());
+		Collections.unmodifiableMap(new HashMap<>());
 
 
 	/**

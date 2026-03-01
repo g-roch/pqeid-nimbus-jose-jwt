@@ -94,7 +94,7 @@ public class RetryingJWKSetSource<C extends SecurityContext> extends JWKSetSourc
 		} catch (JWKSetUnavailableException e) {
 			// assume transient network issue, retry once
 			if (eventListener != null) {
-				eventListener.notify(new RetrialEvent<C>(this, e, context));
+				eventListener.notify(new RetrialEvent<>(this, e, context));
 			}
 			return getSource().getJWKSet(refreshEvaluator, currentTime, context);
 		}

@@ -129,7 +129,7 @@ public class JWKSourceBuilder<C extends SecurityContext> {
 	 * @param retriever The resource retriever. Must not be {@code null}.
 	 */
 	public static <C extends SecurityContext> JWKSourceBuilder<C> create(final URL jwkSetURL, final ResourceRetriever retriever) {
-		return new JWKSourceBuilder<>(new URLBasedJWKSetSource<C>(jwkSetURL, retriever));
+		return new JWKSourceBuilder<>(new URLBasedJWKSetSource<>(jwkSetURL, retriever));
 	}
 	
 	
