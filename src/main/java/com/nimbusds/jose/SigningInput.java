@@ -19,6 +19,7 @@ package com.nimbusds.jose;
 
 import java.security.Signature;
 import java.security.SignatureException;
+import javax.crypto.Mac;
 
 /**
  * Represents the data that is used as input for generating a signature.
@@ -52,5 +53,15 @@ public interface SigningInput {
   default void apply(final Signature signature) throws SignatureException {
 
     signature.update(toByteArray());
+  }
+
+  /**
+   * Applies the signing input to the provided MAC instance.
+   *
+   * @param mac The MAC to update with this signing input.
+   */
+  default void apply(final Mac mac) {
+
+    mac.update(toByteArray());
   }
 }

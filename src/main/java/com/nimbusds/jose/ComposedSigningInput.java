@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Objects;
+import javax.crypto.Mac;
 
 /**
  * Implements a signing input from a {@link JWSHeader} and {@link Payload} that
@@ -83,6 +84,14 @@ final class ComposedSigningInput implements SigningInput {
     signature.update(encodeUTF8(header));
     signature.update((byte) '.');
     signature.update(getEncodedPayloadByteArray());
+  }
+
+  @Override
+  public void apply(Mac mac) {
+
+    mac.update(encodeUTF8(header));
+    mac.update((byte) '.');
+    mac.update(getEncodedPayloadByteArray());
   }
 
   private byte[] getEncodedPayloadByteArray() {
