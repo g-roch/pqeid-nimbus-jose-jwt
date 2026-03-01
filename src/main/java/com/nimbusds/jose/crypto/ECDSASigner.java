@@ -80,8 +80,6 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 	 * support key stores that prevent exposure of the private key
 	 * parameters via the {@link java.security.interfaces.ECPrivateKey}
 	 * API.
-	 *
-	 * See https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/169
 	 */
 	private final PrivateKey privateKey;
 

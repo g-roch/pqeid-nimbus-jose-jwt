@@ -129,13 +129,13 @@ public class ECDH1PU {
     /**
      * Derives a shared key (via concat KDF).
      *
-     * The method should only be called in the
+     * <p>The method should only be called in the
      * {@link ECDH.AlgorithmMode#DIRECT} mode.
      *
-     * The method derives the Content Encryption Key (CEK) for the "enc"
+     * <p>The method derives the Content Encryption Key (CEK) for the "enc"
      * algorithm, in the {@link ECDH.AlgorithmMode#DIRECT} mode.
      *
-     * The method does not take the auth tag because the auth tag will be
+     * <p>The method does not take the auth tag because the auth tag will be
      * generated using a CEK derived as an output of this method.
      *
      * @param header    The JWE header. Its algorithm and encryption method
@@ -189,9 +189,9 @@ public class ECDH1PU {
     /**
      * Derives a shared key (via concat KDF).
      *
-     * The method should only be called in {@link ECDH.AlgorithmMode#KW}.
+     * <p>The method should only be called in {@link ECDH.AlgorithmMode#KW}.
      *
-     * In Key Agreement with {@link ECDH.AlgorithmMode#KW} mode, the JWE
+     * <p>In Key Agreement with {@link ECDH.AlgorithmMode#KW} mode, the JWE
      * Authentication Tag is included in the input to the KDF. This ensures
      * that the content of the JWE was produced by the original sender and not
      * by another recipient.

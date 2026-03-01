@@ -12,9 +12,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
  * Interface for minting {@link JWSObject JSON Web Signature (JWS) objects} and
  * {@link com.nimbusds.jwt.SignedJWT signed JSON Web Tokens} (JWTs).
  *
- * An optional context parameter is available to facilitate passing of
- * additional data between the caller and the underlying JWS minter (in
- * both directions).
+ * <p>An optional context parameter is available to pass additional data
+ * between the caller and the underlying JWS minter (in both directions).
  *
  * @author Josh Cummings
  * @version 2021-01-14
@@ -28,16 +27,16 @@ public interface JWSMinter<C extends SecurityContext> {
 	 * Token (JWT) use the {@link JWTClaimsSet#toPayload()} method to
 	 * obtain a {@link Payload} representation of the JWT claims.
 	 *
-	 * Derives the signing key from the {@link JWSHeader} as well as any
+	 * <p>Derives the signing key from the {@link JWSHeader} as well as any
 	 * application-specific {@link SecurityContext context}.
 	 *
-	 * Once the key is discovered, adds any headers related to the
+	 * <p>Once the key is discovered, adds any headers related to the
 	 * discovered signing key, including {@code kid}, {@code x5u},
 	 * {@code x5c}, and {@code x5t#256}.
 	 *
-	 * All other headers and claims remain as-is. This method expects the
-	 * caller to add the {@code typ}, {@code alg}, and any other needed
-	 * headers.
+	 * <p>All other headers and claims remain as-is. This method expects
+	 * the caller to add the {@code typ}, {@code alg}, and any other
+	 * necessary headers.
 	 *
 	 * @param header  The {@link JWSHeader} to use, less any
 	 *                key-identifying headers, which this method will

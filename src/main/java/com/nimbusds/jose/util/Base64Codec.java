@@ -135,7 +135,7 @@ final class Base64Codec {
 	/**
 	 * Convert a digit index to the appropriate base 64 ASCII byte.
 	 *
-	 * Uses '+' and '/' for 62 and 63, as required for standard base 64.
+	 * <p>Uses '+' and '/' for 62 and 63, as required for standard base 64.
 	 *
 	 * @param digit_idx Must be at least 0 and at most 63. Output is undefined
 	 *                  if digit_idx is not on this range.
@@ -174,7 +174,7 @@ final class Base64Codec {
 	/**
 	 * Convert a digit index to the appropriate base64url ASCII byte.
 	 *
-	 * Uses '-' and '_' for 62 and 63, as required for the base64url encoding.
+	 * <p>Uses '-' and '_' for 62 and 63, as required for the base64url encoding.
 	 *
 	 * @param digit_idx Must be at least 0 and at most 63. Output is undefined
 	 *                  if digit_idx is not on this range.
@@ -214,7 +214,7 @@ final class Base64Codec {
 	 * Decode an ASCII byte to a base 64 digit index (0 to 63), or -1 if the
 	 * input is not a valid base 64 digit.
 	 *
-	 * Supports '+' and '/' for standard base 64, but also '-' and '_' for
+	 * <p>Supports '+' and '/' for standard base 64, but also '-' and '_' for
 	 * base64url.
 	 *
 	 * @param ascii An ASCII character.
