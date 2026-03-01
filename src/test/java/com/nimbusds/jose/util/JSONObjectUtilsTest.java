@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -37,7 +38,7 @@ import static org.junit.Assert.*;
  * Tests the JSON object utilities.
  *
  * @author Vladimir Dzhuvinov
- * @version 2025-11-06
+ * @version 2026-03-01
  */
 public class JSONObjectUtilsTest {
 
@@ -1058,6 +1059,112 @@ public class JSONObjectUtilsTest {
 		} catch (ParseException e) {
 			assertEquals("Unexpected type of JSON object member now", e.getMessage());
 		}
+	}
+
+
+        @Test
+        public void testGetEpochSecondAsInstant() throws ParseException {
+
+		Instant now = Instant.ofEpochSecond(Instant.now().getEpochSecond());
+
+		long ts = now.getEpochSecond();
+
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		jsonObject.put("now", ts);
+
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+
+		jsonObject = JSONObjectUtils.parse(json);
+		assertEquals(now, JSONObjectUtils.getEpochSecondAsInstant(jsonObject, "now"));
+		assertEquals(ts, JSONObjectUtils.getLong(jsonObject, "now"));
+	}
+
+
+        @Test
+        public void testGetEpochSecondAsInstant_null() throws ParseException {
+
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		jsonObject.put("now", null);
+
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+
+		jsonObject = JSONObjectUtils.parse(json);
+		assertNull(JSONObjectUtils.getEpochSecondAsInstant(jsonObject, "now"));
+	}
+
+
+        @Test
+        public void testGetEpochSecondAsInstant_missing() throws ParseException {
+
+		assertNull(JSONObjectUtils.getEpochSecondAsInstant(JSONObjectUtils.newJSONObject(), "now"));
+	}
+
+
+        @Test
+        public void testGetEpochSecondAsInstant_illegal() throws ParseException {
+
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		jsonObject.put("now", "xxx");
+
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+
+		jsonObject = JSONObjectUtils.parse(json);
+		try {
+			JSONObjectUtils.getEpochSecondAsInstant(jsonObject, "now");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Unexpected type of JSON object member now", e.getMessage());
+		}
+	}
+
+
+	@Test
+	public void testGetEpochSecondAsInstant_zero() throws ParseException {
+
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		jsonObject.put("ts", 0L);
+
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+
+		jsonObject = JSONObjectUtils.parse(json);
+		assertEquals(Instant.EPOCH, JSONObjectUtils.getEpochSecondAsInstant(jsonObject, "ts"));
+	}
+
+
+	@Test
+	public void testGetEpochSecondAsInstant_knownValue() throws ParseException {
+
+		// 2011-03-22T18:43:00Z
+		long ts = 1300819380L;
+
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		jsonObject.put("exp", ts);
+
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+
+		jsonObject = JSONObjectUtils.parse(json);
+		Instant result = JSONObjectUtils.getEpochSecondAsInstant(jsonObject, "exp");
+		assertEquals(Instant.ofEpochSecond(1300819380L), result);
+		assertEquals(ts, result.getEpochSecond());
+	}
+
+
+	@Test
+	public void testGetEpochSecondAsInstant_consistentWithDateVariant() throws ParseException {
+
+		long ts = 1700000000L;
+
+		Map<String, Object> jsonObject = JSONObjectUtils.newJSONObject();
+		jsonObject.put("ts", ts);
+
+		String json = JSONObjectUtils.toJSONString(jsonObject);
+
+		jsonObject = JSONObjectUtils.parse(json);
+		Date dateResult = JSONObjectUtils.getEpochSecondAsDate(jsonObject, "ts");
+		Instant instantResult = JSONObjectUtils.getEpochSecondAsInstant(jsonObject, "ts");
+
+		assertEquals(dateResult.toInstant(), instantResult);
+		assertEquals(dateResult.getTime() / 1000L, instantResult.getEpochSecond());
 	}
 
 

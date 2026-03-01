@@ -29,6 +29,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.*;
 
 
@@ -36,7 +37,7 @@ import java.util.*;
  * JSON object helper methods.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-11-14
+ * @version 2026-03-01
  */
 public class JSONObjectUtils {
 	
@@ -508,6 +509,30 @@ public class JSONObjectUtils {
 		}
 
 		return new Base64URL(value);
+	}
+
+
+	/**
+	 * Gets a number member of a JSON object as an {@link Instant}
+	 * expressed in seconds since the Unix epoch.
+	 *
+	 * @param o    The JSON object. Must not be {@code null}.
+	 * @param name The JSON object member name. Must not be {@code null}.
+	 *
+	 * @return The JSON object member value, may be {@code null}.
+	 *
+	 * @throws ParseException If the value is not of the expected type.
+	 */
+	public static Instant getEpochSecondAsInstant(final Map<String, Object> o, final String name)
+		throws ParseException {
+
+		Number value = getGeneric(o, name, Number.class);
+
+		if (value == null) {
+			return null;
+		}
+
+		return Instant.ofEpochSecond(value.longValue());
 	}
 
 

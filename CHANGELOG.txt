@@ -1836,3 +1836,4 @@ version 9.40 (2024-06-06)
 
 11.0 (2026-03-01)
     * Compile source and target bumped from Java 7 to Java 8.
+    * Adds JSONObjectUtils.getEpochSecondAsInstant static method.
