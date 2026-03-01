@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.*;
 
 import static com.nimbusds.jose.util.JSONArrayUtilsTest.createJSONArrayWithNesting;
@@ -63,12 +64,12 @@ public class JWTClaimsSetTest extends TestCase {
 	}
 
 
-	public void testRun() {
+	public void testRun_Instant() {
 
 		JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
 
 		// JWT time claim precision is seconds
-		final Date NOW =  new Date(new Date().getTime() / 1000 * 1000);
+		final Instant now =  Instant.ofEpochSecond(Instant.now().getEpochSecond());
 
 		// iss
 		assertNull("iss init check", builder.build().getIssuer());
@@ -86,19 +87,22 @@ public class JWTClaimsSetTest extends TestCase {
 		assertEquals("aud set check", "http://audience.com", builder.build().getAudience().get(0));
 
 		// exp
+		assertNull("exp init check", builder.build().getExpirationInstant());
 		assertNull("exp init check", builder.build().getExpirationTime());
-		builder.expirationTime(NOW);
-		assertEquals("exp set check", NOW, builder.build().getExpirationTime());
+		builder.expirationInstant(now);
+		assertEquals("exp set check", now, builder.build().getExpirationInstant());
 
 		// nbf
+		assertNull("nbf init check", builder.build().getNotBeforeInstant());
 		assertNull("nbf init check", builder.build().getNotBeforeTime());
-		builder.notBeforeTime(NOW);
-		assertEquals("nbf set check", NOW, builder.build().getNotBeforeTime());
+		builder.notBeforeInstant(now);
+		assertEquals("nbf set check", now, builder.build().getNotBeforeInstant());
 
 		// iat
+		assertNull("iat init check", builder.build().getIssueInstant());
 		assertNull("iat init check", builder.build().getIssueTime());
-		builder.issueTime(NOW);
-		assertEquals("iat set check", NOW, builder.build().getIssueTime());
+		builder.issueInstant(now);
+		assertEquals("iat set check", now, builder.build().getIssueInstant());
 
 		// jti
 		assertNull("jti init check", builder.build().getJWTID());
@@ -118,9 +122,9 @@ public class JWTClaimsSetTest extends TestCase {
 		assertEquals("iss parse check map", "http://issuer.com", (String)all.get(JWTClaimNames.ISSUER));
 		assertEquals("sub parse check map", "http://subject.com", (String)all.get(JWTClaimNames.SUBJECT));
 		assertEquals("aud parse check map", "http://audience.com", (String)((List)all.get(JWTClaimNames.AUDIENCE)).get(0));
-		assertEquals("exp parse check map", NOW, all.get(JWTClaimNames.EXPIRATION_TIME));
-		assertEquals("nbf parse check map", NOW, all.get(JWTClaimNames.NOT_BEFORE));
-		assertEquals("iat parse check map", NOW, all.get(JWTClaimNames.ISSUED_AT));
+		assertEquals("exp parse check map", now, all.get(JWTClaimNames.EXPIRATION_TIME));
+		assertEquals("nbf parse check map", now, all.get(JWTClaimNames.NOT_BEFORE));
+		assertEquals("iat parse check map", now, all.get(JWTClaimNames.ISSUED_AT));
 		assertEquals("jti parse check map", "123", (String)all.get(JWTClaimNames.JWT_ID));
 		assertEquals("abc", (String)all.get("x-custom"));
 		assertEquals(8, all.size());
@@ -144,9 +148,9 @@ public class JWTClaimsSetTest extends TestCase {
 		assertEquals("iss parse check", "http://issuer.com", claimsSet.getIssuer());
 		assertEquals("sub parse check", "http://subject.com", claimsSet.getSubject());
 		assertEquals("aud parse check", "http://audience.com", claimsSet.getAudience().get(0));
-		assertEquals("exp parse check", NOW, claimsSet.getExpirationTime());
-		assertEquals("nbf parse check", NOW, claimsSet.getNotBeforeTime());
-		assertEquals("iat parse check", NOW, claimsSet.getIssueTime());
+		assertEquals("exp parse check", now, claimsSet.getExpirationInstant());
+		assertEquals("nbf parse check", now, claimsSet.getNotBeforeInstant());
+		assertEquals("iat parse check", now, claimsSet.getIssueInstant());
 		assertEquals("jti parse check", "123", claimsSet.getJWTID());
 		assertEquals("abc", (String)claimsSet.getClaim("x-custom"));
 		assertEquals(8, claimsSet.getClaims().size());
@@ -157,9 +161,112 @@ public class JWTClaimsSetTest extends TestCase {
 		assertEquals("iss parse check map", "http://issuer.com", (String)all.get(JWTClaimNames.ISSUER));
 		assertEquals("sub parse check map", "http://subject.com", (String)all.get(JWTClaimNames.SUBJECT));
 		assertEquals("aud parse check map", "http://audience.com", (String)((List)all.get(JWTClaimNames.AUDIENCE)).get(0));
-		assertEquals("exp parse check map", NOW, all.get(JWTClaimNames.EXPIRATION_TIME));
-		assertEquals("nbf parse check map", NOW, all.get(JWTClaimNames.NOT_BEFORE));
-		assertEquals("iat parse check map", NOW, all.get(JWTClaimNames.ISSUED_AT));
+		assertEquals("exp parse check map", Date.from(now), all.get(JWTClaimNames.EXPIRATION_TIME));
+		assertEquals("nbf parse check map", Date.from(now), all.get(JWTClaimNames.NOT_BEFORE));
+		assertEquals("iat parse check map", Date.from(now), all.get(JWTClaimNames.ISSUED_AT));
+		assertEquals("jti parse check map", "123", (String)all.get(JWTClaimNames.JWT_ID));
+		assertEquals("abc", (String)all.get("x-custom"));
+		assertEquals(8, all.size());
+	}
+
+
+	public void testRun_Date() {
+
+		JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder();
+
+		// JWT time claim precision is seconds
+		final Date now =  new Date(new Date().getTime() / 1000 * 1000);
+
+		// iss
+		assertNull("iss init check", builder.build().getIssuer());
+		builder.issuer("http://issuer.com");
+		assertEquals("iss set check", "http://issuer.com", builder.build().getIssuer());
+
+		// sub
+		assertNull("sub init check", builder.build().getSubject());
+		builder.subject("http://subject.com");
+		assertEquals("sub set check", "http://subject.com", builder.build().getSubject());
+
+		// aud
+		assertTrue("aud init check", builder.build().getAudience().isEmpty());
+		builder.audience(Collections.singletonList("http://audience.com"));
+		assertEquals("aud set check", "http://audience.com", builder.build().getAudience().get(0));
+
+		// exp
+		assertNull("exp init check", builder.build().getExpirationTime());
+		builder.expirationTime(now);
+		assertEquals("exp set check", now, builder.build().getExpirationTime());
+
+		// nbf
+		assertNull("nbf init check", builder.build().getNotBeforeTime());
+		builder.notBeforeTime(now);
+		assertEquals("nbf set check", now, builder.build().getNotBeforeTime());
+
+		// iat
+		assertNull("iat init check", builder.build().getIssueTime());
+		builder.issueTime(now);
+		assertEquals("iat set check", now, builder.build().getIssueTime());
+
+		// jti
+		assertNull("jti init check", builder.build().getJWTID());
+		builder.jwtID("123");
+		assertEquals("jti set check", "123", builder.build().getJWTID());
+
+		// no custom claims
+		assertEquals(7, builder.build().getClaims().size());
+
+		// x-custom
+		builder.claim("x-custom", "abc");
+		assertEquals("abc", (String) builder.build().getClaim("x-custom"));
+
+		// claims set so far
+		Map<String,Object> all = builder.getClaims();
+
+		assertEquals("iss parse check map", "http://issuer.com", (String)all.get(JWTClaimNames.ISSUER));
+		assertEquals("sub parse check map", "http://subject.com", (String)all.get(JWTClaimNames.SUBJECT));
+		assertEquals("aud parse check map", "http://audience.com", (String)((List)all.get(JWTClaimNames.AUDIENCE)).get(0));
+		assertEquals("exp parse check map", now, all.get(JWTClaimNames.EXPIRATION_TIME));
+		assertEquals("nbf parse check map", now, all.get(JWTClaimNames.NOT_BEFORE));
+		assertEquals("iat parse check map", now, all.get(JWTClaimNames.ISSUED_AT));
+		assertEquals("jti parse check map", "123", (String)all.get(JWTClaimNames.JWT_ID));
+		assertEquals("abc", (String)all.get("x-custom"));
+		assertEquals(8, all.size());
+
+
+		// serialise
+		Map<String, Object> json = builder.build().toJSONObject();
+
+		assertEquals(8, json.size());
+
+		// parse back
+		JWTClaimsSet claimsSet = null;
+		try {
+			claimsSet = JWTClaimsSet.parse(json);
+
+		} catch (java.text.ParseException e) {
+
+			fail(e.getMessage());
+		}
+
+		assertEquals("iss parse check", "http://issuer.com", claimsSet.getIssuer());
+		assertEquals("sub parse check", "http://subject.com", claimsSet.getSubject());
+		assertEquals("aud parse check", "http://audience.com", claimsSet.getAudience().get(0));
+		assertEquals("exp parse check", now, claimsSet.getExpirationTime());
+		assertEquals("nbf parse check", now, claimsSet.getNotBeforeTime());
+		assertEquals("iat parse check", now, claimsSet.getIssueTime());
+		assertEquals("jti parse check", "123", claimsSet.getJWTID());
+		assertEquals("abc", (String)claimsSet.getClaim("x-custom"));
+		assertEquals(8, claimsSet.getClaims().size());
+
+
+		all = claimsSet.getClaims();
+
+		assertEquals("iss parse check map", "http://issuer.com", (String)all.get(JWTClaimNames.ISSUER));
+		assertEquals("sub parse check map", "http://subject.com", (String)all.get(JWTClaimNames.SUBJECT));
+		assertEquals("aud parse check map", "http://audience.com", (String)((List)all.get(JWTClaimNames.AUDIENCE)).get(0));
+		assertEquals("exp parse check map", now, all.get(JWTClaimNames.EXPIRATION_TIME));
+		assertEquals("nbf parse check map", now, all.get(JWTClaimNames.NOT_BEFORE));
+		assertEquals("iat parse check map", now, all.get(JWTClaimNames.ISSUED_AT));
 		assertEquals("jti parse check map", "123", (String)all.get(JWTClaimNames.JWT_ID));
 		assertEquals("abc", (String)all.get("x-custom"));
 		assertEquals(8, all.size());
@@ -237,6 +344,117 @@ public class JWTClaimsSetTest extends TestCase {
 		JWTClaimsSet cs = new JWTClaimsSet.Builder().build();
 		
 		assertNull(cs.getClaim("xyz"));
+	}
+
+
+	public void testWithInstantClaims()
+		throws ParseException {
+
+		Instant now = Instant.ofEpochSecond(Instant.now().getEpochSecond());
+		Instant exp = now.plusSeconds(10);
+		Instant nbf = now.minusSeconds(5);
+		Instant iat = now.minusSeconds(15);
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.expirationInstant(exp)
+			.notBeforeInstant(nbf)
+			.issueInstant(iat)
+			.build();
+
+		assertEquals(exp, claimsSet.getExpirationInstant());
+		assertEquals(nbf, claimsSet.getNotBeforeInstant());
+		assertEquals(iat, claimsSet.getIssueInstant());
+
+		assertEquals(Date.from(exp), claimsSet.getExpirationTime());
+		assertEquals(Date.from(nbf), claimsSet.getNotBeforeTime());
+		assertEquals(Date.from(iat), claimsSet.getIssueTime());
+
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
+		assertEquals(exp.getEpochSecond(), jsonObject.get(JWTClaimNames.EXPIRATION_TIME));
+		assertEquals(nbf.getEpochSecond(), jsonObject.get(JWTClaimNames.NOT_BEFORE));
+		assertEquals(iat.getEpochSecond(), jsonObject.get(JWTClaimNames.ISSUED_AT));
+
+		assertEquals(3, jsonObject.size());
+
+		claimsSet = JWTClaimsSet.parse(JSONObjectUtils.toJSONString(jsonObject));
+
+		assertEquals(exp, claimsSet.getExpirationInstant());
+		assertEquals(nbf, claimsSet.getNotBeforeInstant());
+		assertEquals(iat, claimsSet.getIssueInstant());
+
+		assertEquals(Date.from(exp), claimsSet.getExpirationTime());
+		assertEquals(Date.from(nbf), claimsSet.getNotBeforeTime());
+		assertEquals(Date.from(iat), claimsSet.getIssueTime());
+
+		assertEquals(3, claimsSet.getClaims().size());
+	}
+
+
+	public void testWithInstantClaims_null()
+		throws ParseException {
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.expirationInstant(null)
+			.notBeforeInstant(null)
+			.issueInstant(null)
+			.build();
+
+		assertNull(claimsSet.getExpirationInstant());
+		assertNull(claimsSet.getNotBeforeInstant());
+		assertNull(claimsSet.getIssueInstant());
+
+		assertNull(claimsSet.getExpirationTime());
+		assertNull(claimsSet.getNotBeforeTime());
+		assertNull(claimsSet.getIssueTime());
+
+		Map<String, Object> jsonObject = claimsSet.toJSONObject();
+		assertTrue(jsonObject.isEmpty());
+
+		claimsSet = JWTClaimsSet.parse(JSONObjectUtils.toJSONString(jsonObject));
+
+		assertNull(claimsSet.getExpirationInstant());
+		assertNull(claimsSet.getNotBeforeInstant());
+		assertNull(claimsSet.getIssueInstant());
+
+		assertNull(claimsSet.getExpirationTime());
+		assertNull(claimsSet.getNotBeforeTime());
+		assertNull(claimsSet.getIssueTime());
+
+		assertTrue(claimsSet.getClaims().isEmpty());
+	}
+
+
+	public void testWithInstantClaims_nullClaimsClaimInBuilder() throws ParseException {
+
+		Instant now = Instant.ofEpochSecond(Instant.now().getEpochSecond());
+		Instant exp = now.plusSeconds(10);
+		Instant nbf = now.minusSeconds(5);
+		Instant iat = now.minusSeconds(15);
+
+		JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+			.expirationInstant(exp)
+			.expirationInstant(null)
+			.notBeforeInstant(nbf)
+			.notBeforeInstant(null)
+			.issueInstant(iat)
+			.issueInstant(null)
+			.build();
+
+		assertNull(claimsSet.getExpirationInstant());
+		assertNull(claimsSet.getNotBeforeInstant());
+		assertNull(claimsSet.getIssueInstant());
+
+		Map<String, Object> claims = claimsSet.getClaims();
+		assertTrue(claims.containsKey(JWTClaimNames.EXPIRATION_TIME));
+		assertTrue(claims.containsKey(JWTClaimNames.NOT_BEFORE));
+		assertTrue(claims.containsKey(JWTClaimNames.ISSUED_AT));
+		assertNull(claims.get(JWTClaimNames.EXPIRATION_TIME));
+		assertNull(claims.get(JWTClaimNames.NOT_BEFORE));
+		assertNull(claims.get(JWTClaimNames.ISSUED_AT));
+		assertEquals(3, claims.size());
+
+		claimsSet = JWTClaimsSet.parse(claimsSet.toString(false));
+		assertTrue(claimsSet.getClaims().isEmpty());
 	}
 	
 	
@@ -1114,6 +1332,22 @@ public class JWTClaimsSetTest extends TestCase {
 		JWTClaimsSet claimsB = JWTClaimsSet.parse(json);
 
 		assertEquals(claimsB, claimsA);
+	}
+
+
+	public void testEqualsIgnoresSerializeNullClaims() throws ParseException {
+
+		JWTClaimsSet set_1 = new JWTClaimsSet.Builder()
+			.subject("alice")
+			.serializeNullClaims(true)
+			.build();
+
+		JWTClaimsSet set_2 = new JWTClaimsSet.Builder()
+			.subject("alice")
+			.serializeNullClaims(false)
+			.build();
+
+		assertTrue(set_1.equals(set_2));
 	}
 	
 	
