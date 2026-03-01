@@ -166,6 +166,15 @@ public class ECDSAVerifier extends ECDSAProvider implements JWSVerifier, Critica
 		              final Base64URL signature)
 		throws JOSEException {
 
+		return verify(header, new ByteArraySigningInput(signedContent), signature);
+	}
+
+	@Override
+	public boolean verify(final JWSHeader header,
+		              final SigningInput signedContent,
+		              final Base64URL signature)
+		throws JOSEException {
+
 		final JWSAlgorithm alg = header.getAlgorithm();
 
 		if (! supportedJWSAlgorithms().contains(alg)) {
@@ -197,7 +206,7 @@ public class ECDSAVerifier extends ECDSAProvider implements JWSVerifier, Critica
 
 		try {
 			sig.initVerify(publicKey);
-			sig.update(signedContent);
+			signedContent.apply(sig);
 			return sig.verify(derSignature);
 
 		} catch (InvalidKeyException e) {

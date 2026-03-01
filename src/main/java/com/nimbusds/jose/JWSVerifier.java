@@ -19,6 +19,7 @@ package com.nimbusds.jose;
 
 
 import com.nimbusds.jose.util.Base64URL;
+import java.security.Signature;
 
 
 /**
@@ -52,4 +53,40 @@ public interface JWSVerifier extends JWSProvider {
 	 */
 	boolean verify(final JWSHeader header, final byte[] signingInput, final Base64URL signature)
 		throws JOSEException;
+
+
+	/**
+	 * Verifies the specified {@link JWSObject#getSignature signature} of a
+	 * {@link JWSObject JWS object}.
+	 *
+	 * <p>The default implementation of this overload calls
+	 * {@link #verify(JWSHeader, byte[], Base64URL)} using
+	 * {@link SigningInput#toByteArray()}. Implementors of this interface may
+	 * avoid materializing the signing input into a byte array by implementing
+	 * this overload and using {@link SigningInput#apply(Signature)} to allow
+	 * the signing input to feed its bytes into a {@link Signature} in chunks.
+	 *
+	 * @param header       The JSON Web Signature (JWS) header. Must
+	 *                     specify a supported JWS algorithm and must not
+	 *                     be {@code null}.
+	 * @param signingInput The signing input. Must not be {@code null}.
+	 * @param signature    The signature part of the JWS object. Must not
+	 *                     be {@code null}.
+	 *
+	 * @return {@code true} if the signature was successfully verified,
+	 *         {@code false} if the signature is invalid or if a critical
+	 *         header is neither supported nor marked for deferral to the
+	 *         application.
+	 *
+	 * @throws JOSEException If the JWS algorithm is not supported, or if
+	 *                       signature verification failed for some other
+	 *                       internal reason.
+	 *
+	 * @since 11.0
+	 */
+	default boolean verify(final JWSHeader header, final SigningInput signingInput, final Base64URL signature)
+		throws JOSEException {
+
+		return verify(header, signingInput.toByteArray(), signature);
+	}
 }
