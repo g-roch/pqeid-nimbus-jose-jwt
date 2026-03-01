@@ -1833,3 +1833,6 @@ version 9.40 (2024-06-06)
       Ed25519Verifier. Must internally call
       critPolicy.getDeferredCriticalHeaderParams(), not
       critPolicy.getProcessedCriticalHeaderParams() (iss #612).
+
+11.0 (2026-03-01)
+    * Compile source and target bumped from Java 7 to Java 8.

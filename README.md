@@ -1,6 +1,6 @@
 # Nimbus JOSE + JWT
 
-* The most popular and robust Java 7+ and Android library for JSON Web Tokens 
+* The most popular and robust Java 8+ and Android library for JSON Web Tokens 
   (JWT)
 * Supports all standard signature (JWS) and encryption (JWE) algorithms, 
   including recent developments such `secp256k1`, `ECDH-1PU` and `XC20P`
@@ -86,7 +86,7 @@ The library handles the following JOSE algorithms:
 
 ## System requirements and dependencies
 
-The Nimbus JOSE+JWT library requires Java 7+ and has minimal dependencies.
+The Nimbus JOSE+JWT library requires Java 8+ and has minimal dependencies.
 
 * (shaded) JCIP for concurrency annotations
 * (shaded) GSon for parsing and serialisation of JSON
@@ -139,10 +139,4 @@ To post bug reports and suggestions:
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=connect2id_nimbus-jose-jwt&metric=bugs)](https://sonarcloud.io/dashboard?id=connect2id_nimbus-jose-jwt)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=connect2id_nimbus-jose-jwt&metric=coverage)](https://sonarcloud.io/dashboard?id=connect2id_nimbus-jose-jwt)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=connect2id_nimbus-jose-jwt&metric=ncloc)](https://sonarcloud.io/dashboard?id=connect2id_nimbus-jose-jwt)
-
-## Twitter
-
-Follow updates and new releases on Twitter:
-
-<https://twitter.com/connect2id>
 
