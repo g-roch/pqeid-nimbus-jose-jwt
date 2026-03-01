@@ -21,7 +21,6 @@ package com.nimbusds.jose.jwk.source;
 import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.nimbusds.jose.proc.SecurityContext;
