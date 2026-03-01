@@ -35,7 +35,7 @@ import com.nimbusds.jose.util.JSONObjectUtils;
  * Tests plain header parsing and serialisation.
  *
  * @author Vladimir Dzhuvinov
- * @version 2019-10-04
+ * @version 2026-03-01
  */
 public class PlainHeaderTest extends TestCase {
 
@@ -219,6 +219,17 @@ public class PlainHeaderTest extends TestCase {
 		
 		Header header = PlainHeader.parse(JSONObjectUtils.toJSONString(jsonObject));
 		assertNull(header.getCriticalParams());
+	}
+
+
+	public void testParseIllegalJSON() {
+
+		try {
+			PlainHeader.parse("#not json");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
 	}
 }
 

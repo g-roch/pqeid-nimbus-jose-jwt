@@ -42,7 +42,7 @@ import static com.nimbusds.jose.util.JSONObjectUtilsTest.createJSONObjectWithNes
  * @author Vladimir Dzhuvinov
  * @author Justin Richer
  * @author Joey Zhao
- * @version 2025-02-25
+ * @version 2026-03-01
  */
 public class JWTClaimsSetTest extends TestCase {
 
@@ -1334,8 +1334,6 @@ public class JWTClaimsSetTest extends TestCase {
 			.build();
 
 		String json = claimsSet.toString();
-
-		System.out.println(json);
 	}
 
 	public void testEntityMappingParseExample() throws ParseException {
@@ -1454,5 +1452,16 @@ public class JWTClaimsSetTest extends TestCase {
 		Map<String, Object> jsonObject = createJSONObjectWithNesting(nestingLimit - 1);
 		String json = JSONObjectUtils.toJSONString(jsonObject);
 		assertEquals(jsonObject, JWTClaimsSet.parse(json).getClaims());
+	}
+
+
+	public void testParseIllegalJSON() {
+
+		try {
+			JWTClaimsSet.parse("#");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
 	}
 }

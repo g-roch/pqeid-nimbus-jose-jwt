@@ -37,7 +37,7 @@ import java.util.*;
  * Tests JWE header parsing and serialisation.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-10-01
+ * @version 2026-03-01
  */
 public class JWEHeaderTest extends TestCase {
 
@@ -676,6 +676,17 @@ public class JWEHeaderTest extends TestCase {
 			fail();
 		} catch (ParseException e) {
 			assertEquals("Non-public key in jwk header parameter", e.getMessage());
+		}
+	}
+
+
+	public void testParseIllegalJSON() {
+
+		try {
+			JWEHeader.parse("#not json");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
 		}
 	}
 }

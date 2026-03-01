@@ -18,6 +18,7 @@
 package com.nimbusds.jwt;
 
 
+import java.text.ParseException;
 import java.util.Date;
 
 import junit.framework.TestCase;
@@ -32,7 +33,7 @@ import com.nimbusds.jose.JWEObject;
  * Tests the JWT parser. Uses test vectors from JWT spec.
  *
  * @author Vladimir Dzhuvinov
- * @version 2015-08-19
+ * @version 2026-03-01
  */
 public class JWTParserTest extends TestCase {
 
@@ -95,5 +96,16 @@ public class JWTParserTest extends TestCase {
 		assertEquals(EncryptionMethod.A128CBC_HS256, encryptedJWT.getHeader().getEncryptionMethod());
 		assertNull(encryptedJWT.getHeader().getType());
 		assertNull(encryptedJWT.getHeader().getContentType());
+	}
+
+
+	public void testParseIllegal_headerNotJSON() {
+
+		try {
+			JWTParser.parse("IyJhbGciOiJST0F.AAAA.AAAA.AAA.A");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid unsecured/JWS/JWE header: Invalid JSON object", e.getMessage());
+		}
 	}
 }

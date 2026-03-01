@@ -38,7 +38,7 @@ import com.nimbusds.jose.util.JSONObjectUtils;
  * Tests JWS header parsing and serialisation.
  *
  * @author Vladimir Dzhuvinov
- * @version 2022-09-22
+ * @version 2026-03-01
  */
 public class JWSHeaderTest extends TestCase {
 	
@@ -663,6 +663,17 @@ public class JWSHeaderTest extends TestCase {
 		JWSHeader header = JWSHeader.parse("{\"alg\":\"RS256\",\"kid\":null}");
 		
 		assertNull(header.getKeyID());
+	}
+
+
+	public void testParseIllegalJSON() {
+
+		try {
+			JWSHeader.parse("#not json");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Invalid JSON object", e.getMessage());
+		}
 	}
 }
 
