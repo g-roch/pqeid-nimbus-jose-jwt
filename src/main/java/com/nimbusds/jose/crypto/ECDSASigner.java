@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2025, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,7 +14,6 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package com.nimbusds.jose.crypto;
 
 
@@ -69,7 +68,8 @@ import java.util.Set;
  *
  * @author Axel Nennker
  * @author Vladimir Dzhuvinov
- * @version 2025-07-19
+ * @author Joost Koehoorn
+ * @version 2026-04-02
  */
 @ThreadSafe
 public class ECDSASigner extends ECDSAProvider implements JWSSigner {
@@ -234,11 +234,12 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 	@Override
 	public Base64URL sign(final JWSHeader header, final byte[] signingInput) throws JOSEException {
 
-		return sign(header, new ByteArraySigningInput(signingInput));
+		return sign(header, new ByteArrayJWSInput(signingInput));
 	}
 
+
 	@Override
-	public Base64URL sign(final JWSHeader header, final SigningInput signingInput)
+	public Base64URL sign(final JWSHeader header, final JWSInput jwtInput)
 		throws JOSEException {
 
 		final JWSAlgorithm alg = header.getAlgorithm();
@@ -268,7 +269,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 							public Base64URL complete() throws JOSEException {
 
 								try {
-									signingInput.apply(dsa);
+									jwtInput.apply(dsa);
 									final byte[] jcaSignature = dsa.sign();
 									final int rsByteArrayLength = ECDSA.getSignatureByteArrayLength(header.getAlgorithm());
 									final byte[] jwsSignature = ECDSA.transcodeSignatureToConcat(jcaSignature, rsByteArrayLength);
@@ -280,7 +281,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 						}
 				);
 			}
-			signingInput.apply(dsa);
+			jwtInput.apply(dsa);
 			jcaSignature = dsa.sign();
 
 		} catch (InvalidKeyException | SignatureException e) {

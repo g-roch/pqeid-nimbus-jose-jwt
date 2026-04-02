@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2023, Connect2id Ltd and contributors.
+ * Copyright 2012-2026, Connect2id Ltd and contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,12 +14,11 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package com.nimbusds.jose.crypto.impl;
 
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.SigningInput;
+import com.nimbusds.jose.JWSInput;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.crypto.Mac;
@@ -37,7 +36,7 @@ import java.security.Provider;
  * @author Axel Nennker
  * @author Vladimir Dzhuvinov
  * @author Ulrich Winter
- * @version 2023-09-14
+ * @version 2026-04-02
  */
 @ThreadSafe
 public class HMAC {
@@ -156,6 +155,7 @@ public class HMAC {
 		return mac.doFinal();
 	}
 
+
 	/**
 	 * Computes a Hash-based Message Authentication Code (HMAC) for the
 	 * specified secret key and message.
@@ -164,7 +164,7 @@ public class HMAC {
 	 *                  algorithm name. Must not be {@code null}.
 	 * @param secretKey The secret key. Its algorithm name is ignored.
 	 *                  Must not be {@code null}.
-	 * @param input     The message. Must not be {@code null}.
+	 * @param jwsInput  The message. Must not be {@code null}.
 	 * @param provider  The JCA provider, {@code null} to use the default.
 	 *
 	 * @return The computed HMAC.
@@ -174,14 +174,15 @@ public class HMAC {
 	 */
 	public static byte[] compute(final String alg,
 				     final SecretKey secretKey,
-				     final SigningInput input,
+				     final JWSInput jwsInput,
 				     final Provider provider)
 			throws JOSEException {
 
 		Mac mac = getInitMac(alg, secretKey, provider);
-		input.apply(mac);
+		jwsInput.apply(mac);
 		return mac.doFinal();
 	}
+
 
 	/**
 	 * Computes a Hash-based Message Authentication Code (HMAC) for the

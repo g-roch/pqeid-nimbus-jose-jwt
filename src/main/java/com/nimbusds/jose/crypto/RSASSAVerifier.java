@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -18,12 +18,12 @@
 package com.nimbusds.jose.crypto;
 
 
-import com.nimbusds.jose.ByteArraySigningInput;
+import com.nimbusds.jose.ByteArrayJWSInput;
 import com.nimbusds.jose.CriticalHeaderParamsAware;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.SigningInput;
+import com.nimbusds.jose.JWSInput;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.crypto.impl.RSASSA;
 import com.nimbusds.jose.crypto.impl.RSASSAProvider;
@@ -61,10 +61,12 @@ import java.util.Set;
  *     <li>{@link com.nimbusds.jose.JWSAlgorithm#PS512}
  * </ul>
  *
- * <p>Supports the BouncyCastle FIPS provider for the PSxxx family of JWS algorithms.
+ * <p>Supports the BouncyCastle FIPS provider for the PSxxx family of JWS
+ * algorithms.
  * 
  * @author Vladimir Dzhuvinov
- * @version 2024-04-20
+ * @author Joost Koehoorn
+ * @version 2026-04-02
  */
 @ThreadSafe
 public class RSASSAVerifier extends RSASSAProvider implements JWSVerifier, CriticalHeaderParamsAware {
@@ -154,11 +156,12 @@ public class RSASSAVerifier extends RSASSAProvider implements JWSVerifier, Criti
 		              final Base64URL signature)
 		throws JOSEException {
 
-		return verify(header, new ByteArraySigningInput(signedContent), signature);
+		return verify(header, new ByteArrayJWSInput(signedContent), signature);
 	}
 
+
 	@Override
-	public boolean verify(final JWSHeader header, final SigningInput signedContent, final Base64URL signature) throws JOSEException {
+	public boolean verify(final JWSHeader header, final JWSInput jwsInput, final Base64URL signature) throws JOSEException {
 
 		if (! critPolicy.headerPasses(header)) {
 			return false;
@@ -174,7 +177,7 @@ public class RSASSAVerifier extends RSASSAProvider implements JWSVerifier, Criti
 		}
 
 		try {
-			signedContent.apply(verifier);
+			jwsInput.apply(verifier);
 			return verifier.verify(signature.decode());
 
 		} catch (SignatureException e) {

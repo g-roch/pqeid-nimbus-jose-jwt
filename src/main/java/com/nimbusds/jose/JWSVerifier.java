@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,7 +14,6 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package com.nimbusds.jose;
 
 
@@ -26,7 +25,8 @@ import java.security.Signature;
  * JSON Web Signature (JWS) verifier.
  *
  * @author Vladimir Dzhuvinov
- * @version 2015-04-21
+ * @author Joost Koehoorn
+ * @version 2026-04-02
  */
 public interface JWSVerifier extends JWSProvider {
 
@@ -59,19 +59,20 @@ public interface JWSVerifier extends JWSProvider {
 	 * Verifies the specified {@link JWSObject#getSignature signature} of a
 	 * {@link JWSObject JWS object}.
 	 *
-	 * <p>The default implementation of this overload calls
+	 * <p>The default implementation calls
 	 * {@link #verify(JWSHeader, byte[], Base64URL)} using
-	 * {@link SigningInput#toByteArray()}. Implementors of this interface may
-	 * avoid materializing the signing input into a byte array by implementing
-	 * this overload and using {@link SigningInput#apply(Signature)} to allow
-	 * the signing input to feed its bytes into a {@link Signature} in chunks.
+	 * {@link JWSInput#toByteArray()}. Implementing this method allows use
+	 * of the {@link JWSInput#apply(Signature)} method which is more
+	 * efficient as it avoids serialising the input into a temporary byte
+	 * array, allowing the bytes to be fed into a {@link Signature} in
+	 * chunks.
 	 *
-	 * @param header       The JSON Web Signature (JWS) header. Must
-	 *                     specify a supported JWS algorithm and must not
-	 *                     be {@code null}.
-	 * @param signingInput The signing input. Must not be {@code null}.
-	 * @param signature    The signature part of the JWS object. Must not
-	 *                     be {@code null}.
+	 * @param header    The JSON Web Signature (JWS) header. Must
+	 *                  specify a supported JWS algorithm and must not be
+	 *                  {@code null}.
+	 * @param jwsInput  The JWS input. Must not be {@code null}.
+	 * @param signature The signature part of the JWS object. Must not
+	 *                  be {@code null}.
 	 *
 	 * @return {@code true} if the signature was successfully verified,
 	 *         {@code false} if the signature is invalid or if a critical
@@ -84,9 +85,9 @@ public interface JWSVerifier extends JWSProvider {
 	 *
 	 * @since 11.0
 	 */
-	default boolean verify(final JWSHeader header, final SigningInput signingInput, final Base64URL signature)
+	default boolean verify(final JWSHeader header, final JWSInput jwsInput, final Base64URL signature)
 		throws JOSEException {
 
-		return verify(header, signingInput.toByteArray(), signature);
+		return verify(header, jwsInput.toByteArray(), signature);
 	}
 }

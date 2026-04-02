@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -35,7 +35,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>This class is thread-safe.
  *
  * @author Vladimir Dzhuvinov
- * @version 2024-04-20
+ * @author Joost Koehoorn
+ * @version 2026-04-02
  */
 @ThreadSafe
 public class JWSObject extends JOSEObject {
@@ -79,9 +80,9 @@ public class JWSObject extends JOSEObject {
 
 
 	/**
-	 * The signing input for this JWS object.
+	 * The JWS input.
 	 */
-	private final SigningInput signingInput;
+	private final JWSInput jwsInput;
 
 
 	/**
@@ -108,7 +109,7 @@ public class JWSObject extends JOSEObject {
 
 		this.header = Objects.requireNonNull(header);
 		setPayload(Objects.requireNonNull(payload));
-		signingInput = composeSigningInput();
+		jwsInput = composeJWSInput();
 		signature = null;
 		state.set(State.UNSIGNED);
 	}
@@ -158,14 +159,14 @@ public class JWSObject extends JOSEObject {
 
 		setPayload(Objects.requireNonNull(payload));
 		
-		signingInput = composeSigningInput();
+		jwsInput = composeJWSInput();
 
 		if (thirdPart.toString().trim().isEmpty()) {
 			throw new ParseException("The signature must not be empty", 0);
 		}
 		
 		signature = thirdPart;
-		state.set(State.SIGNED); // but signature not verified yet!
+		state.set(State.SIGNED); // The signature is not verified yet!
 
 		if (getHeader().isBase64URLEncodePayload()) {
 			setParsedParts(firstPart, payload.toBase64URL(), thirdPart);
@@ -173,6 +174,7 @@ public class JWSObject extends JOSEObject {
 			setParsedParts(firstPart, new Base64URL(""), thirdPart);
 		}
 	}
+
 
 	@Override
 	public JWSHeader getHeader() {
@@ -182,12 +184,13 @@ public class JWSObject extends JOSEObject {
 
 
 	/**
-	 * Composes the signing input from the header and payload.
+	 * Composes the JWS input from the header and payload.
 	 *
-	 * @return The signing input.
+	 * @return The JWS input.
 	 */
-	private SigningInput composeSigningInput() {
-		return new ComposedSigningInput(getHeader(), getPayload());
+	private JWSInput composeJWSInput() {
+
+		return new ComposedJWSInput(getHeader(), getPayload());
 	}
 
 
@@ -198,7 +201,7 @@ public class JWSObject extends JOSEObject {
 	 */
 	public byte[] getSigningInput() {
 		
-		return signingInput.toByteArray();
+		return jwsInput.toByteArray();
 	}
 
 
@@ -290,7 +293,7 @@ public class JWSObject extends JOSEObject {
 		ensureJWSSignerSupport(signer);
 
 		try {
-			signature = signer.sign(getHeader(), signingInput);
+			signature = signer.sign(getHeader(), jwsInput);
 			
 		} catch (final ActionRequiredForJWSCompletionException e) {
 			// Catch to enable state SIGNED update
@@ -351,7 +354,7 @@ public class JWSObject extends JOSEObject {
 		boolean verified;
 
 		try {
-			verified = verifier.verify(getHeader(), signingInput, getSignature());
+			verified = verifier.verify(getHeader(), jwsInput, getSignature());
 		} catch (JOSEException e) {
 
 			throw e;
@@ -417,7 +420,7 @@ public class JWSObject extends JOSEObject {
 			return header.toBase64URL().toString() + '.' + '.' + signature.toString();
 		}
 
-		return signingInput.toString() + '.' + signature.toString();
+		return jwsInput.toString() + '.' + signature.toString();
 	}
 
 	

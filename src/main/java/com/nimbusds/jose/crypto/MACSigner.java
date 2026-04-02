@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2023, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,16 +14,15 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package com.nimbusds.jose.crypto;
 
 
-import com.nimbusds.jose.ByteArraySigningInput;
+import com.nimbusds.jose.ByteArrayJWSInput;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.KeyLengthException;
-import com.nimbusds.jose.SigningInput;
+import com.nimbusds.jose.JWSInput;
 import com.nimbusds.jose.crypto.impl.HMAC;
 import com.nimbusds.jose.crypto.impl.MACProvider;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
@@ -57,7 +56,8 @@ import javax.crypto.SecretKey;
  * 
  * @author Vladimir Dzhuvinov
  * @author Ulrich Winter
- * @version 2024-10-28
+ * @author Joost Koehoorn
+ * @version 2026-04-02
  */
 @ThreadSafe
 public class MACSigner extends MACProvider implements JWSSigner {
@@ -131,17 +131,18 @@ public class MACSigner extends MACProvider implements JWSSigner {
 	public Base64URL sign(final JWSHeader header, final byte[] signingInput)
 		throws JOSEException {
 
-		return sign(header, new ByteArraySigningInput(signingInput));
+		return sign(header, new ByteArrayJWSInput(signingInput));
 	}
 
+
 	@Override
-	public Base64URL sign(final JWSHeader header, final SigningInput signingInput)
+	public Base64URL sign(final JWSHeader header, final JWSInput jwtInput)
 		throws JOSEException {
 
 		ensureSecretLengthSatisfiesAlgorithm(header.getAlgorithm());
 
 		String jcaAlg = getJCAAlgorithmName(header.getAlgorithm());
-		byte[] hmac = HMAC.compute(jcaAlg, getSecretKey(), signingInput, getJCAContext().getProvider());
+		byte[] hmac = HMAC.compute(jcaAlg, getSecretKey(), jwtInput, getJCAContext().getProvider());
 		return Base64URL.encode(hmac);
 	}
 }

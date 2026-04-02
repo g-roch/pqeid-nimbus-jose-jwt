@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,16 +14,15 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package com.nimbusds.jose.crypto;
 
 
-import com.nimbusds.jose.ByteArraySigningInput;
+import com.nimbusds.jose.ByteArrayJWSInput;
 import com.nimbusds.jose.CriticalHeaderParamsAware;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSVerifier;
-import com.nimbusds.jose.SigningInput;
+import com.nimbusds.jose.JWSInput;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.crypto.impl.HMAC;
 import com.nimbusds.jose.crypto.impl.MACProvider;
@@ -58,7 +57,8 @@ import java.util.Set;
  <p>Tested with the AWS CloudHSM JCE provider.
  * 
  * @author Vladimir Dzhuvinov
- * @version 2026-02-19
+ * @author Joost Koehoorn
+ * @version 2026-04-02
  */
 @ThreadSafe
 public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHeaderParamsAware {
@@ -217,13 +217,14 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 		              final Base64URL signature)
 		throws JOSEException {
 
-		return verify(header, new ByteArraySigningInput(signedContent), signature);
+		return verify(header, new ByteArrayJWSInput(signedContent), signature);
 	}
+
 
 	@Override
 	public boolean verify(final JWSHeader header,
-									final SigningInput signedContent,
-									final Base64URL signature)
+			      final JWSInput jwsInput,
+			      final Base64URL signature)
 		throws JOSEException {
 
 		ensureSecretLengthSatisfiesAlgorithm(header.getAlgorithm());
@@ -233,7 +234,7 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 		}
 
 		String jcaAlg = getJCAAlgorithmName(header.getAlgorithm());
-		byte[] expectedHMAC = HMAC.compute(jcaAlg, getSecretKey(), signedContent, getJCAContext().getProvider());
+		byte[] expectedHMAC = HMAC.compute(jcaAlg, getSecretKey(), jwsInput, getJCAContext().getProvider());
 		return ConstantTimeUtils.areEqual(expectedHMAC, signature.decode());
 	}
 }

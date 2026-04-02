@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2025, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -14,7 +14,6 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-
 package com.nimbusds.jose.crypto;
 
 
@@ -74,11 +73,13 @@ import java.util.Set;
  *         2048 bits}
  * </ul>
  *
- * <p>Supports the BouncyCastle FIPS provider for the PSxxx family of JWS algorithms.
+ * <p>Supports the BouncyCastle FIPS provider for the PSxxx family of JWS
+ * algorithms.
  * 
  * @author Vladimir Dzhuvinov
  * @author Omer Levi Hevroni
- * @version 2025-07-17
+ * @author Joost Koehoorn
+ * @version 2026-04-02
  */
 @ThreadSafe
 public class RSASSASigner extends RSASSAProvider implements JWSSigner {
@@ -244,11 +245,12 @@ public class RSASSASigner extends RSASSAProvider implements JWSSigner {
 	public Base64URL sign(final JWSHeader header, final byte[] signingInput)
 		throws JOSEException {
 
-		return sign(header, new ByteArraySigningInput(signingInput));
+		return sign(header, new ByteArrayJWSInput(signingInput));
 	}
 
+
 	@Override
-	public Base64URL sign(final JWSHeader header, final SigningInput signingInput) throws JOSEException {
+	public Base64URL sign(final JWSHeader header, final JWSInput jwtInput) throws JOSEException {
 
 		final Signature signer = getInitiatedSignature(header);
 		
@@ -266,13 +268,13 @@ public class RSASSASigner extends RSASSAProvider implements JWSSigner {
 
 					@Override
 					public Base64URL complete() throws JOSEException {
-						return sign(signingInput, signer);
+						return sign(jwtInput, signer);
 					}
 				}
 			);
 		}
 		
-		return sign(signingInput, signer);
+		return sign(jwtInput, signer);
 	}
 	
 	
@@ -290,11 +292,11 @@ public class RSASSASigner extends RSASSAProvider implements JWSSigner {
 	}
 	
 	
-	private Base64URL sign(final SigningInput signingInput, final Signature signer)
+	private Base64URL sign(final JWSInput jwsInput, final Signature signer)
 		throws JOSEException {
 		
 		try {
-			signingInput.apply(signer);
+			jwsInput.apply(signer);
 			return Base64URL.encode(signer.sign());
 		} catch (SignatureException e) {
 			throw new JOSEException("RSA signature exception: " + e.getMessage(), e);

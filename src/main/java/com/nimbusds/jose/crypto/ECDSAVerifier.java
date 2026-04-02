@@ -59,7 +59,8 @@ import com.nimbusds.jose.util.Base64URL;
  * 
  * @author Axel Nennker
  * @author Vladimir Dzhuvinov
- * @version 2026-02-19
+ * @author Joost Koehoorn
+ * @version 2026-04-02
  */
 @ThreadSafe
 public class ECDSAVerifier extends ECDSAProvider implements JWSVerifier, CriticalHeaderParamsAware {
@@ -166,12 +167,12 @@ public class ECDSAVerifier extends ECDSAProvider implements JWSVerifier, Critica
 		              final Base64URL signature)
 		throws JOSEException {
 
-		return verify(header, new ByteArraySigningInput(signedContent), signature);
+		return verify(header, new ByteArrayJWSInput(signedContent), signature);
 	}
 
 	@Override
 	public boolean verify(final JWSHeader header,
-		              final SigningInput signedContent,
+		              final JWSInput jwsInput,
 		              final Base64URL signature)
 		throws JOSEException {
 
@@ -206,7 +207,7 @@ public class ECDSAVerifier extends ECDSAProvider implements JWSVerifier, Critica
 
 		try {
 			sig.initVerify(publicKey);
-			signedContent.apply(sig);
+			jwsInput.apply(sig);
 			return sig.verify(derSignature);
 
 		} catch (InvalidKeyException e) {
