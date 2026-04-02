@@ -19,6 +19,7 @@ package com.nimbusds.jose.crypto.impl;
 
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.SigningInput;
 import net.jcip.annotations.ThreadSafe;
 
 import javax.crypto.Mac;
@@ -152,6 +153,33 @@ public class HMAC {
 
 		Mac mac = getInitMac(alg, secretKey, provider);
 		mac.update(message);
+		return mac.doFinal();
+	}
+
+	/**
+	 * Computes a Hash-based Message Authentication Code (HMAC) for the
+	 * specified secret key and message.
+	 *
+	 * @param alg       The Java Cryptography Architecture (JCA) HMAC
+	 *                  algorithm name. Must not be {@code null}.
+	 * @param secretKey The secret key. Its algorithm name is ignored.
+	 *                  Must not be {@code null}.
+	 * @param input     The message. Must not be {@code null}.
+	 * @param provider  The JCA provider, {@code null} to use the default.
+	 *
+	 * @return The computed HMAC.
+	 *
+	 * @throws JOSEException If the algorithm is not supported or the MAC
+	 *                       secret key is invalid.
+	 */
+	public static byte[] compute(final String alg,
+				     final SecretKey secretKey,
+				     final SigningInput input,
+				     final Provider provider)
+			throws JOSEException {
+
+		Mac mac = getInitMac(alg, secretKey, provider);
+		input.apply(mac);
 		return mac.doFinal();
 	}
 

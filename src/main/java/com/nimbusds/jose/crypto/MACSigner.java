@@ -18,10 +18,12 @@
 package com.nimbusds.jose.crypto;
 
 
+import com.nimbusds.jose.ByteArraySigningInput;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.KeyLengthException;
+import com.nimbusds.jose.SigningInput;
 import com.nimbusds.jose.crypto.impl.HMAC;
 import com.nimbusds.jose.crypto.impl.MACProvider;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
@@ -127,6 +129,13 @@ public class MACSigner extends MACProvider implements JWSSigner {
 
 	@Override
 	public Base64URL sign(final JWSHeader header, final byte[] signingInput)
+		throws JOSEException {
+
+		return sign(header, new ByteArraySigningInput(signingInput));
+	}
+
+	@Override
+	public Base64URL sign(final JWSHeader header, final SigningInput signingInput)
 		throws JOSEException {
 
 		ensureSecretLengthSatisfiesAlgorithm(header.getAlgorithm());

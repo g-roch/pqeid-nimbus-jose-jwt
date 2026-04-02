@@ -232,7 +232,13 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 
 
 	@Override
-	public Base64URL sign(final JWSHeader header, final byte[] signingInput)
+	public Base64URL sign(final JWSHeader header, final byte[] signingInput) throws JOSEException {
+
+		return sign(header, new ByteArraySigningInput(signingInput));
+	}
+
+	@Override
+	public Base64URL sign(final JWSHeader header, final SigningInput signingInput)
 		throws JOSEException {
 
 		final JWSAlgorithm alg = header.getAlgorithm();
@@ -262,7 +268,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 							public Base64URL complete() throws JOSEException {
 
 								try {
-									dsa.update(signingInput);
+									signingInput.apply(dsa);
 									final byte[] jcaSignature = dsa.sign();
 									final int rsByteArrayLength = ECDSA.getSignatureByteArrayLength(header.getAlgorithm());
 									final byte[] jwsSignature = ECDSA.transcodeSignatureToConcat(jcaSignature, rsByteArrayLength);
@@ -274,7 +280,7 @@ public class ECDSASigner extends ECDSAProvider implements JWSSigner {
 						}
 				);
 			}
-			dsa.update(signingInput);
+			signingInput.apply(dsa);
 			jcaSignature = dsa.sign();
 
 		} catch (InvalidKeyException | SignatureException e) {

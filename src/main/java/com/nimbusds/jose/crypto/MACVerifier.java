@@ -18,10 +18,12 @@
 package com.nimbusds.jose.crypto;
 
 
+import com.nimbusds.jose.ByteArraySigningInput;
 import com.nimbusds.jose.CriticalHeaderParamsAware;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.SigningInput;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.crypto.impl.HMAC;
 import com.nimbusds.jose.crypto.impl.MACProvider;
@@ -215,9 +217,18 @@ public class MACVerifier extends MACProvider implements JWSVerifier, CriticalHea
 		              final Base64URL signature)
 		throws JOSEException {
 
+		return verify(header, new ByteArraySigningInput(signedContent), signature);
+	}
+
+	@Override
+	public boolean verify(final JWSHeader header,
+									final SigningInput signedContent,
+									final Base64URL signature)
+		throws JOSEException {
+
 		ensureSecretLengthSatisfiesAlgorithm(header.getAlgorithm());
 
-		if (! critPolicy.headerPasses(header)) {
+		if (!critPolicy.headerPasses(header)) {
 			return false;
 		}
 

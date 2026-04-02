@@ -18,10 +18,12 @@
 package com.nimbusds.jose.crypto;
 
 
+import com.nimbusds.jose.ByteArraySigningInput;
 import com.nimbusds.jose.CriticalHeaderParamsAware;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.SigningInput;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.crypto.impl.RSASSA;
 import com.nimbusds.jose.crypto.impl.RSASSAProvider;
@@ -152,6 +154,12 @@ public class RSASSAVerifier extends RSASSAProvider implements JWSVerifier, Criti
 		              final Base64URL signature)
 		throws JOSEException {
 
+		return verify(header, new ByteArraySigningInput(signedContent), signature);
+	}
+
+	@Override
+	public boolean verify(final JWSHeader header, final SigningInput signedContent, final Base64URL signature) throws JOSEException {
+
 		if (! critPolicy.headerPasses(header)) {
 			return false;
 		}
@@ -166,7 +174,7 @@ public class RSASSAVerifier extends RSASSAProvider implements JWSVerifier, Criti
 		}
 
 		try {
-			verifier.update(signedContent);
+			signedContent.apply(verifier);
 			return verifier.verify(signature.decode());
 
 		} catch (SignatureException e) {

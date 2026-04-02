@@ -19,7 +19,6 @@ package com.nimbusds.jose;
 
 
 import com.nimbusds.jose.util.Base64URL;
-import com.nimbusds.jose.util.StandardCharset;
 import net.jcip.annotations.ThreadSafe;
 
 import java.security.Signature;
@@ -82,7 +81,7 @@ public class JWSObject extends JOSEObject {
 	/**
 	 * The signing input for this JWS object.
 	 */
-	private final String signingInputString;
+	private final SigningInput signingInput;
 
 
 	/**
@@ -109,7 +108,7 @@ public class JWSObject extends JOSEObject {
 
 		this.header = Objects.requireNonNull(header);
 		setPayload(Objects.requireNonNull(payload));
-		signingInputString = composeSigningInput();
+		signingInput = composeSigningInput();
 		signature = null;
 		state.set(State.UNSIGNED);
 	}
@@ -159,7 +158,7 @@ public class JWSObject extends JOSEObject {
 
 		setPayload(Objects.requireNonNull(payload));
 		
-		signingInputString = composeSigningInput();
+		signingInput = composeSigningInput();
 
 		if (thirdPart.toString().trim().isEmpty()) {
 			throw new ParseException("The signature must not be empty", 0);
@@ -183,17 +182,12 @@ public class JWSObject extends JOSEObject {
 
 
 	/**
-	 * Composes the signing input string from the header and payload.
+	 * Composes the signing input from the header and payload.
 	 *
-	 * @return The signing input string.
+	 * @return The signing input.
 	 */
-	private String composeSigningInput() {
-		
-		if (header.isBase64URLEncodePayload()) {
-			return getHeader().toBase64URL().toString() + '.' + getPayload().toBase64URL().toString();
-		} else {
-			return getHeader().toBase64URL().toString() + '.' + getPayload().toString();
-		}
+	private SigningInput composeSigningInput() {
+		return new ComposedSigningInput(getHeader(), getPayload());
 	}
 
 
@@ -204,7 +198,7 @@ public class JWSObject extends JOSEObject {
 	 */
 	public byte[] getSigningInput() {
 		
-		return signingInputString.getBytes(StandardCharset.UTF_8);
+		return signingInput.toByteArray();
 	}
 
 
@@ -296,7 +290,7 @@ public class JWSObject extends JOSEObject {
 		ensureJWSSignerSupport(signer);
 
 		try {
-			signature = signer.sign(getHeader(), getSigningInput());
+			signature = signer.sign(getHeader(), signingInput);
 			
 		} catch (final ActionRequiredForJWSCompletionException e) {
 			// Catch to enable state SIGNED update
@@ -357,8 +351,7 @@ public class JWSObject extends JOSEObject {
 		boolean verified;
 
 		try {
-			verified = verifier.verify(getHeader(), getSigningInput(), getSignature());
-
+			verified = verifier.verify(getHeader(), signingInput, getSignature());
 		} catch (JOSEException e) {
 
 			throw e;
@@ -424,7 +417,7 @@ public class JWSObject extends JOSEObject {
 			return header.toBase64URL().toString() + '.' + '.' + signature.toString();
 		}
 
-		return signingInputString + '.' + signature.toString();
+		return signingInput.toString() + '.' + signature.toString();
 	}
 
 	

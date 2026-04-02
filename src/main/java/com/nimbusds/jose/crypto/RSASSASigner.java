@@ -244,6 +244,12 @@ public class RSASSASigner extends RSASSAProvider implements JWSSigner {
 	public Base64URL sign(final JWSHeader header, final byte[] signingInput)
 		throws JOSEException {
 
+		return sign(header, new ByteArraySigningInput(signingInput));
+	}
+
+	@Override
+	public Base64URL sign(final JWSHeader header, final SigningInput signingInput) throws JOSEException {
+
 		final Signature signer = getInitiatedSignature(header);
 		
 		if (opts.contains(UserAuthenticationRequired.getInstance())) {
@@ -284,11 +290,11 @@ public class RSASSASigner extends RSASSAProvider implements JWSSigner {
 	}
 	
 	
-	private Base64URL sign(final byte[] signingInput, final Signature signer)
+	private Base64URL sign(final SigningInput signingInput, final Signature signer)
 		throws JOSEException {
 		
 		try {
-			signer.update(signingInput);
+			signingInput.apply(signer);
 			return Base64URL.encode(signer.sign());
 		} catch (SignatureException e) {
 			throw new JOSEException("RSA signature exception: " + e.getMessage(), e);
