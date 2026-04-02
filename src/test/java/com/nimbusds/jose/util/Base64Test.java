@@ -1,7 +1,7 @@
 /*
  * nimbus-jose-jwt
  *
- * Copyright 2012-2016, Connect2id Ltd.
+ * Copyright 2012-2026, Connect2id Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use
  * this file except in compliance with the License. You may obtain a copy of the
@@ -27,7 +27,7 @@ import junit.framework.TestCase;
  * Tests the Base64URL class.
  *
  * @author Vladimir Dzhuvinov
- * @version 2021-07-02
+ * @version 2026-04-02
  */
 public class Base64Test extends TestCase {
 
@@ -75,6 +75,12 @@ public class Base64Test extends TestCase {
 	public void testFromNull() {
 		
 		assertNull(Base64.from(null));
+	}
+
+
+	public void testFromEmptyString() {
+
+		assertTrue(Base64.from("").toString().isEmpty());
 	}
 	
 	
