@@ -44,6 +44,9 @@ public class KeyTypeTest extends TestCase {
 		
 		assertEquals("OKP", KeyType.OKP.getValue());
 		assertEquals(Requirement.OPTIONAL, KeyType.OCT.getRequirement());
+
+		assertEquals("AKP", KeyType.AKP.getValue());
+		assertEquals(Requirement.OPTIONAL, KeyType.AKP.getRequirement());
 	}
 
 
@@ -63,6 +66,10 @@ public class KeyTypeTest extends TestCase {
 		assertEquals(KeyType.EC, KeyType.forAlgorithm(JWSAlgorithm.ES256));
 		assertEquals(KeyType.EC, KeyType.forAlgorithm(JWSAlgorithm.ES384));
 		assertEquals(KeyType.EC, KeyType.forAlgorithm(JWSAlgorithm.ES512));
+
+		assertEquals(KeyType.AKP, KeyType.forAlgorithm(JWSAlgorithm.ML_DSA_44));
+		assertEquals(KeyType.AKP, KeyType.forAlgorithm(JWSAlgorithm.ML_DSA_65));
+		assertEquals(KeyType.AKP, KeyType.forAlgorithm(JWSAlgorithm.ML_DSA_87));
 		
 		assertEquals(KeyType.OKP, KeyType.forAlgorithm(JWSAlgorithm.EdDSA));
 

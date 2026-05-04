@@ -34,8 +34,10 @@ import junit.framework.TestCase;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jose.crypto.MLDSAVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
+import com.nimbusds.jose.MLDSATestSupport;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.util.ByteUtils;
 
@@ -296,6 +298,22 @@ public class DefaultJWSVerifierFactoryTest extends TestCase {
 
 		ECDSAVerifier ecdsaVerifier = (ECDSAVerifier)verifier;
 		assertEquals(key, ecdsaVerifier.getPublicKey());
+	}
+
+
+	public void testCreateMLDSA65Verifier()
+		throws Exception {
+
+		JWSHeader header = new JWSHeader(JWSAlgorithm.ML_DSA_65);
+		Key key = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65).getPublic();
+
+		JWSVerifierFactory factory = new DefaultJWSVerifierFactory();
+
+		JWSVerifier verifier = factory.createJWSVerifier(header, key);
+		assertTrue(verifier.supportedJWSAlgorithms().contains(header.getAlgorithm()));
+
+		MLDSAVerifier mldsaVerifier = (MLDSAVerifier)verifier;
+		assertEquals(key, mldsaVerifier.getPublicKey().toPublicKey());
 	}
 
 

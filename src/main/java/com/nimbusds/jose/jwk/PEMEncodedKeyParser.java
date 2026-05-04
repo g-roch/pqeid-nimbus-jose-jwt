@@ -17,6 +17,8 @@
 package com.nimbusds.jose.jwk;
 
 
+import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+
 import java.io.Reader;
 import java.io.StringReader;
 import java.security.*;
@@ -30,6 +32,7 @@ import com.nimbusds.jose.JOSEException;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.jcajce.interfaces.MLDSAPrivateKey;
 import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -42,12 +45,38 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
  * @author Stefan Larsson
  */
 class PEMEncodedKeyParser {
-	
-	
-	// JcaPEMKeyConverter looks threadsafe
-	private static final JcaPEMKeyConverter pemConverter = new JcaPEMKeyConverter();
-	
-	
+
+	/**
+	 * Lazy holder for the shared PEM converter.
+	 *
+	 * <p>The Bouncy Castle provider binding is deferred to avoid changing the
+	 * runtime when the {@link PEMEncodedKeyParser} class is initialized.
+	 * This matters because the parser already requires Bouncy Castle PEM
+	 * classes, but older code didn't force early initialization of the plain
+	 * Bouncy Castle JCA provider singleton.
+	 *
+	 * <p>If the plain Bouncy Castle provider is available, the converter is
+	 * still explicitly bound to it. That preserves ML-DSA support, but it is a
+	 * partial observable behavior change versus the previous provider-neutral
+	 * converter because RSA / EC PEM conversion will now prefer Bouncy Castle
+	 * key implementations when available.
+	 */
+	private static final class PemConverterHolder {
+		// JcaPEMKeyConverter looks threadsafe
+		static final JcaPEMKeyConverter pemConverter = buildPemConverter();
+
+		private static JcaPEMKeyConverter buildPemConverter() {
+			JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+			try {
+				converter.setProvider(BouncyCastleProviderSingleton.getInstance());
+			} catch (NoClassDefFoundError ignore) {
+				// ignore c
+			}
+			return converter;
+		}
+	}
+
+
 	private PEMEncodedKeyParser() {
 		// prevent construction of utility class
 	}
@@ -113,7 +142,7 @@ class PEMEncodedKeyParser {
 	private static KeyPair toKeyPair(final SubjectPublicKeyInfo spki) 
 		throws PEMException {
 		
-		return new KeyPair(pemConverter.getPublicKey(spki), null);
+		return new KeyPair(PemConverterHolder.pemConverter.getPublicKey(spki), null);
 	}
 	
 	
@@ -121,21 +150,21 @@ class PEMEncodedKeyParser {
 		throws PEMException {
 		
 		final SubjectPublicKeyInfo spki = pemObj.getSubjectPublicKeyInfo();
-		return new KeyPair(pemConverter.getPublicKey(spki), null);
+		return new KeyPair(PemConverterHolder.pemConverter.getPublicKey(spki), null);
 	}
 	
 	
 	private static KeyPair toKeyPair(final PEMKeyPair pair) 
 		throws PEMException {
 		
-		return pemConverter.getKeyPair(pair);
+		return PemConverterHolder.pemConverter.getKeyPair(pair);
 	}
 	
 	
 	private static KeyPair toKeyPair(final PrivateKeyInfo pki)
 		throws PEMException, NoSuchAlgorithmException, InvalidKeySpecException {
 		
-		final PrivateKey privateKey = pemConverter.getPrivateKey(pki);
+		final PrivateKey privateKey = PemConverterHolder.pemConverter.getPrivateKey(pki);
 		
 		// If it's RSA, we can use the modulus and public exponents as BigIntegers to create a public key
 		if (privateKey instanceof RSAPrivateCrtKey) {
@@ -146,6 +175,10 @@ class PEMEncodedKeyParser {
 			final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 			final PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 			return new KeyPair(publicKey, privateKey);
+		}
+
+		if (privateKey instanceof MLDSAPrivateKey) {
+			return new KeyPair(((MLDSAPrivateKey)privateKey).getPublicKey(), privateKey);
 		}
 		
 		// If was a private EC key, it would already have been received as a PEMKeyPair

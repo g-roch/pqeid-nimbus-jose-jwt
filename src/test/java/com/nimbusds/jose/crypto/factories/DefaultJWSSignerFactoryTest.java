@@ -52,10 +52,12 @@ public class DefaultJWSSignerFactoryTest extends TestCase {
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(JWSAlgorithm.Family.RSA));
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(JWSAlgorithm.Family.EC));
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(Ed25519Signer.SUPPORTED_ALGORITHMS));
+		assertTrue(factory.supportedJWSAlgorithms().containsAll(MLDSASigner.SUPPORTED_ALGORITHMS));
 		assertEquals(JWSAlgorithm.Family.HMAC_SHA.size()
 			+ JWSAlgorithm.Family.RSA.size()
 			+ JWSAlgorithm.Family.EC.size()
 			+ Ed25519Signer.SUPPORTED_ALGORITHMS.size()
+			+ MLDSASigner.SUPPORTED_ALGORITHMS.size()
 			, factory.supportedJWSAlgorithms().size());
 	}
 
@@ -224,6 +226,23 @@ public class DefaultJWSSignerFactoryTest extends TestCase {
 			} catch (JOSEException e) {
 				assertEquals("Unsupported JWK type and / or curve", e.getMessage());
 			}
+		}
+	}
+
+
+	public void testMLDSASigner()
+		throws Exception {
+
+		factory.getJCAContext().setProvider(MLDSATestSupport.provider());
+
+		for (JWSAlgorithm alg: MLDSATestSupport.ALGORITHMS) {
+			JWK key = new MLDSAKey(MLDSATestSupport.generateKeyPair(alg));
+
+			JWSObject jwsObject = testSignerWithAlg(key, alg, MLDSASigner.class);
+			assertTrue(jwsObject.verify(new MLDSAVerifier(key.toMLDSAKey().toPublicJWK())));
+
+			JWSObject jwsObject2 = testSignerNoAlg(key, alg, MLDSASigner.class);
+			assertTrue(jwsObject2.verify(new MLDSAVerifier(key.toMLDSAKey().toPublicJWK())));
 		}
 	}
 

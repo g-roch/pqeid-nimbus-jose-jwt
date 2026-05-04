@@ -75,16 +75,16 @@ public class JWSAlgorithmFamilyJWSKeySelector<C extends SecurityContext> extends
 	
 	/**
 	 * Queries the given JWK Set {@link URL} for keys, creating a
-	 * {@link JWSAlgorithmFamilyJWSKeySelector} based on the RSA or EC key
-	 * type, whichever comes back first.
+	 * {@link JWSAlgorithmFamilyJWSKeySelector} based on the RSA, EC, or
+	 * ML-DSA key type, whichever comes back first.
 	 *
 	 * @param jwkSetURL The JWK Set {@link URL} to query.
 	 * @param <C>       The {@link SecurityContext}
 	 *
 	 * @return An instance of {@link JWSAlgorithmFamilyJWSKeySelector}.
 	 *
-	 * @throws KeySourceException if the JWKs cannot be retrieved or no RSA
-	 *                            or EC public JWKs are found.
+	 * @throws KeySourceException if the JWKs cannot be retrieved or no RSA,
+	 *                            EC, or ML-DSA public JWKs are found.
 	 */
 	public static <C extends SecurityContext> JWSAlgorithmFamilyJWSKeySelector<C> fromJWKSetURL(final URL jwkSetURL)
 		throws KeySourceException {
@@ -96,8 +96,8 @@ public class JWSAlgorithmFamilyJWSKeySelector<C extends SecurityContext> extends
 
 	/**
 	 * Queries the given {@link JWKSource} for keys, creating a
-	 * {@link JWSAlgorithmFamilyJWSKeySelector} based on the RSA or EC key
-	 * type, whichever comes back first.
+	 * {@link JWSAlgorithmFamilyJWSKeySelector} based on the RSA, EC, or
+	 * ML-DSA key type, whichever comes back first.
 	 *
 	 * @param jwkSource The {@link JWKSource}.
 	 * @param <C>       The {@link SecurityContext}.
@@ -105,7 +105,7 @@ public class JWSAlgorithmFamilyJWSKeySelector<C extends SecurityContext> extends
 	 * @return An instance of {@link JWSAlgorithmFamilyJWSKeySelector}.
 	 *
 	 * @throws KeySourceException If the JWKs cannot be retrieved or no
-	 *                            RSA or EC public JWKs are found.
+	 *                            RSA, EC, or ML-DSA public JWKs are found.
 	 */
 	public static <C extends SecurityContext> JWSAlgorithmFamilyJWSKeySelector<C> fromJWKSource(final JWKSource<C> jwkSource)
 		throws KeySourceException {
@@ -113,7 +113,7 @@ public class JWSAlgorithmFamilyJWSKeySelector<C extends SecurityContext> extends
 		JWKMatcher jwkMatcher = new JWKMatcher.Builder()
 				.publicOnly(true)
 				.keyUses(KeyUse.SIGNATURE, null) // use=sig is optional
-				.keyTypes(KeyType.RSA, KeyType.EC)
+				.keyTypes(KeyType.RSA, KeyType.EC, KeyType.AKP)
 				.build();
 		List<? extends JWK> jwks = jwkSource.get(new JWKSelector(jwkMatcher), null);
 		for (JWK jwk : jwks) {
@@ -122,6 +122,11 @@ public class JWSAlgorithmFamilyJWSKeySelector<C extends SecurityContext> extends
 			}
 			if (KeyType.EC.equals(jwk.getKeyType())) {
 				return new JWSAlgorithmFamilyJWSKeySelector<>(JWSAlgorithm.Family.EC, jwkSource);
+			}
+			if (KeyType.AKP.equals(jwk.getKeyType())
+				&& jwk.getAlgorithm() instanceof JWSAlgorithm
+				&& JWSAlgorithm.Family.ML.contains((JWSAlgorithm)jwk.getAlgorithm())) {
+				return new JWSAlgorithmFamilyJWSKeySelector<>(JWSAlgorithm.Family.ML, jwkSource);
 			}
 		}
 		throw new KeySourceException("Couldn't retrieve JWKs");

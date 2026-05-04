@@ -33,11 +33,13 @@ import org.junit.Test;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.MLDSATestSupport;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jose.jwk.MLDSAKey;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
@@ -51,9 +53,11 @@ public class MultiAlgorithmKeySelectorTest {
 	private final String kid1 = UUID.randomUUID().toString();
 	private final String kid2 = UUID.randomUUID().toString();
 	private final String kid3 = UUID.randomUUID().toString();
+	private final String kid4 = UUID.randomUUID().toString();
 	
 	private RSAKey signingRS256Jwk;
 	private ECKey signingES256Jwk;
+	private MLDSAKey signingMLDSA65Jwk;
 
 	@Before
 	public void beforeTests() throws Exception {
@@ -66,9 +70,15 @@ public class MultiAlgorithmKeySelectorTest {
 		signingES256Jwk = new ECKey.Builder(fullECJwk).algorithm(JWSAlgorithm.ES256)
 				.keyUse(KeyUse.SIGNATURE).keyID(kid2).build();
 
-		JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(Arrays.<JWK>asList(signingRS256Jwk, signingES256Jwk)));
+		signingMLDSA65Jwk = new MLDSAKey.Builder(MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65).getPublic())
+				.algorithm(JWSAlgorithm.ML_DSA_65)
+				.keyUse(KeyUse.SIGNATURE)
+				.keyID(kid4)
+				.build();
+
+		JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(Arrays.<JWK>asList(signingRS256Jwk, signingES256Jwk, signingMLDSA65Jwk)));
 		
-		Set<JWSAlgorithm> algorithms = new HashSet<>(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.RS512, JWSAlgorithm.ES256));
+		Set<JWSAlgorithm> algorithms = new HashSet<>(Arrays.asList(JWSAlgorithm.RS256, JWSAlgorithm.RS512, JWSAlgorithm.ES256, JWSAlgorithm.ML_DSA_65));
 		
 		keySelector = new JWSVerificationKeySelector<>(algorithms, jwks);
 	}
@@ -86,6 +96,11 @@ public class MultiAlgorithmKeySelectorTest {
 		assertEquals(1, candidates.size());
 		assertEquals(signingES256Jwk.toECPublicKey().getAlgorithm(), candidates.get(0).getAlgorithm());
 		assertEquals(signingES256Jwk.toECPublicKey().getParams(), ((ECPublicKey)candidates.get(0)).getParams());
+
+		candidates = keySelector.selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.ML_DSA_65).keyID(kid4).build(), null);
+
+		assertEquals(1, candidates.size());
+		assertEquals(signingMLDSA65Jwk.toPublicKey(), candidates.get(0));
 	}
 
 	@Test

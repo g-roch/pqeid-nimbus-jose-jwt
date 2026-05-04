@@ -26,11 +26,17 @@ import junit.framework.TestCase;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.MLDSATestSupport;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.JWSProvider;
 import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.MLDSASigner;
+import com.nimbusds.jose.crypto.MLDSAVerifier;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jca.JCAAware;
 import com.nimbusds.jose.jca.JCAContext;
+import com.nimbusds.jose.jwk.MLDSAKey;
 import com.nimbusds.jose.proc.JWSVerifierFactory;
 import com.nimbusds.jose.util.ByteUtils;
 
@@ -58,9 +64,11 @@ public class DefaultJWSVerifierFactoryTest extends TestCase {
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(JWSAlgorithm.Family.HMAC_SHA));
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(JWSAlgorithm.Family.RSA));
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(JWSAlgorithm.Family.EC));
+		assertTrue(factory.supportedJWSAlgorithms().containsAll(MLDSAVerifier.SUPPORTED_ALGORITHMS));
 		assertEquals(JWSAlgorithm.Family.HMAC_SHA.size()
 			+ JWSAlgorithm.Family.RSA.size()
 			+ JWSAlgorithm.Family.EC.size()
+			+ MLDSAVerifier.SUPPORTED_ALGORITHMS.size()
 			, factory.supportedJWSAlgorithms().size());
 	}
 
@@ -114,5 +122,26 @@ public class DefaultJWSVerifierFactoryTest extends TestCase {
 		JWSVerifier verifier = factory.createJWSVerifier(new JWSHeader(JWSAlgorithm.HS256), key);
 
 		assertEquals("BC", verifier.getJCAContext().getProvider().getName());
+	}
+
+
+	public void testCreateMLDSAVerifier()
+		throws Exception {
+
+		DefaultJWSVerifierFactory factory = new DefaultJWSVerifierFactory();
+		factory.getJCAContext().setProvider(MLDSATestSupport.provider());
+
+		java.security.KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		MLDSAKey signerKey = new MLDSAKey(keyPair);
+		MLDSASigner signer = new MLDSASigner(signerKey);
+		signer.getJCAContext().setProvider(MLDSATestSupport.provider());
+
+		JWSObject jwsObject = new JWSObject(new JWSHeader(JWSAlgorithm.ML_DSA_65), new Payload("hello"));
+		jwsObject.sign(signer);
+
+		JWSVerifier verifier = factory.createJWSVerifier(new JWSHeader(JWSAlgorithm.ML_DSA_65), keyPair.getPublic());
+		assertTrue(verifier instanceof MLDSAVerifier);
+		assertEquals("BC", verifier.getJCAContext().getProvider().getName());
+		assertTrue(jwsObject.verify(verifier));
 	}
 }

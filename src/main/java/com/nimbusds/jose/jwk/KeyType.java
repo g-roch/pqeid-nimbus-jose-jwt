@@ -40,6 +40,7 @@ import net.jcip.annotations.Immutable;
  *     <li>{@link #RSA}
  *     <li>{@link #OCT}
  *     <li>{@link #OKP}
+ *     <li>{@link #AKP}
  * </ul>
  *
  * <p>Additional key types can be defined using the constructor.
@@ -89,6 +90,12 @@ public final class KeyType implements Serializable {
 	 * Octet key pair (optional).
 	 */
 	public static final KeyType OKP = new KeyType("OKP", Requirement.OPTIONAL);
+
+
+	/**
+	 * Asymmetric key pair (optional).
+	 */
+	public static final KeyType AKP = new KeyType("AKP", Requirement.OPTIONAL);
 	
 
 	/**
@@ -209,6 +216,8 @@ public final class KeyType implements Serializable {
 			return OCT;
 		} else if (s.equals(OKP.getValue())) {
 			return OKP;
+		} else if (s.equals(AKP.getValue())) {
+			return AKP;
 		} else {
 			return new KeyType(s, null);
 		}
@@ -246,6 +255,8 @@ public final class KeyType implements Serializable {
 			return KeyType.OCT;
 		} else if (JWEAlgorithm.Family.PBES2.contains(alg)) {
 			return KeyType.OCT;
+		} else if (JWSAlgorithm.Family.ML.contains(alg)) {
+			return KeyType.AKP;
 		} else if (JWSAlgorithm.Family.ED.contains(alg)) {
 			return KeyType.OKP;
 		} else {

@@ -46,6 +46,9 @@ import net.jcip.annotations.Immutable;
  *     <li>{@link #EdDSA}
  *     <li>{@link #Ed25519}
  *     <li>{@link #Ed448}
+ *     <li>{@link #ML_DSA_44}
+ *     <li>{@link #ML_DSA_65}
+ *     <li>{@link #ML_DSA_87}
  * </ul>
  *
  * <p>Additional JWS algorithm names can be defined using the constructors.
@@ -163,6 +166,27 @@ public final class JWSAlgorithm extends Algorithm {
 
 
 	/**
+	 * ML-DSA-44: Equivalent to ~128-bit security (replaces Dilithium2). NIST Level 2, replaces
+	 * Ed25519/P-256.
+	 */
+	public static final JWSAlgorithm ML_DSA_44 = new JWSAlgorithm("ML-DSA-44");
+
+
+	/**
+	 * Post-quantum-cryptography (PQC), ML-DSA-65: Equivalent to ~192-bit security (replaces
+	 * Dilithium3). This is the recommended default for ML-DSA. NIST Level 3, replaces Ed25519/P-256.
+	 */
+	public static final JWSAlgorithm ML_DSA_65 = new JWSAlgorithm("ML-DSA-65");
+
+
+	/**
+	 * ML-DSA-87: Equivalent to ~256-bit security (replaces Dilithium5). NIST Level 5, replaces
+	 * Ed25519/P-256.
+	 */
+	public static final JWSAlgorithm ML_DSA_87 = new JWSAlgorithm("ML-DSA-87");
+
+
+	/**
 	 * JWS algorithm family.
 	 */
 	public static final class Family extends AlgorithmFamily<JWSAlgorithm> {
@@ -194,6 +218,12 @@ public final class JWSAlgorithm extends Algorithm {
 		 * Edwards Curve signature (EdDSA).
 		 */
 		public static final Family ED = new Family(EdDSA, Ed25519, Ed448);
+
+
+		/**
+		 * Edwards Curve signature (EdDSA).
+		 */
+		public static final Family ML = new Family(ML_DSA_44, ML_DSA_65, ML_DSA_87);
 		
 		
 		/**
@@ -203,7 +233,8 @@ public final class JWSAlgorithm extends Algorithm {
 			.concat(
 				RSA.toArray(new JWSAlgorithm[]{}),
 				EC.toArray(new JWSAlgorithm[]{}),
-				ED.toArray(new JWSAlgorithm[]{})
+				ED.toArray(new JWSAlgorithm[]{}),
+				ML.toArray(new JWSAlgorithm[]{})
 			)
 		);
 
@@ -286,6 +317,12 @@ public final class JWSAlgorithm extends Algorithm {
 			return Ed25519;
 		} else if (s.equals(Ed448.getName())) {
 			return Ed448;
+		} else if (s.equals(ML_DSA_44.getName())) {
+			return ML_DSA_44;
+		} else if (s.equals(ML_DSA_65.getName())) {
+			return ML_DSA_65;
+		} else if (s.equals(ML_DSA_87.getName())) {
+			return ML_DSA_87;
 		} else {
 			return new JWSAlgorithm(s);
 		}

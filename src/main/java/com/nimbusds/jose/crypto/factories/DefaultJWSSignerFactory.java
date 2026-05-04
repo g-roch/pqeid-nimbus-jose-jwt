@@ -23,6 +23,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.Ed25519Signer;
+import com.nimbusds.jose.crypto.MLDSASigner;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jca.JCAContext;
@@ -59,6 +60,7 @@ public class DefaultJWSSignerFactory implements JWSSignerFactory {
 		algs.addAll(RSASSASigner.SUPPORTED_ALGORITHMS);
 		algs.addAll(ECDSASigner.SUPPORTED_ALGORITHMS);
 		algs.addAll(Ed25519Signer.SUPPORTED_ALGORITHMS);
+		algs.addAll(MLDSASigner.SUPPORTED_ALGORITHMS);
 		SUPPORTED_ALGORITHMS = Collections.unmodifiableSet(algs);
 	}
 
@@ -94,6 +96,8 @@ public class DefaultJWSSignerFactory implements JWSSignerFactory {
 			signer = new ECDSASigner((ECKey)key);
 		} else if (key instanceof OctetKeyPair && Ed25519Signer.SUPPORTED_CURVES.contains(((OctetKeyPair) key).getCurve())) {
 			signer = new Ed25519Signer((OctetKeyPair)key);
+		} else if (key instanceof MLDSAKey) {
+			signer = new MLDSASigner((MLDSAKey)key);
 		} else {
 			throw new JOSEException("Unsupported JWK type and / or curve");
 		}
@@ -144,6 +148,12 @@ public class DefaultJWSSignerFactory implements JWSSignerFactory {
 			Ed25519Signer.SUPPORTED_CURVES.contains(((OctetKeyPair) key).getCurve())) {
 
 			signer = new Ed25519Signer((OctetKeyPair)key);
+
+		} else if (
+			MLDSASigner.SUPPORTED_ALGORITHMS.contains(alg) &&
+			key instanceof MLDSAKey) {
+
+			signer = new MLDSASigner((MLDSAKey)key);
 
 		} else {
 			throw new JOSEException("Unsupported JWK type, JWK curve and / or JWS algorithm");

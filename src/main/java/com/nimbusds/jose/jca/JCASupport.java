@@ -27,6 +27,7 @@ import javax.crypto.NoSuchPaddingException;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.impl.ECDSA;
+import com.nimbusds.jose.crypto.impl.MLDSA;
 import com.nimbusds.jose.crypto.impl.RSASSA;
 
 
@@ -178,6 +179,15 @@ public final class JCASupport {
 		if (JWSAlgorithm.Family.EC.contains(alg)) {
 			try {
 				ECDSA.getSignerAndVerifier(alg, provider);
+			} catch (JOSEException e) {
+				return false;
+			}
+			return true;
+		}
+
+		if (JWSAlgorithm.Family.ML.contains(alg)) {
+			try {
+				MLDSA.getSignerAndVerifier(alg, provider);
 			} catch (JOSEException e) {
 				return false;
 			}

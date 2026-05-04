@@ -1244,7 +1244,26 @@ public class JWKMatcherTest extends TestCase {
 		assertTrue(JWKMatcher.forJWSHeader(header).matches(rsa));
 	}
 
-	
+
+	public void testMatchMLDSAJWSHeader() {
+
+		MLDSAKey mldsa = new MLDSAKey(MLDSATestSupport.generateKeyPairUnchecked(JWSAlgorithm.ML_DSA_65));
+
+		JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ML_DSA_65)
+			.keyID("Dave")
+			.x509CertSHA256Thumbprint(new Base64URL("thumbprint"))
+			.build();
+
+		MLDSAKey matchingKey = new MLDSAKey.Builder(mldsa)
+			.keyID("Dave")
+			.x509CertSHA256Thumbprint(new Base64URL("thumbprint"))
+			.build();
+
+		assertTrue(JWKMatcher.forJWSHeader(header).matches(matchingKey));
+		assertFalse(JWKMatcher.forJWSHeader(header).matches(new MLDSAKey.Builder(mldsa).keyID("Eve").build()));
+	}
+
+
 	public void testMismatchJWSHeader() {
 		RSAKey rsa = new RSAKey.Builder(new Base64URL("n"), new Base64URL("e"))
 			.algorithm(JWSAlgorithm.RS256)

@@ -20,6 +20,7 @@ package com.nimbusds.jose.jwk;
 
 import com.nimbusds.jose.Algorithm;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.util.Base64;
 import com.nimbusds.jose.util.*;
 import com.nimbusds.jwt.util.DateUtils;
@@ -669,6 +670,26 @@ public abstract class JWK implements Serializable {
 
 
 	/**
+	 * Casts this JWK to an algorithm key pair JWK.
+	 *
+	 * @return The algorithm key pair JWK.
+	 */
+	public AKPJWK toAKPJWK() {
+		return (AKPJWK)this;
+	}
+
+
+	/**
+	 * Casts this JWK to an ML-DSA JWK.
+	 *
+	 * @return The ML-DSA JWK.
+	 */
+	public MLDSAKey toMLDSAKey() {
+		return (MLDSAKey)this;
+	}
+
+
+	/**
 	 * Returns a JSON object representation of this JWK. This method is 
 	 * intended to be called from extending classes.
 	 *
@@ -772,8 +793,9 @@ public abstract class JWK implements Serializable {
 
 	/**
 	 * Parses a JWK from the specified JSON object string representation. 
-	 * The JWK must be an {@link ECKey}, an {@link RSAKey}, or a 
-	 * {@link OctetSequenceKey}.
+	 * The JWK must be an {@link ECKey}, an {@link RSAKey}, an
+	 * {@link OctetSequenceKey}, an {@link OctetKeyPair}, or an
+	 * {@link MLDSAKey}.
 	 *
 	 * @param s The JSON object string to parse. Must not be {@code null}.
 	 *
@@ -790,9 +812,10 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Parses a JWK from the specified JSON object representation. The JWK 
-	 * must be an {@link ECKey}, an {@link RSAKey}, or a 
-	 * {@link OctetSequenceKey}.
+	 * Parses a JWK from the specified JSON object representation. The JWK
+	 * must be an {@link ECKey}, an {@link RSAKey}, an
+	 * {@link OctetSequenceKey}, an {@link OctetKeyPair}, or an
+	 * {@link MLDSAKey}.
 	 *
 	 * @param jsonObject The JSON object to parse. Must not be 
 	 *                   {@code null}.
@@ -829,16 +852,53 @@ public abstract class JWK implements Serializable {
 			
 			return OctetKeyPair.parse(jsonObject);
 
+		} else if (kty == KeyType.AKP) {
+
+			return parseAKP(jsonObject);
+
+		} else if (MLDSAKey.LEGACY_KEY_TYPE.equals(kty)) {
+
+			return MLDSAKey.parse(jsonObject);
+
 		} else {
 
 			throw new ParseException("Unsupported key type \"" + JWKParameterNames.KEY_TYPE + "\" parameter: " + kty, 0);
 		}
 	}
-	
-	
+
+
 	/**
-	 * Parses a public {@link RSAKey RSA} or {@link ECKey EC JWK} from the
-	 * specified X.509 certificate. Requires BouncyCastle.
+	 * Parses {@code AKP} key type keys.
+	 *
+	 * <p>{@code AKP} is meant for algorithms that do not already have a dedicated key type,
+	 * unlike {@code EC}, which has a dedicated key type. Future algorithms may also use {@code AKP}.
+	 */
+	private static JWK parseAKP(final Map<String, Object> jsonObject)
+		throws ParseException {
+
+		String algName = JSONObjectUtils.getString(jsonObject, JWKParameterNames.ALGORITHM);
+
+		if (algName == null) {
+			throw new ParseException("Missing algorithm \"alg\" parameter for AKP key type", 0);
+		}
+
+		JWSAlgorithm algorithm = JWSAlgorithm.parse(algName);
+
+		if (JWSAlgorithm.Family.ML.contains(algorithm)) {
+			return MLDSAKey.parse(jsonObject);
+		}
+
+		throw new ParseException(
+			"Unsupported algorithm \"alg\" parameter for AKP key type: " + algName,
+			0
+		);
+	}
+
+
+	/**
+	 * Parses a public {@link RSAKey RSA}, {@link ECKey EC}, or
+	 * {@link MLDSAKey ML-DSA} JWK from the specified X.509 certificate.
+	 * Requires BouncyCastle.
 	 *
 	 * <p><strong>Important:</strong> The X.509 certificate is not
 	 * validated!
@@ -856,7 +916,7 @@ public abstract class JWK implements Serializable {
 	 *
 	 * @param cert The X.509 certificate. Must not be {@code null}.
 	 *
-	 * @return The public RSA or EC JWK.
+	 * @return The public RSA, EC, or ML-DSA JWK.
 	 *
 	 * @throws JOSEException If parsing failed.
 	 */
@@ -867,6 +927,8 @@ public abstract class JWK implements Serializable {
 			return RSAKey.parse(cert);
 		} else if (cert.getPublicKey() instanceof ECPublicKey) {
 			return ECKey.parse(cert);
+		} else if (MLDSAKey.isMLDSAPublicKey(cert.getPublicKey())) {
+			return MLDSAKey.parse(cert);
 		} else {
 			throw new JOSEException("Unsupported public key algorithm: " + cert.getPublicKey().getAlgorithm());
 		}
@@ -874,8 +936,9 @@ public abstract class JWK implements Serializable {
 	
 	
 	/**
-	 * Parses a public {@link RSAKey RSA} or {@link ECKey EC JWK} from the
-	 * specified PEM-encoded X.509 certificate. Requires BouncyCastle.
+	 * Parses a public {@link RSAKey RSA}, {@link ECKey EC}, or
+	 * {@link MLDSAKey ML-DSA} JWK from the specified PEM-encoded X.509
+	 * certificate. Requires BouncyCastle.
 	 *
 	 * <p><strong>Important:</strong> The X.509 certificate is not
 	 * validated!
@@ -894,7 +957,7 @@ public abstract class JWK implements Serializable {
 	 * @param pemEncodedCert The PEM-encoded X.509 certificate. Must not be
 	 *                       {@code null}.
 	 *
-	 * @return The public RSA or EC JWK.
+	 * @return The public RSA, EC, or ML-DSA JWK.
 	 *
 	 * @throws JOSEException If parsing failed.
 	 */
@@ -914,8 +977,9 @@ public abstract class JWK implements Serializable {
 	/**
 	 * Loads a JWK from the specified JCE key store. The JWK can be a
 	 * public / private {@link RSAKey RSA key}, a public / private
-	 * {@link ECKey EC key}, or a {@link OctetSequenceKey secret key}.
-	 * Requires BouncyCastle.
+	 * {@link ECKey EC key}, a public / private {@link MLDSAKey ML-DSA
+	 * key}, or a {@link OctetSequenceKey secret key}. Requires
+	 * BouncyCastle.
 	 *
 	 * <p><strong>Important:</strong> The X.509 certificate is not
 	 * validated!
@@ -925,11 +989,12 @@ public abstract class JWK implements Serializable {
 	 * @param pin      The pin to unlock the private key if any, empty or
 	 *                 {@code null} if not required.
 	 *
-	 * @return The public / private RSA or EC JWK, or secret JWK, or
-	 *         {@code null} if no key with the specified alias was found.
+	 * @return The public / private RSA, EC, or ML-DSA JWK, or secret JWK,
+	 *         or {@code null} if no key with the specified alias was
+	 *         found.
 	 *
 	 * @throws KeyStoreException On a key store exception.
-	 * @throws JOSEException     If RSA or EC key loading failed.
+	 * @throws JOSEException     If RSA, EC, or ML-DSA key loading failed.
 	 */
 	public static JWK load(final KeyStore keyStore, final String alias, final char[] pin)
 		throws KeyStoreException, JOSEException {
@@ -945,14 +1010,16 @@ public abstract class JWK implements Serializable {
 			return RSAKey.load(keyStore, alias, pin);
 		} else if (cert.getPublicKey() instanceof ECPublicKey) {
 			return ECKey.load(keyStore, alias, pin);
+		} else if (MLDSAKey.isMLDSAPublicKey(cert.getPublicKey())) {
+			return MLDSAKey.load(keyStore, alias, pin);
 		} else {
 			throw new JOSEException("Unsupported public key algorithm: " + cert.getPublicKey().getAlgorithm());
 		}
 	}
 
 	/**
-	 * Parses an RSA or EC JWK from the specified string of one or more
-	 * PEM-encoded object(s):
+	 * Parses an RSA, EC, or ML-DSA JWK from the specified string of one or
+	 * more PEM-encoded object(s):
 	 *
 	 * <ul>
 	 *     <li>X.509 certificate (PEM header: BEGIN CERTIFICATE)
@@ -967,9 +1034,9 @@ public abstract class JWK implements Serializable {
 	 *
 	 * @param pemEncodedObjects The string of PEM-encoded object(s).
 	 *
-	 * @return The public / (private) RSA or EC JWK.
+	 * @return The public / (private) RSA, EC, or ML-DSA JWK.
 	 *
-	 * @throws JOSEException If RSA or EC key parsing failed.
+	 * @throws JOSEException If RSA, EC, or ML-DSA key parsing failed.
 	 */
 	public static JWK parseFromPEMEncodedObjects(final String pemEncodedObjects)
 		throws JOSEException {
@@ -985,7 +1052,7 @@ public abstract class JWK implements Serializable {
 		final PrivateKey privateKey = pair.getPrivate();
 		
 		if (publicKey == null) {
-			// For EC keys, for RSA the public can be reconstructed
+			// For EC keys, for RSA and ML-DSA the public can be reconstructed
 			throw new JOSEException("Missing PEM-encoded public key to construct JWK");
 		}
 
@@ -1017,6 +1084,16 @@ public abstract class JWK implements Serializable {
 				throw new JOSEException("Unsupported " + KeyType.RSA.getValue() + " private key type: " + privateKey);
 			}
 			return builder.build();
+		}
+
+		if (MLDSAKey.isMLDSAPublicKey(publicKey)) {
+			try {
+				return privateKey != null ?
+					new MLDSAKey.Builder(privateKey, publicKey).build() :
+					new MLDSAKey.Builder(publicKey).build();
+			} catch (IllegalArgumentException e) {
+				throw new JOSEException("Invalid " + KeyType.AKP.getValue() + " key: " + e.getMessage(), e);
+			}
 		}
 
 		throw new JOSEException("Unsupported algorithm of PEM-encoded key: " + publicKey.getAlgorithm());

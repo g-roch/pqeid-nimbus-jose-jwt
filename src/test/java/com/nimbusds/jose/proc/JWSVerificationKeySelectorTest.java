@@ -23,6 +23,7 @@ import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
@@ -35,6 +36,7 @@ import java.util.Set;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.MLDSATestSupport;
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.util.Base64URL;
@@ -207,6 +209,58 @@ public class JWSVerificationKeySelectorTest extends TestCase {
 
 		// Select for header with unexpected JWS alg
 		candidates = keySelector.selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("1").build(), null);
+		assertTrue(candidates.isEmpty());
+	}
+
+
+	public void testForMLDSA65()
+		throws Exception {
+
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		MLDSAKey mldsaJWK1 = new MLDSAKey.Builder(keyPair.getPublic())
+			.keyID("1")
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.ML_DSA_65)
+			.build();
+
+		KeyPair otherKeyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		MLDSAKey mldsaJWK2 = new MLDSAKey.Builder(otherKeyPair.getPublic())
+			.keyID("2")
+			.keyUse(KeyUse.SIGNATURE)
+			.algorithm(JWSAlgorithm.ML_DSA_65)
+			.build();
+
+		JWSVerificationKeySelector keySelector = new JWSVerificationKeySelector(
+			JWSAlgorithm.ML_DSA_65,
+			new ImmutableJWKSet(new JWKSet(Arrays.asList(mldsaJWK1, (JWK)mldsaJWK2))));
+
+		assertTrue(keySelector.isAllowed(JWSAlgorithm.ML_DSA_65));
+		assertEquals(JWSAlgorithm.ML_DSA_65, keySelector.getExpectedJWSAlgorithm());
+		assertNotNull(keySelector.getJWKSource());
+
+		JWKMatcher m = keySelector.createJWKMatcher(new JWSHeader.Builder(JWSAlgorithm.ML_DSA_65).keyID("1").build());
+		assertTrue(m.getKeyTypes().contains(KeyType.AKP));
+		assertTrue(m.getKeyIDs().contains("1"));
+		assertTrue(m.getKeyUses().contains(KeyUse.SIGNATURE));
+		assertTrue(m.getAlgorithms().contains(JWSAlgorithm.ML_DSA_65));
+
+		m = keySelector.createJWKMatcher(new JWSHeader.Builder(JWSAlgorithm.ML_DSA_44).keyID("1").build());
+		assertNull(m);
+
+		List<Key> candidates = keySelector.selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.ML_DSA_65).keyID("1").build(), null);
+		assertEquals(1, candidates.size());
+		assertTrue(candidates.get(0) instanceof PublicKey);
+		assertEquals(mldsaJWK1.toPublicKey(), candidates.get(0));
+
+		candidates = keySelector.selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.ML_DSA_65).build(), null);
+		assertEquals(2, candidates.size());
+		assertEquals(mldsaJWK1.toPublicKey(), candidates.get(0));
+		assertEquals(mldsaJWK2.toPublicKey(), candidates.get(1));
+
+		candidates = keySelector.selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.ML_DSA_65).keyID("100").build(), null);
+		assertTrue(candidates.isEmpty());
+
+		candidates = keySelector.selectJWSKeys(new JWSHeader.Builder(JWSAlgorithm.ML_DSA_87).keyID("1").build(), null);
 		assertTrue(candidates.isEmpty());
 	}
 

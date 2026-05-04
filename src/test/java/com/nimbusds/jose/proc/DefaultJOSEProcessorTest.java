@@ -19,9 +19,12 @@ package com.nimbusds.jose.proc;
 
 
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.MLDSATestSupport;
 import com.nimbusds.jose.crypto.DirectEncrypter;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MLDSASigner;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
+import com.nimbusds.jose.jwk.MLDSAKey;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
@@ -83,6 +86,26 @@ public class DefaultJOSEProcessorTest extends TestCase {
 
 		assertEquals("Hello world!", processor.process(jwsObject, null).toString());
 		assertEquals("Hello world!", processor.process(jwsObject.serialize(), null).toString());
+	}
+
+
+	public void testProcessJWS_MLDSA()
+		throws Exception {
+
+		java.security.KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		JWSObject jwsObject = new JWSObject(new JWSHeader(JWSAlgorithm.ML_DSA_65), new Payload("Hello PQC!"));
+		jwsObject.sign(new MLDSASigner(new MLDSAKey(keyPair)));
+
+		ConfigurableJOSEProcessor<SimpleSecurityContext> processor = new DefaultJOSEProcessor<>();
+		processor.setJWSKeySelector(new JWSKeySelector<SimpleSecurityContext>() {
+			@Override
+			public List<? extends Key> selectJWSKeys(final JWSHeader header, final SimpleSecurityContext context) {
+				return Collections.singletonList(keyPair.getPublic());
+			}
+		});
+
+		assertEquals("Hello PQC!", processor.process(jwsObject, null).toString());
+		assertEquals("Hello PQC!", processor.process(jwsObject.serialize(), null).toString());
 	}
 
 

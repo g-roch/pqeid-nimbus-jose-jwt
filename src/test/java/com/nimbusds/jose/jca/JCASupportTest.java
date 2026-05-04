@@ -152,6 +152,9 @@ public class JCASupportTest {
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.ES256, bc));
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.ES384, bc));
 		assertTrue(JCASupport.isSupported(JWSAlgorithm.ES512, bc));
+		assertTrue(JCASupport.isSupported(JWSAlgorithm.ML_DSA_44, bc));
+		assertTrue(JCASupport.isSupported(JWSAlgorithm.ML_DSA_65, bc));
+		assertTrue(JCASupport.isSupported(JWSAlgorithm.ML_DSA_87, bc));
 	}
 	
 	

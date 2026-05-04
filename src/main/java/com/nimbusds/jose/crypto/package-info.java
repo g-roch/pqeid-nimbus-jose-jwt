@@ -44,6 +44,11 @@
  *             <li>{@link com.nimbusds.jose.crypto.Ed25519Signer}
  *             <li>{@link com.nimbusds.jose.crypto.Ed25519Verifier}
  *         </ul>
+ *      <li>For ML-DSA signatures ML-DSA-44, ML-DSA-65 and ML-DSA-87:
+ *         <ul>
+ *             <li>{@link com.nimbusds.jose.crypto.MLDSASigner}
+ *             <li>{@link com.nimbusds.jose.crypto.MLDSAVerifier}
+ *         </ul>
  * </ul>
  *
  * <p>Provides {@link com.nimbusds.jose.JWEEncrypter encrypters} and 

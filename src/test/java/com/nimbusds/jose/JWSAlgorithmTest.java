@@ -52,6 +52,9 @@ public class JWSAlgorithmTest extends TestCase {
 		assertEquals(JWSAlgorithm.EdDSA, JWSAlgorithm.parse("EdDSA"));
 		assertEquals(JWSAlgorithm.Ed25519, JWSAlgorithm.parse("Ed25519"));
 		assertEquals(JWSAlgorithm.Ed448, JWSAlgorithm.parse("Ed448"));
+		assertEquals(JWSAlgorithm.ML_DSA_44, JWSAlgorithm.parse("ML-DSA-44"));
+		assertEquals(JWSAlgorithm.ML_DSA_65, JWSAlgorithm.parse("ML-DSA-65"));
+		assertEquals(JWSAlgorithm.ML_DSA_87, JWSAlgorithm.parse("ML-DSA-87"));
 	}
 
 
@@ -93,6 +96,15 @@ public class JWSAlgorithmTest extends TestCase {
 		assertTrue(JWSAlgorithm.Family.ED.contains(JWSAlgorithm.Ed448));
 		assertEquals(3, JWSAlgorithm.Family.ED.size());
 	}
+
+
+	public void testMLFamily() {
+
+		assertTrue(JWSAlgorithm.Family.ML.contains(JWSAlgorithm.ML_DSA_44));
+		assertTrue(JWSAlgorithm.Family.ML.contains(JWSAlgorithm.ML_DSA_65));
+		assertTrue(JWSAlgorithm.Family.ML.contains(JWSAlgorithm.ML_DSA_87));
+		assertEquals(3, JWSAlgorithm.Family.ML.size());
+	}
 	
 	
 	public void testSignatureSuperFamily() {
@@ -110,6 +122,9 @@ public class JWSAlgorithmTest extends TestCase {
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.EdDSA));
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.Ed25519));
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.Ed448));
-		assertEquals(13, JWSAlgorithm.Family.SIGNATURE.size());
+		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ML_DSA_44));
+		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ML_DSA_65));
+		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ML_DSA_87));
+		assertEquals(16, JWSAlgorithm.Family.SIGNATURE.size());
 	}
 }

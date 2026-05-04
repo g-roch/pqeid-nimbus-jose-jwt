@@ -26,6 +26,7 @@ import java.security.spec.ECParameterSpec;
 import java.util.*;
 
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.MLDSATestSupport;
 import com.nimbusds.jose.util.Base64URL;
 import junit.framework.TestCase;
 
@@ -242,6 +243,28 @@ public class JWKSelectorTest extends TestCase {
 		RSAKey key1 = (RSAKey)matches.get(0);
 		assertEquals(KeyType.RSA, key1.getKeyType());
 		assertEquals(JWSAlgorithm.RS256, key1.getAlgorithm());
+		assertEquals("1", key1.getKeyID());
+
+		assertEquals(1, matches.size());
+	}
+
+
+	public void testSelectByMLDSAAlgorithm()
+		throws Exception {
+
+		JWKSelector selector = new JWKSelector(new JWKMatcher.Builder().keyType(KeyType.AKP).algorithm(JWSAlgorithm.ML_DSA_65).build());
+
+		List<JWK> keyList = new ArrayList<>();
+		keyList.add(new MLDSAKey.Builder(MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65).getPublic()).keyID("1").algorithm(JWSAlgorithm.ML_DSA_65).build());
+		keyList.add(new MLDSAKey.Builder(MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_87).getPublic()).keyID("2").algorithm(JWSAlgorithm.ML_DSA_87).build());
+
+		JWKSet jwkSet = new JWKSet(keyList);
+
+		List<JWK> matches = selector.select(jwkSet);
+
+		MLDSAKey key1 = (MLDSAKey)matches.get(0);
+		assertEquals(KeyType.AKP, key1.getKeyType());
+		assertEquals(JWSAlgorithm.ML_DSA_65, key1.getAlgorithm());
 		assertEquals("1", key1.getKeyID());
 
 		assertEquals(1, matches.size());

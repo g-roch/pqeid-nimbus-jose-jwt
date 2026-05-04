@@ -34,13 +34,14 @@ public class KeyConverter {
 	
 
 	/**
-	 * Converts the specified list of JSON Web Keys (JWK) their standard
-	 * Java class representation. Asymmetric {@link RSAKey RSA} and
-	 * {@link ECKey EC key} pairs are converted to
-	 * {@link java.security.PublicKey} and {@link java.security.PrivateKey}
-	 * (if specified) objects. {@link OctetSequenceKey secret JWKs} are
-	 * converted to {@link javax.crypto.SecretKey} objects. Key conversion
-	 * exceptions are silently ignored.
+	 * Converts the specified list of JSON Web Keys (JWK) to their
+	 * standard Java class representation. Asymmetric JWKs ({@link RSAKey RSA},
+	 * {@link ECKey EC key}, {@link OctetKeyPair octet key pair},
+	 * {@link AKPJWK algorithm key pair}) are converted to {@link java.security.PublicKey} and
+	 * {@link java.security.PrivateKey} (if specified) objects.
+	 * {@link OctetSequenceKey secret JWKs} are converted to
+	 * {@link javax.crypto.SecretKey} objects. Key conversion exceptions
+	 * are silently ignored.
 	 *
 	 * @param jwkList The JWK list. May be {@code null}.
 	 *

@@ -1843,3 +1843,13 @@ version 9.40 (2024-06-06)
     * Adds JWKSet.getKeysByAlgorithm(JWSAlgorithm) method.
     * Adds JWKSet.getKeysByAlgorithm(JWSAlgorithm,)
     * Adds JSONObjectUtils.getEpochSecondAsInstant static method.
+    * Adds support for the ML-DSA JWS algorithms ML-DSA-44, ML-DSA-65 and
+      ML-DSA-87.
+	    * Adds MLDSASigner, MLDSAVerifier, MLDSAKey and MLDSAKeyGenerator.
+	    * Adds support for ML-DSA JWKs using the AKP key type with pub / priv
+	      parameters, retaining parsing compatibility with the earlier ML-DSA JWK form.
+	    * Integrates ML-DSA into JWK parsing and loading from JSON, PEM, X.509 and
+	      key stores, default JWS signer / verifier factories, JWK selection and
+	      JCA support helpers.
+	    * Known limitation: larger x5c chains with ML-DSA, especially ML-DSA-65
+	      and ML-DSA-87, may exceed Nimbus's existing protected-header size limit.

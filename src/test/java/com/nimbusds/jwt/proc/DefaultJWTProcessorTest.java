@@ -19,14 +19,17 @@ package com.nimbusds.jwt.proc;
 
 
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.MLDSATestSupport;
 import com.nimbusds.jose.crypto.AESEncrypter;
 import com.nimbusds.jose.crypto.DirectEncrypter;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MLDSASigner;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.crypto.factories.DefaultJWEDecrypterFactory;
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory;
 import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.MLDSAKey;
 import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
@@ -113,6 +116,28 @@ public class DefaultJWTProcessorTest extends TestCase {
 
 		assertEquals("alice", processor.process(jwt.serialize(), null).getSubject());
 		assertEquals("https://openid.c2id.com", processor.process(jwt.serialize(), null).getIssuer());
+	}
+
+
+	public void testProcessSignedJWT_MLDSA()
+		throws Exception {
+
+		java.security.KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		JWTClaimsSet claims = new JWTClaimsSet.Builder().subject("alice").build();
+		SignedJWT jwt = new SignedJWT(new JWSHeader(JWSAlgorithm.ML_DSA_65), claims);
+		jwt.sign(new MLDSASigner(new MLDSAKey(keyPair)));
+
+		ConfigurableJWTProcessor<SimpleSecurityContext> processor = new DefaultJWTProcessor<>();
+		processor.setJWTClaimsSetVerifier(null);
+		processor.setJWSKeySelector(new JWSKeySelector<SimpleSecurityContext>() {
+			@Override
+			public List<? extends Key> selectJWSKeys(final JWSHeader header, final SimpleSecurityContext context) {
+				return Collections.singletonList(keyPair.getPublic());
+			}
+		});
+
+		assertEquals("alice", processor.process(jwt, null).getSubject());
+		assertEquals("alice", processor.process(jwt.serialize(), null).getSubject());
 	}
 	
 	

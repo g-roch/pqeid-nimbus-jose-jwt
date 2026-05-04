@@ -31,6 +31,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
@@ -45,9 +46,11 @@ import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.MLDSATestSupport;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.jwk.gen.MLDSAKeyGenerator;
 import com.nimbusds.jose.jwk.gen.OctetKeyPairGenerator;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
@@ -76,7 +79,11 @@ public class JWKTest extends TestCase {
 	private void validateJWKFromX509Cert(final JWK jwk, final KeyType expectedKeyType) {
 		
 		assertEquals(expectedKeyType, jwk.getKeyType());
-		assertNull(jwk.getAlgorithm());
+		if (KeyType.AKP.equals(expectedKeyType)) {
+			assertNotNull(jwk.getAlgorithm());
+		} else {
+			assertNull(jwk.getAlgorithm());
+		}
 		assertNull(jwk.getKeyUse());
 		assertNull(jwk.getKeyOperations());
 		assertEquals(1, jwk.getX509CertChain().size());
@@ -91,6 +98,8 @@ public class JWKTest extends TestCase {
 			assertTrue(jwk instanceof RSAKey);
 		} else if (KeyType.EC.equals(expectedKeyType)) {
 			assertTrue(jwk instanceof ECKey);
+		} else if (KeyType.AKP.equals(expectedKeyType)) {
+			assertTrue(jwk instanceof MLDSAKey);
 		} else {
 			fail();
 		}
@@ -134,6 +143,31 @@ public class JWKTest extends TestCase {
 		JWK jwk = JWK.parseFromPEMEncodedX509Cert(pemEncodedCert);
 		validateJWKFromX509Cert(jwk, KeyType.EC);
 		assertEquals(Curve.P_256, ((ECKey)jwk).getCurve());
+	}
+
+
+	public void testParseMLDSAJWKFromX509Cert()
+		throws Exception {
+
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		X509Certificate cert = MLDSATestSupport.generateSelfSignedCertificate(JWSAlgorithm.ML_DSA_65, keyPair);
+
+		JWK jwk = JWK.parse(cert);
+		validateJWKFromX509Cert(jwk, KeyType.AKP);
+		assertEquals(JWSAlgorithm.ML_DSA_65, ((MLDSAKey)jwk).mlDsaJwsAlgorithm());
+		assertTrue(((MLDSAKey)jwk).matches(cert));
+	}
+
+
+	public void testParseMLDSAJWKFromX509Cert_pem()
+		throws Exception {
+
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		String pemEncodedCert = MLDSATestSupport.toPEM(MLDSATestSupport.generateSelfSignedCertificate(JWSAlgorithm.ML_DSA_65, keyPair));
+
+		JWK jwk = JWK.parseFromPEMEncodedX509Cert(pemEncodedCert);
+		validateJWKFromX509Cert(jwk, KeyType.AKP);
+		assertEquals(JWSAlgorithm.ML_DSA_65, ((MLDSAKey)jwk).mlDsaJwsAlgorithm());
 	}
 	
 	
@@ -281,6 +315,38 @@ public class JWKTest extends TestCase {
 		assertEquals("1", octJWK.getKeyID());
 		assertArrayEquals(secretKey.getEncoded(), octJWK.toByteArray());
 	}
+
+
+	public void testLoadMLDSAJWKFromKeyStore()
+		throws Exception {
+
+		KeyStore keyStore = KeyStore.getInstance("BKS", MLDSATestSupport.provider());
+
+		char[] password = "secret".toCharArray();
+		keyStore.load(null, password);
+
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		X509Certificate cert = MLDSATestSupport.generateSelfSignedCertificate(JWSAlgorithm.ML_DSA_65, keyPair);
+
+		keyStore.setKeyEntry("1", keyPair.getPrivate(), "1234".toCharArray(), new Certificate[] {cert});
+
+		MLDSAKey mldsaKey = (MLDSAKey)JWK.load(keyStore, "1", "1234".toCharArray());
+		assertNotNull(mldsaKey);
+		assertEquals(JWSAlgorithm.ML_DSA_65, mldsaKey.mlDsaJwsAlgorithm());
+		assertEquals("1", mldsaKey.getKeyID());
+		assertEquals(1, mldsaKey.getX509CertChain().size());
+		assertNull(mldsaKey.getX509CertThumbprint());
+		assertNotNull(mldsaKey.getX509CertSHA256Thumbprint());
+		assertTrue(mldsaKey.isPrivate());
+
+		try {
+			JWK.load(keyStore, "1", "".toCharArray());
+			fail();
+		} catch (JOSEException e) {
+			assertTrue(e.getMessage().startsWith("Couldn't retrieve private ML-DSA key (bad pin?): "));
+			assertTrue(e.getCause() instanceof UnrecoverableKeyException);
+		}
+	}
 	
 	
 	public void testLoadJWK_notFound()
@@ -309,6 +375,55 @@ public class JWKTest extends TestCase {
 		assertEquals("PreoKbDNIPW8_AtZm2_sz22kYnEHvbDU80W0MCfYuXL8PjT7QjKhPKcG3LV67D2uB73BxnvzNgk", okp.getX().toString());
 		assertEquals("Dave", okp.getKeyID());
 		assertFalse(okp.isPrivate());
+	}
+
+
+	public void testParseMLDSA()
+		throws Exception {
+
+		MLDSAKey original = new MLDSAKey(MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65));
+
+		JWK jwk = JWK.parse(original.toJSONString());
+		assertEquals(KeyType.AKP, jwk.getKeyType());
+		assertTrue(jwk instanceof AKPJWK);
+		assertTrue(jwk instanceof MLDSAKey);
+		assertEquals(original, jwk);
+	}
+
+
+	public void testParseMLDSALegacyKeyType()
+		throws Exception {
+
+		MLDSAKey original = new MLDSAKey(MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65));
+		Map<String, Object> json = original.toJSONObject();
+		json.put("kty", MLDSAKey.LEGACY_KEY_TYPE.getValue());
+
+		JWK jwk = JWK.parse(json);
+		assertEquals(KeyType.AKP, jwk.getKeyType());
+		assertTrue(jwk instanceof MLDSAKey);
+		assertEquals(original, jwk);
+	}
+
+
+	public void testParseAKPRejectsMissingAlgorithm() {
+
+		try {
+			JWK.parse("{\"kty\":\"AKP\",\"pub\":\"AQI\"}");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Missing algorithm \"alg\" parameter for AKP key type", e.getMessage());
+		}
+	}
+
+
+	public void testParseAKPRejectsUnsupportedAlgorithm() {
+
+		try {
+			JWK.parse("{\"kty\":\"AKP\",\"alg\":\"FN-DSA-512\",\"pub\":\"AQI\"}");
+			fail();
+		} catch (ParseException e) {
+			assertEquals("Unsupported algorithm \"alg\" parameter for AKP key type: FN-DSA-512", e.getMessage());
+		}
 	}
 
 	public void testParsePemRsaPublicKey() throws JOSEException {
@@ -364,6 +479,42 @@ public class JWKTest extends TestCase {
 		ECKey ecKey = (ECKey) JWK.parseFromPEMEncodedObjects(SamplePEMEncodedObjects.EC_CERT_PEM + "\r\n" + SamplePEMEncodedObjects.EC_PRIVATE_KEY_PEM);
 		assertEquals(KeyType.EC, ecKey.getKeyType());
 		assertTrue(ecKey.isPrivate());
+	}
+
+	public void testParsePemMLDSAPublicKey() throws Exception {
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		MLDSAKey mldsaKey = (MLDSAKey) JWK.parseFromPEMEncodedObjects(MLDSATestSupport.toPEM(keyPair.getPublic()));
+		assertEquals(KeyType.AKP, mldsaKey.getKeyType());
+		assertEquals(JWSAlgorithm.ML_DSA_65, mldsaKey.mlDsaJwsAlgorithm());
+		assertFalse(mldsaKey.isPrivate());
+	}
+
+	public void testParsePemMLDSAPublicKeyFromCert() throws Exception {
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		MLDSAKey mldsaKey = (MLDSAKey) JWK.parseFromPEMEncodedObjects(
+			MLDSATestSupport.toPEM(MLDSATestSupport.generateSelfSignedCertificate(JWSAlgorithm.ML_DSA_65, keyPair)));
+		assertEquals(KeyType.AKP, mldsaKey.getKeyType());
+		assertEquals(JWSAlgorithm.ML_DSA_65, mldsaKey.mlDsaJwsAlgorithm());
+		assertFalse(mldsaKey.isPrivate());
+	}
+
+	public void testParsePemMLDSAPrivateKey() throws Exception {
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		MLDSAKey mldsaKey = (MLDSAKey) JWK.parseFromPEMEncodedObjects(MLDSATestSupport.toPEM(keyPair.getPrivate()));
+		assertEquals(KeyType.AKP, mldsaKey.getKeyType());
+		assertEquals(JWSAlgorithm.ML_DSA_65, mldsaKey.mlDsaJwsAlgorithm());
+		assertTrue(mldsaKey.isPrivate());
+	}
+
+	public void testParsePemMLDSAPrivateKeyPlusCert() throws Exception {
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		MLDSAKey mldsaKey = (MLDSAKey) JWK.parseFromPEMEncodedObjects(
+			MLDSATestSupport.toPEM(MLDSATestSupport.generateSelfSignedCertificate(JWSAlgorithm.ML_DSA_65, keyPair))
+				+ "\r\n"
+				+ MLDSATestSupport.toPEM(keyPair.getPrivate()));
+		assertEquals(KeyType.AKP, mldsaKey.getKeyType());
+		assertEquals(JWSAlgorithm.ML_DSA_65, mldsaKey.mlDsaJwsAlgorithm());
+		assertTrue(mldsaKey.isPrivate());
 	}
 
 	public void testPemRoundTripSignVerify() throws JOSEException, ParseException {
@@ -468,7 +619,13 @@ public class JWKTest extends TestCase {
 		jwk = new OctetKeyPairGenerator(Curve.Ed25519).generate();
 		OctetKeyPair okp = jwk.toOctetKeyPair();
 		assertEquals(jwk, okp);
-	}
+
+		jwk = new MLDSAKeyGenerator(JWSAlgorithm.ML_DSA_65).generate();
+		AKPJWK akpJWK = jwk.toAKPJWK();
+		assertEquals(jwk, akpJWK);
+		MLDSAKey mldsaKey = jwk.toMLDSAKey();
+		assertEquals(jwk, mldsaKey);
+		}
 	
 	
 	// https://bitbucket.org/connect2id/nimbus-jose-jwt/issues/355/parsing-of-key_ops-from-jwk-output

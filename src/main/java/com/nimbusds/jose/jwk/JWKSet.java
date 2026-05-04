@@ -30,6 +30,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
@@ -611,7 +612,7 @@ public class JWKSet implements Serializable {
 		
 		List<JWK> jwks = new LinkedList<>();
 		
-		// Load RSA and EC keys
+		// Load RSA, EC, and ML-DSA keys
 		for (Enumeration<String> keyAliases = keyStore.aliases(); keyAliases.hasMoreElements(); ) {
 			
 			final String keyAlias = keyAliases.nextElement();
@@ -621,8 +622,9 @@ public class JWKSet implements Serializable {
 			if (cert == null) {
 				continue; // skip
 			}
-			
-			if (cert.getPublicKey() instanceof RSAPublicKey) {
+
+			PublicKey certPublicKey = cert.getPublicKey();
+			if (certPublicKey instanceof RSAPublicKey) {
 				
 				RSAKey rsaJWK;
 				try {
@@ -637,7 +639,7 @@ public class JWKSet implements Serializable {
 				
 				jwks.add(rsaJWK);
 				
-			} else if (cert.getPublicKey() instanceof ECPublicKey) {
+			} else if (certPublicKey instanceof ECPublicKey) {
 				
 				ECKey ecJWK;
 				try {
@@ -648,6 +650,18 @@ public class JWKSet implements Serializable {
 				
 				if (ecJWK != null) {
 					jwks.add(ecJWK);
+				}
+			} else if (MLDSAKey.isMLDSAPublicKey(certPublicKey)) {
+
+				MLDSAKey mldsaJWK;
+				try {
+					mldsaJWK = MLDSAKey.load(keyStore, keyAlias, keyPassword);
+				} catch (JOSEException e) {
+					continue; // skip cert
+				}
+
+				if (mldsaJWK != null) {
+					jwks.add(mldsaJWK);
 				}
 			}
 		}

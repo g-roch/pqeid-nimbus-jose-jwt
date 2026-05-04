@@ -19,6 +19,7 @@ package com.nimbusds.jose.crypto.factories;
 
 
 import java.security.Key;
+import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import javax.crypto.SecretKey;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
+import com.nimbusds.jose.crypto.MLDSAVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jca.JCAContext;
@@ -59,6 +61,7 @@ public class DefaultJWSVerifierFactory implements JWSVerifierFactory {
 		algs.addAll(MACVerifier.SUPPORTED_ALGORITHMS);
 		algs.addAll(RSASSAVerifier.SUPPORTED_ALGORITHMS);
 		algs.addAll(ECDSAVerifier.SUPPORTED_ALGORITHMS);
+		algs.addAll(MLDSAVerifier.SUPPORTED_ALGORITHMS);
 		SUPPORTED_ALGORITHMS = Collections.unmodifiableSet(algs);
 	}
 
@@ -118,6 +121,16 @@ public class DefaultJWSVerifierFactory implements JWSVerifierFactory {
 			ECPublicKey ecPublicKey = (ECPublicKey)key;
 
 			verifier = new ECDSAVerifier(ecPublicKey);
+
+		} else if (MLDSAVerifier.SUPPORTED_ALGORITHMS.contains(header.getAlgorithm())) {
+
+			if (!(key instanceof PublicKey)) {
+				throw new KeyTypeException(PublicKey.class);
+			}
+
+			PublicKey publicKey = (PublicKey)key;
+
+			verifier = new MLDSAVerifier(publicKey);
 
 		} else {
 

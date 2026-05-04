@@ -21,6 +21,7 @@ package com.nimbusds.jose.jwk;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.MLDSATestSupport;
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jose.jwk.gen.OctetSequenceKeyGenerator;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
@@ -1073,6 +1074,38 @@ public class JWKSetTest {
 		assertEquals(keyStore, ecKey.getKeyStore());
 		
 		assertEquals(3, jwkSet.getKeys().size());
+	}
+
+
+	@Test
+	public void testLoadFromKeyStore_withMLDSA()
+		throws Exception {
+
+		KeyStore keyStore = KeyStore.getInstance("BKS", MLDSATestSupport.provider());
+		keyStore.load(null, "secret".toCharArray());
+
+		KeyPair keyPair = MLDSATestSupport.generateKeyPair(JWSAlgorithm.ML_DSA_65);
+		X509Certificate cert = MLDSATestSupport.generateSelfSignedCertificateWithExampleExtensions(JWSAlgorithm.ML_DSA_65, keyPair);
+
+		keyStore.setKeyEntry("1", keyPair.getPrivate(), "1234".toCharArray(), new Certificate[] {cert});
+
+		JWKSet jwkSet = JWKSet.load(keyStore, new PasswordLookup() {
+			@Override
+			public char[] lookupPassword(final String name) {
+				return "1234".toCharArray();
+			}
+		});
+
+		MLDSAKey mldsaKey = (MLDSAKey)jwkSet.getKeyByKeyId("1");
+		assertNotNull(mldsaKey);
+		assertEquals(KeyUse.SIGNATURE, mldsaKey.getKeyUse());
+		assertEquals("1", mldsaKey.getKeyID());
+		assertEquals(JWSAlgorithm.ML_DSA_65, mldsaKey.mlDsaJwsAlgorithm());
+		assertEquals(1, mldsaKey.getX509CertChain().size());
+		assertNotNull(mldsaKey.getX509CertSHA256Thumbprint());
+		assertTrue(mldsaKey.isPrivate());
+		assertEquals(keyStore, mldsaKey.getKeyStore());
+		assertEquals(1, jwkSet.getKeys().size());
 	}
 	
 

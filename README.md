@@ -3,7 +3,8 @@
 * The most popular and robust Java 8+ and Android library for JSON Web Tokens 
   (JWT)
 * Supports all standard signature (JWS) and encryption (JWE) algorithms, 
-  including recent developments such `secp256k1`, `ECDH-1PU` and `XC20P`
+  including recent developments such as `secp256k1`, `ECDH-1PU`, `XC20P` and
+  `ML-DSA`
 * Open source Apache 2.0 license
 
 Check out the [library homepage](https://connect2id.com/products/nimbus-jose-jwt) 
@@ -23,7 +24,8 @@ Create, parse and process:
 * With JSON serialisation:
     * JWS JSON objects with one or more signatures
     * JWE JSON objects with one or more recipients
-* JSON Web Key (JWK) objects and JWK sets
+* JSON Web Key (JWK) objects and JWK sets, including `AKP` JWKs for
+  `ML-DSA` with `pub` / `priv` members
 
 
 ## Supported JOSE algorithms
@@ -33,7 +35,9 @@ The library handles the following JOSE algorithms:
 * HMAC integrity protection: `HS256`, `HS384` and `HS512`
 * RSASSA-PKCS1-V1_5 signatures: `RS256`, `RS384` and `RS512`
 * RSASSA-PSS signatures: `PS256`, `PS384` and `PS512`
-* EC signatures: `ES256`, `ES256K`, `ES384`, `ES512` and `EdDSA`
+* EC signatures: `ES256`, `ES256K`, `ES384` and `ES512`
+* Edwards-curve signatures: `EdDSA` and `Ed25519`
+* Post-quantum ML-DSA signatures: `ML-DSA-44`, `ML-DSA-65` and `ML-DSA-87`
 * Key encryption with RSAES-PKCS1-V1_5: `RSA1_5` (deprecated)
 * Key encryption with RSAES OAEP: `RSA-OAEP`, `RSA-OAEP-256` and `RSA-OAEP-512`
 * Key encryption with AES key wrap: `A128KW`, `A192KW` and `A256KW`
@@ -82,6 +86,7 @@ The library handles the following JOSE algorithms:
   AEAD_XChaCha20_Poly1305
 * draft-ietf-jose-fully-specified-algorithms-02 - Fully-Specified Algorithms 
   for JOSE and COSE
+* draft-ietf-cose-dilithium - ML-DSA for JOSE and COSE
 
 
 ## System requirements and dependencies
@@ -91,8 +96,9 @@ The Nimbus JOSE+JWT library requires Java 8+ and has minimal dependencies.
 * (shaded) JCIP for concurrency annotations
 * (shaded) GSon for parsing and serialisation of JSON
 * (optional) BouncyCastle as an alternative JCA provider and for selected key
-  and certificate utilities. Must not be imported together with the 
-  BouncyCastle FIPS provider!
+  and certificate utilities. ML-DSA functionality requires a JCA provider with
+  ML-DSA support; BouncyCastle is supported out of the box. Must not be
+  imported together with the BouncyCastle FIPS provider!
 * (optional) BouncyCastle FIPS as a FIPS 140-2, Level 1 compliant JCA provider.
   Must not be imported together with the plain BouncyCastle provider!
 * (optional) Tink for OKP generation, EdDSA with Ed25519, ECDH with X25519 and 
@@ -139,4 +145,3 @@ To post bug reports and suggestions:
 [![Bugs](https://sonarcloud.io/api/project_badges/measure?project=connect2id_nimbus-jose-jwt&metric=bugs)](https://sonarcloud.io/dashboard?id=connect2id_nimbus-jose-jwt)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=connect2id_nimbus-jose-jwt&metric=coverage)](https://sonarcloud.io/dashboard?id=connect2id_nimbus-jose-jwt)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=connect2id_nimbus-jose-jwt&metric=ncloc)](https://sonarcloud.io/dashboard?id=connect2id_nimbus-jose-jwt)
-

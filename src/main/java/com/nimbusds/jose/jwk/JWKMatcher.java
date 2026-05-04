@@ -1337,6 +1337,14 @@ public class JWKMatcher {
 				.algorithms(algorithm, null)
 				.curves(Curve.forJWSAlgorithm(algorithm))
 				.build();
+		} else if (JWSAlgorithm.Family.ML.contains(algorithm)) {
+			return new JWKMatcher.Builder()
+				.keyType(KeyType.forAlgorithm(algorithm))
+				.keyID(jwsHeader.getKeyID())
+				.keyUses(KeyUse.SIGNATURE, null)
+				.algorithms(algorithm, null)
+				.x509CertSHA256Thumbprint(jwsHeader.getX509CertSHA256Thumbprint())
+				.build();
 		} else {
 			return null; // Unsupported algorithm
 		}
