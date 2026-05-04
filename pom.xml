@@ -146,6 +146,10 @@
                             <compileSourceRoots>
                                 <compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
                             </compileSourceRoots>
+							<compilerArgs>
+								<arg>--patch-module</arg>
+								<arg>com.nimbusds.jose.jwt=${project.build.outputDirectory}</arg>
+							</compilerArgs>
                             <multiReleaseOutput>true</multiReleaseOutput>
                         </configuration>
                     </execution>
