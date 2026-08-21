@@ -227,6 +227,22 @@ public final class JWEAlgorithm extends Algorithm {
 
 
 	/**
+	 * PQEID: X-Wing hybrid post-quantum KEM (X25519 + ML-KEM-768,
+	 * {@code draft-connolly-cfrg-xwing-kem}), used as a direct KEM-based key
+	 * encryption algorithm (analogous to RSA-OAEP/AES-KW - the KEM
+	 * ciphertext travels in the JWE "encrypted key" field).
+	 *
+	 * <p><strong>Not an IETF/JOSE-registered algorithm.</strong> There is no
+	 * standardized JOSE encoding for X-Wing yet (relevant drafts, e.g.
+	 * {@code draft-reddy-cose-jose-pqc-kem}, are still in flux as of this
+	 * writing) - {@code "XWING"} is a project-specific identifier for a
+	 * research POC, not meant to interoperate with anything outside this
+	 * project.
+	 */
+	public static final JWEAlgorithm XWING = new JWEAlgorithm("XWING", Requirement.OPTIONAL);
+
+
+	/**
 	 * PBES2 (RFC 2898) with HMAC SHA-256 as the PRF and AES Key Wrap
 	 * (RFC 3394) using 128 bit keys for the encryption scheme.
 	 */

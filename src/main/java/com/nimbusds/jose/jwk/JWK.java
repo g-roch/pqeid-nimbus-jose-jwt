@@ -690,7 +690,17 @@ public abstract class JWK implements Serializable {
 
 
 	/**
-	 * Returns a JSON object representation of this JWK. This method is 
+	 * PQEID: casts this JWK to an X-Wing JWK.
+	 *
+	 * @return The X-Wing JWK.
+	 */
+	public XWingKey toXWingKey() {
+		return (XWingKey)this;
+	}
+
+
+	/**
+	 * Returns a JSON object representation of this JWK. This method is
 	 * intended to be called from extending classes.
 	 *
 	 * <p>Example:
@@ -859,6 +869,11 @@ public abstract class JWK implements Serializable {
 		} else if (MLDSAKey.LEGACY_KEY_TYPE.equals(kty)) {
 
 			return MLDSAKey.parse(jsonObject);
+
+		} else if (XWingKey.KEY_TYPE.equals(kty)) {
+
+			// PQEID: custom, unregistered key type - see XWingKey javadoc.
+			return XWingKey.parse(jsonObject);
 
 		} else {
 

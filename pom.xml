@@ -79,7 +79,7 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.81</version>
+            <version>1.84</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -369,22 +369,25 @@
                 <jar.attachClassifier>false</jar.attachClassifier>
             </properties>
             <dependencies>
+                <!-- PQEID: bumped 1.81 -> 1.84, needed for org.bouncycastle.pqc.crypto.xwing
+                     (X-Wing hybrid KEM support, confirmed present in BC 1.84), and to stay
+                     consistent with the BC version pinned everywhere else in this project. -->
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcprov-jdk18on</artifactId>
-                    <version>1.81</version>
+                    <version>1.84</version>
                     <optional>true</optional>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcutil-jdk18on</artifactId>
-                    <version>1.81</version>
+                    <version>1.84</version>
                     <optional>true</optional>
                 </dependency>
                 <dependency>
                     <groupId>org.bouncycastle</groupId>
                     <artifactId>bcpkix-jdk18on</artifactId>
-                    <version>1.81</version>
+                    <version>1.84</version>
                     <optional>true</optional>
                 </dependency>
             </dependencies>

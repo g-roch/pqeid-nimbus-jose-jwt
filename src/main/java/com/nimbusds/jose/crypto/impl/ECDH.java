@@ -79,8 +79,17 @@ public class ECDH {
 	public static AlgorithmMode resolveAlgorithmMode(final JWEAlgorithm alg)
 		throws JOSEException {
 
-		if (alg.equals(JWEAlgorithm.ECDH_ES)) {
+		if (alg.equals(JWEAlgorithm.XWING)) {
 
+			// PQEID: ECDH-ES itself has been replaced by XWING in this fork
+			// (no legacy classical-only key agreement kept around). XWING
+			// reuses ECDHCryptoProvider's encryptWithZ/decryptWithZ (see
+			// XWingEncrypter/XWingDecrypter) with the KEM shared secret
+			// standing in for "Z" - treated as DIRECT mode exactly like plain
+			// ECDH-ES used to be, since the KEM ciphertext (not a CEK wrap) is
+			// what travels in the JWE "encrypted key" field, injected
+			// separately by XWingEncrypter/XWingDecrypter around this shared
+			// logic.
 			return AlgorithmMode.DIRECT;
 
 		} else if (alg.equals(JWEAlgorithm.ECDH_ES_A128KW) ||
@@ -114,7 +123,7 @@ public class ECDH {
 	public static int sharedKeyLength(final JWEAlgorithm alg, final EncryptionMethod enc)
 		throws JOSEException {
 
-		if (alg.equals(JWEAlgorithm.ECDH_ES)) {
+		if (alg.equals(JWEAlgorithm.XWING)) {
 
 			int length = enc.cekBitLength();
 
