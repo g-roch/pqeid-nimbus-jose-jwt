@@ -5,7 +5,8 @@
 
     <groupId>com.nimbusds</groupId>
     <artifactId>nimbus-jose-jwt</artifactId>
-    <version>10.9-SNAPSHOT</version>
+    <!-- <version>10.9-SNAPSHOT</version> -->
+    <version>10.9-pqeid-local-1</version>
     <packaging>jar</packaging>
 
     <name>Nimbus JOSE+JWT</name>
