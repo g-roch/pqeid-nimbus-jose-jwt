@@ -1,110 +1,116 @@
 # Nimbus JOSE + JWT
 
-* The most popular and robust Java 8+ and Android library for JSON Web Tokens 
+> [!CAUTION]
+> This repository is used for development and not for production.
+
+Compile the code with Maven for use in `pqeid-didresolver-kotlin-android` (maven local package):
+
+```bash
+mvn install -DskipTests -Dmaven.javadoc.skip=true
+```
+
+- The most popular and robust Java 8+ and Android library for JSON Web Tokens
   (JWT)
-* Supports all standard signature (JWS) and encryption (JWE) algorithms, 
+- Supports all standard signature (JWS) and encryption (JWE) algorithms,
   including recent developments such as `secp256k1`, `ECDH-1PU`, `XC20P` and
   `ML-DSA`
-* Open source Apache 2.0 license
+- Open source Apache 2.0 license
 
-Check out the [library homepage](https://connect2id.com/products/nimbus-jose-jwt) 
+Check out the [library homepage](https://connect2id.com/products/nimbus-jose-jwt)
 for more info and examples.
-
 
 ## Full compact JOSE and JWT support
 
 Create, parse and process:
 
-* JOSE secured objects:
-  * With compact URL-safe serialisation:
-    * JSON Web Signature (JWS) objects
-    * JSON Web Encryption (JWE) objects
-    * Unsecured (`alg=none`) JOSE objects
-    * Signed, encrypted and unsecured JSON Web Tokens (JWTs)
-* With JSON serialisation:
-    * JWS JSON objects with one or more signatures
-    * JWE JSON objects with one or more recipients
-* JSON Web Key (JWK) objects and JWK sets, including `AKP` JWKs for
+- JOSE secured objects:
+  - With compact URL-safe serialisation:
+    - JSON Web Signature (JWS) objects
+    - JSON Web Encryption (JWE) objects
+    - Unsecured (`alg=none`) JOSE objects
+    - Signed, encrypted and unsecured JSON Web Tokens (JWTs)
+- With JSON serialisation:
+  - JWS JSON objects with one or more signatures
+  - JWE JSON objects with one or more recipients
+- JSON Web Key (JWK) objects and JWK sets, including `AKP` JWKs for
   `ML-DSA` with `pub` / `priv` members
-
 
 ## Supported JOSE algorithms
 
 The library handles the following JOSE algorithms:
 
-* HMAC integrity protection: `HS256`, `HS384` and `HS512`
-* RSASSA-PKCS1-V1_5 signatures: `RS256`, `RS384` and `RS512`
-* RSASSA-PSS signatures: `PS256`, `PS384` and `PS512`
-* EC signatures: `ES256`, `ES256K`, `ES384` and `ES512`
-* Edwards-curve signatures: `EdDSA` and `Ed25519`
-* Post-quantum ML-DSA signatures: `ML-DSA-44`, `ML-DSA-65` and `ML-DSA-87`
-* Key encryption with RSAES-PKCS1-V1_5: `RSA1_5` (deprecated)
-* Key encryption with RSAES OAEP: `RSA-OAEP`, `RSA-OAEP-256` and `RSA-OAEP-512`
-* Key encryption with AES key wrap: `A128KW`, `A192KW` and `A256KW`
-* Key encryption with AES GCM: `A128CGMKW`, `A192CGMKW` and `A256CGMKW`
-* Direct shared symmetric key encryption: `dir`
-* Key agreement with Elliptic Curve Diffie-Hellman Ephemeral Static: `ECDH-ES`,
+- HMAC integrity protection: `HS256`, `HS384` and `HS512`
+- RSASSA-PKCS1-V1_5 signatures: `RS256`, `RS384` and `RS512`
+- RSASSA-PSS signatures: `PS256`, `PS384` and `PS512`
+- EC signatures: `ES256`, `ES256K`, `ES384` and `ES512`
+- Edwards-curve signatures: `EdDSA` and `Ed25519`
+- Post-quantum ML-DSA signatures: `ML-DSA-44`, `ML-DSA-65` and `ML-DSA-87`
+- Key encryption with RSAES-PKCS1-V1_5: `RSA1_5` (deprecated)
+- Key encryption with RSAES OAEP: `RSA-OAEP`, `RSA-OAEP-256` and `RSA-OAEP-512`
+- Key encryption with AES key wrap: `A128KW`, `A192KW` and `A256KW`
+- Key encryption with AES GCM: `A128CGMKW`, `A192CGMKW` and `A256CGMKW`
+- Direct shared symmetric key encryption: `dir`
+- Key agreement with Elliptic Curve Diffie-Hellman Ephemeral Static: `ECDH-ES`,
   `ECDH-ES+A128KW`, `ECDH-ES+A192KW` and `ECDH-ES+A256KW`
-* Public key authenticated encryption utilising the One-Pass Unified Model for 
-  Elliptic Curve Diffie-Hellman key agreement: `ECDH-1PU`, `ECDH-1PU+A128KW`, 
+- Public key authenticated encryption utilising the One-Pass Unified Model for
+  Elliptic Curve Diffie-Hellman key agreement: `ECDH-1PU`, `ECDH-1PU+A128KW`,
   `ECDH-1PU+A128KW`, `ECDH-1PU+A256KW`
-* Password-based encryption: `PBES2-HS256+A128KW`, `PBES2-HS384+A192KW` and
+- Password-based encryption: `PBES2-HS256+A128KW`, `PBES2-HS384+A192KW` and
   `PBES2-HS512+A256KW`
-* Content encryption with AES_CBC_HMAC_SHA2: `A128CBC-HS256`, `A192CBC-HS384`,
+- Content encryption with AES_CBC_HMAC_SHA2: `A128CBC-HS256`, `A192CBC-HS384`,
   `A256CBC-HS512`, the deprecated `A128CBC+HS256` and `A256CBC+HS512` are also
   supported
-* Content encryption with AES GCM: `A128GCM`, `A192GCM` and `A256GCM`
-* Content encryption with extended nonce ChaCha20-Poly1305: `XC20P`
-* JWE Compression with `DEFLATE`.
-
+- Content encryption with AES GCM: `A128GCM`, `A192GCM` and `A256GCM`
+- Content encryption with extended nonce ChaCha20-Poly1305: `XC20P`
+- JWE Compression with `DEFLATE`.
 
 ## Supported specifications
 
-* RFC 7515 - JSON Web Signature (JWS)
-* RFC 7516 - JSON Web Encryption (JWE)
-* RFC 7517 - JSON Web Key (JWK)
-* RFC 7518 - JSON Web Algorithms (JWA)
-* RFC 7519 - JSON Web Token (JWT)
-* RFC 7165 - Use Cases and Requirements for JSON Object Signing and Encryption
+- RFC 7515 - JSON Web Signature (JWS)
+- RFC 7516 - JSON Web Encryption (JWE)
+- RFC 7517 - JSON Web Key (JWK)
+- RFC 7518 - JSON Web Algorithms (JWA)
+- RFC 7519 - JSON Web Token (JWT)
+- RFC 7165 - Use Cases and Requirements for JSON Object Signing and Encryption
   (JOSE)
-* RFC 7520 - Examples of Protecting Content Using JSON Object Signing and
+- RFC 7520 - Examples of Protecting Content Using JSON Object Signing and
   Encryption (JOSE)
-* RFC 7638 - JSON Web Key (JWK) Thumbprint
-* RFC 7797 - JSON Web Signature (JWS) Unencoded Payload Option
-* RFC 8037 - CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures in JSON 
+- RFC 7638 - JSON Web Key (JWK) Thumbprint
+- RFC 7797 - JSON Web Signature (JWS) Unencoded Payload Option
+- RFC 8037 - CFRG Elliptic Curve Diffie-Hellman (ECDH) and Signatures in JSON
   Object Signing and Encryption (JOSE)
-* RFC 8812 - CBOR Object Signing and Encryption (COSE) and JSON Object Signing  
-  and Encryption (JOSE) Registrations for Web Authentication (WebAuthn) 
+- RFC 8812 - CBOR Object Signing and Encryption (COSE) and JSON Object Signing  
+  and Encryption (JOSE) Registrations for Web Authentication (WebAuthn)
   Algorithms
-* RFC 9278 - JSON Web Key (JWK) Thumbprint URI
-* OpenID Federation 1.0
-* draft-madden-jose-ecdh-1pu-04 - Public Key Authenticated Encryption for JOSE: 
+- RFC 9278 - JSON Web Key (JWK) Thumbprint URI
+- OpenID Federation 1.0
+- draft-madden-jose-ecdh-1pu-04 - Public Key Authenticated Encryption for JOSE:
   ECDH-1PU
-* draft-amringer-jose-chacha-02 - Chacha derived AEAD algorithms in JSON Object 
+- draft-amringer-jose-chacha-02 - Chacha derived AEAD algorithms in JSON Object
   Signing and Encryption (JOSE) (note, support for XC20P only)
-* draft-irtf-cfrg-xchacha-03 - XChaCha: eXtended-nonce ChaCha and 
+- draft-irtf-cfrg-xchacha-03 - XChaCha: eXtended-nonce ChaCha and
   AEAD_XChaCha20_Poly1305
-* draft-ietf-jose-fully-specified-algorithms-02 - Fully-Specified Algorithms 
+- draft-ietf-jose-fully-specified-algorithms-02 - Fully-Specified Algorithms
   for JOSE and COSE
-* draft-ietf-cose-dilithium - ML-DSA for JOSE and COSE
-
+- draft-ietf-cose-dilithium - ML-DSA for JOSE and COSE
 
 ## System requirements and dependencies
 
 The Nimbus JOSE+JWT library requires Java 8+ and has minimal dependencies.
 
-* (shaded) JCIP for concurrency annotations
-* (shaded) GSon for parsing and serialisation of JSON
-* (optional) BouncyCastle as an alternative JCA provider and for selected key
+- (shaded) JCIP for concurrency annotations
+- (shaded) GSon for parsing and serialisation of JSON
+- (optional) BouncyCastle as an alternative JCA provider and for selected key
   and certificate utilities. ML-DSA functionality requires a JCA provider with
   ML-DSA support; BouncyCastle is supported out of the box. Must not be
   imported together with the BouncyCastle FIPS provider!
-* (optional) BouncyCastle FIPS as a FIPS 140-2, Level 1 compliant JCA provider.
+- (optional) BouncyCastle FIPS as a FIPS 140-2, Level 1 compliant JCA provider.
   Must not be imported together with the plain BouncyCastle provider!
-* (optional) Tink for OKP generation, EdDSA with Ed25519, ECDH with X25519 and 
+- (optional) Tink for OKP generation, EdDSA with Ed25519, ECDH with X25519 and
   content encryption with XC20P.
 
 For Maven add:
+
 ```
 <dependency>
     <groupId>com.nimbusds</groupId>
@@ -112,13 +118,13 @@ For Maven add:
     <version>[ version ]</version>
 </dependency>
 ```
-where `[ version ]` is the latest stable version.
 
+where `[ version ]` is the latest stable version.
 
 ## Use with Proguard and R8
 
-To work around missing class errors when using this library with 
-[ProGuard](https://www.guardsquare.com/manual/configuration/usage) and   
+To work around missing class errors when using this library with
+[ProGuard](https://www.guardsquare.com/manual/configuration/usage) and  
 [R8](https://developer.android.com/build/shrink-code) "full mode":
 
 ```text
@@ -129,13 +135,11 @@ To work around missing class errors when using this library with
 
 See issue #518 for details.
 
-
 ## Issues / suggestions
 
 To post bug reports and suggestions:
 
 <https://bitbucket.org/connect2id/nimbus-jose-jwt/issues>
-
 
 ## SonarCloud Status
 
