@@ -185,6 +185,12 @@ public final class JWSAlgorithm extends Algorithm {
 	 */
 	public static final JWSAlgorithm ML_DSA_87 = new JWSAlgorithm("ML-DSA-87");
 
+    /**
+	* PQEID: composite PQ/T hybrid signature ML-DSA-65 + ECDSA P-256 (ES256),
+    * draft-ietf-jose-pq-composite-sigs-04. Both component signatures must verify.
+    */ 
+	public static final JWSAlgorithm ML_DSA_65_ES256 = new JWSAlgorithm("ML-DSA-65-ES256");
+
 
 	/**
 	 * JWS algorithm family.
@@ -224,8 +230,15 @@ public final class JWSAlgorithm extends Algorithm {
 		 * Edwards Curve signature (EdDSA).
 		 */
 		public static final Family ML = new Family(ML_DSA_44, ML_DSA_65, ML_DSA_87);
+
+		/**
+		 * 
+		 * * PQEID: composite (PQ/T hybrid) ML-DSA signatures.
+		 */
+		public static final Family ML_COMPOSITE = new Family(ML_DSA_65_ES256);	
+
 		
-		
+			
 		/**
 		 * Super family of all digital signature based JWS algorithms.
 		 */
@@ -234,7 +247,8 @@ public final class JWSAlgorithm extends Algorithm {
 				RSA.toArray(new JWSAlgorithm[]{}),
 				EC.toArray(new JWSAlgorithm[]{}),
 				ED.toArray(new JWSAlgorithm[]{}),
-				ML.toArray(new JWSAlgorithm[]{})
+				ML.toArray(new JWSAlgorithm[]{}),
+				ML_COMPOSITE.toArray(new JWSAlgorithm[]{})
 			)
 		);
 
@@ -323,6 +337,8 @@ public final class JWSAlgorithm extends Algorithm {
 			return ML_DSA_65;
 		} else if (s.equals(ML_DSA_87.getName())) {
 			return ML_DSA_87;
+		} else if (s.equals(ML_DSA_65_ES256.getName())) {
+			return ML_DSA_65_ES256; // PQEID
 		} else {
 			return new JWSAlgorithm(s);
 		}

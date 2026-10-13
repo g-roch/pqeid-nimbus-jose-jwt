@@ -125,6 +125,7 @@ public class JWSAlgorithmTest extends TestCase {
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ML_DSA_44));
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ML_DSA_65));
 		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ML_DSA_87));
-		assertEquals(16, JWSAlgorithm.Family.SIGNATURE.size());
+		assertTrue(JWSAlgorithm.Family.SIGNATURE.contains(JWSAlgorithm.ML_DSA_65_ES256));
+		assertEquals(17, JWSAlgorithm.Family.SIGNATURE.size());
 	}
 }

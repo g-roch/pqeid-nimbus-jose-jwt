@@ -10,6 +10,7 @@ import javax.crypto.SecretKey;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.JWSObject.State;
 import com.nimbusds.jose.crypto.*;
+import com.nimbusds.jose.crypto.CompositeSigner;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jca.JCAAware;
 import com.nimbusds.jose.jwk.*;
@@ -53,11 +54,13 @@ public class DefaultJWSSignerFactoryTest extends TestCase {
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(JWSAlgorithm.Family.EC));
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(Ed25519Signer.SUPPORTED_ALGORITHMS));
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(MLDSASigner.SUPPORTED_ALGORITHMS));
+		assertTrue(factory.supportedJWSAlgorithms().containsAll(CompositeSigner.SUPPORTED_ALGORITHMS));
 		assertEquals(JWSAlgorithm.Family.HMAC_SHA.size()
 			+ JWSAlgorithm.Family.RSA.size()
 			+ JWSAlgorithm.Family.EC.size()
 			+ Ed25519Signer.SUPPORTED_ALGORITHMS.size()
 			+ MLDSASigner.SUPPORTED_ALGORITHMS.size()
+			+ CompositeSigner.SUPPORTED_ALGORITHMS.size()
 			, factory.supportedJWSAlgorithms().size());
 	}
 

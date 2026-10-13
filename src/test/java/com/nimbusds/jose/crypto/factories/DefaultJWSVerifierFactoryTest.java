@@ -33,6 +33,7 @@ import com.nimbusds.jose.JWSProvider;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.MLDSASigner;
 import com.nimbusds.jose.crypto.MLDSAVerifier;
+import com.nimbusds.jose.crypto.CompositeVerifier;
 import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jca.JCAAware;
 import com.nimbusds.jose.jca.JCAContext;
@@ -65,10 +66,12 @@ public class DefaultJWSVerifierFactoryTest extends TestCase {
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(JWSAlgorithm.Family.RSA));
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(JWSAlgorithm.Family.EC));
 		assertTrue(factory.supportedJWSAlgorithms().containsAll(MLDSAVerifier.SUPPORTED_ALGORITHMS));
+		 assertTrue(factory.supportedJWSAlgorithms().containsAll(CompositeVerifier.SUPPORTED_ALGORITHMS));
 		assertEquals(JWSAlgorithm.Family.HMAC_SHA.size()
 			+ JWSAlgorithm.Family.RSA.size()
 			+ JWSAlgorithm.Family.EC.size()
 			+ MLDSAVerifier.SUPPORTED_ALGORITHMS.size()
+			+ CompositeVerifier.SUPPORTED_ALGORITHMS.size()
 			, factory.supportedJWSAlgorithms().size());
 	}
 

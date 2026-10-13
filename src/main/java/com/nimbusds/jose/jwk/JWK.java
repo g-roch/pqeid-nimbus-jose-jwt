@@ -903,6 +903,10 @@ public abstract class JWK implements Serializable {
 			return MLDSAKey.parse(jsonObject);
 		}
 
+		if (JWSAlgorithm.Family.ML_COMPOSITE.contains(algorithm)) {
+            return CompositeMLDSAKey.parse(jsonObject);
+    	}
+
 		throw new ParseException(
 			"Unsupported algorithm \"alg\" parameter for AKP key type: " + algName,
 			0
@@ -1070,6 +1074,14 @@ public abstract class JWK implements Serializable {
 			// For EC keys, for RSA and ML-DSA the public can be reconstructed
 			throw new JOSEException("Missing PEM-encoded public key to construct JWK");
 		}
+
+		if (CompositeMLDSAKey.isCompositePublicKey(publicKey)) {
+            try {
+				return CompositeMLDSAKey.fromJCA(publicKey, privateKey);
+                } catch (IllegalArgumentException e) {
+					throw new JOSEException("Invalid composite " + KeyType.AKP.getValue() + " key: " + e.getMessage(), e);
+                }
+              }
 
 		if (publicKey instanceof ECPublicKey) {
 			final ECPublicKey ecPubKey = (ECPublicKey) publicKey;

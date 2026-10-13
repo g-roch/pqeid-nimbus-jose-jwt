@@ -30,6 +30,7 @@ import javax.crypto.SecretKey;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.MLDSAVerifier;
+import com.nimbusds.jose.crypto.CompositeVerifier;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jca.JCAContext;
@@ -62,6 +63,7 @@ public class DefaultJWSVerifierFactory implements JWSVerifierFactory {
 		algs.addAll(RSASSAVerifier.SUPPORTED_ALGORITHMS);
 		algs.addAll(ECDSAVerifier.SUPPORTED_ALGORITHMS);
 		algs.addAll(MLDSAVerifier.SUPPORTED_ALGORITHMS);
+		algs.addAll(CompositeVerifier.SUPPORTED_ALGORITHMS); // PQEID
 		SUPPORTED_ALGORITHMS = Collections.unmodifiableSet(algs);
 	}
 
@@ -121,6 +123,14 @@ public class DefaultJWSVerifierFactory implements JWSVerifierFactory {
 			ECPublicKey ecPublicKey = (ECPublicKey)key;
 
 			verifier = new ECDSAVerifier(ecPublicKey);
+
+		} else if (CompositeVerifier.SUPPORTED_ALGORITHMS.contains(header.getAlgorithm())) {
+
+            if (!(key instanceof PublicKey)) {
+                throw new KeyTypeException(PublicKey.class);
+            } 
+
+			verifier = new CompositeVerifier(header.getAlgorithm(), (PublicKey) key);
 
 		} else if (MLDSAVerifier.SUPPORTED_ALGORITHMS.contains(header.getAlgorithm())) {
 
